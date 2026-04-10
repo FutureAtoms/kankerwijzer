@@ -1,0 +1,326 @@
+{
+  "groupBy": [
+    {
+      "values": [
+        {
+          "sortOrder": 10,
+          "label": "0",
+          "code": "stadium/0"
+        },
+        {
+          "sortOrder": 21,
+          "label": "I",
+          "code": "stadium/i"
+        },
+        {
+          "sortOrder": 46,
+          "label": "II",
+          "code": "stadium/ii"
+        },
+        {
+          "sortOrder": 60,
+          "label": "III",
+          "code": "stadium/iii"
+        },
+        {
+          "sortOrder": 77,
+          "label": "IV",
+          "code": "stadium/iv"
+        },
+        {
+          "sortOrder": 100,
+          "label": "NVT",
+          "code": "stadium/nvt"
+        },
+        {
+          "sortOrder": 88,
+          "label": "Onbekend",
+          "code": "stadium/x"
+        }
+      ],
+      "label": "Stadium",
+      "code": "filter/stadium"
+    }
+  ],
+  "aggregateBy": [
+    {
+      "values": [
+        {
+          "sortOrder": 0,
+          "label": "Alle kankersoorten",
+          "code": "kankersoort/totaal/alle"
+        }
+      ],
+      "label": "Kankersoort",
+      "code": "filter/kankersoort"
+    },
+    {
+      "values": [
+        {
+          "remarks": [
+            {
+              "code": "data/preliminary",
+              "description": "Deze cijfers betreffen voorlopige gegevens.",
+              "symbol": "*"
+            }
+          ],
+          "sortOrder": 47,
+          "label": "2024",
+          "code": "periode/1-jaar/2024"
+        }
+      ],
+      "label": "Periode van diagnose",
+      "code": "filter/periode-van-diagnose"
+    },
+    {
+      "values": [
+        {
+          "sortOrder": 0,
+          "label": "Man en vrouw",
+          "code": "geslacht/totaal/alle"
+        }
+      ],
+      "label": "Geslacht",
+      "code": "filter/geslacht"
+    },
+    {
+      "values": [
+        {
+          "sortOrder": 0,
+          "label": "Totaal",
+          "code": "leeftijdsgroep/totaal/alle"
+        }
+      ],
+      "label": "Leeftijdsgroep",
+      "code": "filter/leeftijdsgroep"
+    },
+    {
+      "values": [
+        {
+          "sortOrder": 0,
+          "label": "Nederland",
+          "code": "regio/totaal/alle"
+        }
+      ],
+      "label": "Regio",
+      "code": "filter/regio"
+    }
+  ],
+  "statistic": {
+    "label": "Verdeling (%)",
+    "code": "statistiek/verdeling",
+    "unit": "%",
+    "dataType": "distribution",
+    "precision": 0
+  },
+  "data": [
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/ii"
+        }
+      ],
+      "value": 12.851286316915216,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "17304",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    },
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/nvt"
+        }
+      ],
+      "value": 10.09446854019369,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "13592",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    },
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/i"
+        }
+      ],
+      "value": 28.803992632642146,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "38784",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    },
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/iii"
+        }
+      ],
+      "value": 12.702750876359099,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "17104",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    },
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/iv"
+        }
+      ],
+      "value": 19.201176400689203,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "25854",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    },
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/0"
+        }
+      ],
+      "value": 3.0056146396530212,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "4047",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    },
+    {
+      "filterValues": [
+        {
+          "filterCode": "filter/stadium",
+          "code": "stadium/x"
+        }
+      ],
+      "value": 13.340710593547621,
+      "state": "data/valid",
+      "metaData": [
+        {
+          "value": "17963",
+          "dataType": "string",
+          "label": "Aantal patiënten",
+          "description": "",
+          "code": "metadata/number-of-patients"
+        }
+      ]
+    }
+  ],
+  "title": {
+    "title": "Stadium bij diagnose, Verdeling (%)",
+    "subtitle": "Alle kankersoorten",
+    "description": "## Stadiumverdeling\nDe stadiumverdeling laat de verdeling van patiënten over verschillende stadia van de ziekte zien. De cijfers van het laatste jaar zijn voorlopig. \n\nDe incidentie per stadium is te vinden op de [incidentiepagina](https://nkr-cijfers.iknl.nl/viewer/incidentie-per-jaar).  \n\nBij stadiumverdeling worden dezelfde selecties gemaakt als bij incidentie.\n\n## Stadium bij diagnose\nVoor de meeste kankers is het stadium volgens de TNM-classificatie vastgelegd. De TNM-classificatie is regelmatig bijgewerkt. Er is gebruik gemaakt van de volgende TNM edities: TNM 4e editie (1989-1992), TNM 4e editie, 2e revisie (1993-1998), TNM 5e editie (1999-2002), TNM 6e editie (2003-2009), TNM 7e editie (2010-2016) en TNM 8e editie (2017-heden).  \n\nBij kanker van de vrouwelijke geslachtsorganen wordt het stadium vastgelegd volgens de FIGO-classificatie, afgeleid van de TNM. Bij lymfomen wordt gebruik gemaakt van de Ann Arbor classificatie. Voor beide classificaties zijn geen afzonderlijke edities beschikbaar. \n\nMeer weten over NKR Cijfers? Op [iknl.nl](https://iknl.nl/nkr/uitleg-nkr-cijfers) staat meer uitleg en informatie over gebruikte definities.",
+    "selectedValues": [
+      {
+        "values": [
+          {
+            "remarks": [
+              {
+                "code": "data/preliminary",
+                "description": "Deze cijfers betreffen voorlopige gegevens.",
+                "symbol": "*"
+              }
+            ],
+            "sortOrder": 47,
+            "label": "2024*",
+            "code": "periode/1-jaar/2024"
+          }
+        ],
+        "label": "Periode van diagnose",
+        "code": "filter/periode-van-diagnose"
+      },
+      {
+        "values": [
+          {
+            "sortOrder": 0,
+            "label": "Man en vrouw",
+            "code": "geslacht/totaal/alle"
+          }
+        ],
+        "label": "Geslacht",
+        "code": "filter/geslacht"
+      },
+      {
+        "values": [
+          {
+            "sortOrder": 0,
+            "label": "Totaal",
+            "code": "leeftijdsgroep/totaal/alle"
+          }
+        ],
+        "label": "Leeftijdsgroep",
+        "code": "filter/leeftijdsgroep"
+      },
+      {
+        "values": [
+          {
+            "sortOrder": 0,
+            "label": "Nederland",
+            "code": "regio/totaal/alle"
+          }
+        ],
+        "label": "Regio",
+        "code": "filter/regio"
+      }
+    ]
+  },
+  "metaData": {
+    "series": [
+      {
+        "label": "Aantal patiënten",
+        "code": "metadata/number-of-patients",
+        "unit": "metadata/number-of-patients/eenheid",
+        "dataType": "absolute",
+        "precision": 0
+      }
+    ],
+    "remarks": [
+      {
+        "code": "remark/classification-stadium",
+        "description": "De indeling in stadia is afhankelijk van tumorsoort en periode. Zie [uitleg](https://iknl.nl/nkr/uitleg-nkr-cijfers#stadiumdiagnose). "
+      }
+    ]
+  }
+}

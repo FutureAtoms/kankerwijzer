@@ -1,0 +1,140 @@
+{
+  "defaultNavigation": {
+    "code": "incidentie/periode"
+  },
+  "items": [
+    {
+      "label": "NKR Cijfers",
+      "pageType": "data-application",
+      "supportedLanguages": [
+        "nl-NL"
+      ],
+      "urlPart": "page-collection%2fnkr-cijfers",
+      "children": [
+        {
+          "label": "Incidentie",
+          "pageType": "data",
+          "supportedLanguages": [
+            "nl-NL",
+            "en-GB"
+          ],
+          "urlPart": "incidentie-per-jaar",
+          "children": [],
+          "isTest": false,
+          "isBeta": false,
+          "code": "incidentie/periode"
+        },
+        {
+          "label": "Stadiumverdeling",
+          "pageType": "data",
+          "supportedLanguages": [
+            "nl-NL",
+            "en-GB"
+          ],
+          "urlPart": "incidentie-verdeling-per-stadium",
+          "children": [],
+          "isTest": false,
+          "isBeta": false,
+          "code": "incidentie/verdeling-per-stadium"
+        },
+        {
+          "label": "Prevalentie",
+          "pageType": "data",
+          "supportedLanguages": [
+            "nl-NL",
+            "en-GB"
+          ],
+          "urlPart": "prevalentie-per-jaar",
+          "children": [],
+          "isTest": false,
+          "isBeta": false,
+          "code": "prevalentie/periode"
+        },
+        {
+          "label": "Sterfte",
+          "pageType": "data",
+          "supportedLanguages": [
+            "nl-NL",
+            "en-GB"
+          ],
+          "urlPart": "sterfte-per-jaar",
+          "children": [],
+          "isTest": false,
+          "isBeta": false,
+          "code": "sterfte/periode"
+        },
+        {
+          "label": "Relatieve overleving",
+          "pageType": "folder",
+          "supportedLanguages": [
+            "nl-NL"
+          ],
+          "urlPart": "page-collection-overleving",
+          "children": [
+            {
+              "label": "Overleving vanaf diagnose",
+              "pageType": "data",
+              "supportedLanguages": [
+                "nl-NL",
+                "en-GB"
+              ],
+              "urlPart": "relatieve-overleving-per-jaren-na-diagnose",
+              "children": [],
+              "isTest": false,
+              "isBeta": false,
+              "code": "overleving/periode"
+            },
+            {
+              "label": "Conditionele overleving",
+              "pageType": "data",
+              "supportedLanguages": [
+                "nl-NL",
+                "en-GB"
+              ],
+              "urlPart": "overleving-overleefde-jaren-na-diagnose",
+              "children": [],
+              "isTest": false,
+              "isBeta": false,
+              "code": "overleving/overleefde-jaren-na-diagnose"
+            }
+          ],
+          "isTest": false,
+          "isBeta": false,
+          "code": "page-collection/overleving"
+        },
+        {
+          "label": "Behandelingen",
+          "pageType": "text",
+          "supportedLanguages": [
+            "nl-NL",
+            "en-GB"
+          ],
+          "urlPart": "page-nkr-cijfers-behandelingen",
+          "children": [],
+          "isTest": false,
+          "isBeta": false,
+          "code": "page/nkr-cijfers-behandelingen"
+        },
+        {
+          "label": "Over NKR Cijfers",
+          "pageType": "text",
+          "supportedLanguages": [
+            "nl-NL",
+            "en-GB"
+          ],
+          "urlPart": "over-nkr-cijfers",
+          "children": [],
+          "isTest": false,
+          "isBeta": false,
+          "code": "page/nkr-cijfers-info"
+        }
+      ],
+      "isTest": false,
+      "isBeta": false,
+      "code": "page-collection/nkr-cijfers"
+    }
+  ],
+  "currentNavigation": {
+    "code": "incidentie/periode"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "indicator": {
+    "title": "Indicator",
+    "values": {
+      "0": "Diagnoses"
+    }
+  },
+  "cancergrp": {
+    "title": "Kankersoort",
+    "values": []
+  },
+  "sex": {
+    "title": "Geslacht",
+    "values": {
+      "1": "Mannen",
+      "2": "Vrouwen",
+      "3": "Alle personen"
+    }
+  },
+  "pc": {
+    "title": "PC Schakelaar",
+    "values": {
+      "3": "PC3",
+      "4": "PC4"
+    }
+  },
+  "transparency": {
+    "title": "Transparantie"
+  }
+}

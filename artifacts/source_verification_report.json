@@ -1,0 +1,306 @@
+{
+  "passed_sources": 6,
+  "total_sources": 6,
+  "status": "pass",
+  "results": [
+    {
+      "source": "iknl.nl.md",
+      "passed": 4,
+      "total": 4,
+      "status": "pass",
+      "checks": [
+        {
+          "check": "iknl entrypoint nkr",
+          "status": "pass",
+          "details": {
+            "url": "https://iknl.nl/nkr",
+            "title": "Nederlandse Kankerregistratie",
+            "status_code": 200,
+            "markdown_length": 24909
+          }
+        },
+        {
+          "check": "iknl entrypoint cancer_types",
+          "status": "pass",
+          "details": {
+            "url": "https://iknl.nl/kankersoorten",
+            "title": "Kankersoorten",
+            "status_code": 200,
+            "markdown_length": 9991
+          }
+        },
+        {
+          "check": "iknl entrypoint news",
+          "status": "pass",
+          "details": {
+            "url": "https://iknl.nl/nieuws",
+            "title": "Nieuws",
+            "status_code": 200,
+            "markdown_length": 17136
+          }
+        },
+        {
+          "check": "iknl entrypoint publications",
+          "status": "pass",
+          "details": {
+            "url": "https://iknl.nl/onderzoek/publicaties",
+            "title": "Publicaties",
+            "status_code": 200,
+            "markdown_length": 13449
+          }
+        }
+      ]
+    },
+    {
+      "source": "kanker.nl.md",
+      "passed": 3,
+      "total": 3,
+      "status": "pass",
+      "checks": [
+        {
+          "check": "bundled kanker.nl dataset present",
+          "status": "pass",
+          "details": {
+            "page_count": 2816
+          }
+        },
+        {
+          "check": "kanker.nl live sample page",
+          "status": "pass",
+          "details": {
+            "url": "https://www.kanker.nl/kankersoorten/borstkanker/algemeen/wat-is-borstkanker",
+            "status_code": 200,
+            "title": "Wat is borstkanker? Symptomen, behandeling en vooruitzichten | kanker.nl",
+            "excerpt": "var _mtm = window._mtm = window._mtm || [];_mtm.push({\"mtm.startTime\": (new Date().getTime()), \"event\": \"mtm.Start\"});var d = document, g = d.createElement(\"script\"), s = d.getElementsByTagName(\"script\")[0];g.type = \"text/javascript\";g.async = true;g.src=\"https://analytics.kreeft.kanker.nl/piwik/js/container_BoZXZY1p.js\";s.parentNode.insertBefore(g, s); form.antibot * :not(.antibot-message) { disp"
+          }
+        },
+        {
+          "check": "kanker.nl robots.txt",
+          "status": "pass",
+          "details": {
+            "excerpt": "#\n# robots.txt\n#\n# This file is to prevent the crawling and indexing of certain parts\n# of your site by web crawlers and spiders run by sites like Yahoo!\n# and Google. By telling these \"robots\" where not to go on your site,\n# you save bandwidth and server resources.\n#\n# This file will be ignored unl"
+          }
+        }
+      ]
+    },
+    {
+      "source": "kankeratlas.iknl.nl.md",
+      "passed": 4,
+      "total": 4,
+      "status": "pass",
+      "checks": [
+        {
+          "check": "kankeratlas filters endpoint",
+          "status": "pass",
+          "details": {
+            "keys": [
+              "cancergrp",
+              "indicator",
+              "pc",
+              "sex",
+              "transparency"
+            ]
+          }
+        },
+        {
+          "check": "kankeratlas cancer groups endpoint",
+          "status": "pass",
+          "details": {
+            "count": 25,
+            "first": {
+              "grp": 1,
+              "name": "Alle kankersoorten",
+              "pc3": true,
+              "pc4": false,
+              "validsex": 3
+            }
+          }
+        },
+        {
+          "check": "kankeratlas postcodes endpoint",
+          "status": "pass",
+          "details": {
+            "count": 890,
+            "first": {
+              "id": 43970,
+              "areacode": 101,
+              "wnpalt": "AMSTERDAM",
+              "province": "Noord-Holland",
+              "name": null,
+              "parent": null,
+              "createdAt": "2025-03-10T15:03:10.102Z",
+              "updatedAt": "2025-03-10T15:03:10.102Z",
+              "publishedAt": "2025-03-10T15:03:10.065Z",
+              "geo": {
+                "pt": [
+                  4.870580404990202,
+                  52.387128682227235
+                ]
+              }
+            }
+          }
+        },
+        {
+          "check": "kankeratlas cancer data endpoint",
+          "status": "pass",
+          "details": {
+            "count": 889,
+            "sample_103": {
+              "id": 2514935,
+              "p10": 1.39,
+              "p20": 1.42,
+              "p50": 1.46,
+              "p80": 1.51,
+              "p90": 1.54,
+              "v": 1,
+              "sex": 3,
+              "createdAt": "2025-03-10T15:02:21.717Z",
+              "updatedAt": "2025-03-10T15:02:21.717Z",
+              "publishedAt": "2025-03-10T15:02:16.923Z",
+              "postcode": 103,
+              "logp50": 0.5505,
+              "logp10": 0.4761,
+              "logp20": 0.5013,
+              "logp80": 0.5977,
+              "logp90": 0.6225,
+              "xvalues": "0.32,0.32,0.42,0.52,0.55,0.59,0.68,0.74,0.74",
+              "yvalues": "0,0.014,0.686,5.828,6.858,5.831,0.685,0.014,0",
+              "pc": 3,
+              "cancer_grp": 11
+            }
+          }
+        }
+      ]
+    },
+    {
+      "source": "nkr-cijfers.nl.md",
+      "passed": 4,
+      "total": 4,
+      "status": "pass",
+      "checks": [
+        {
+          "check": "nkr navigation-items endpoint",
+          "status": "pass",
+          "details": {
+            "defaultNavigation": {
+              "code": "incidentie/periode"
+            },
+            "item_count": 1
+          }
+        },
+        {
+          "check": "nkr configuration endpoint",
+          "status": "pass",
+          "details": {
+            "keys": [
+              "credits",
+              "dataTransferDateTime",
+              "embedEnabled",
+              "featured",
+              "featuredAsFirstGroupBy",
+              "groupBy",
+              "measurementType",
+              "visuals"
+            ]
+          }
+        },
+        {
+          "check": "nkr filter-groups endpoint",
+          "status": "pass",
+          "details": {
+            "keys": [
+              "filterGroups",
+              "filterValuesSelected"
+            ]
+          }
+        },
+        {
+          "check": "nkr data endpoint",
+          "status": "pass",
+          "details": {
+            "keys": [
+              "aggregateBy",
+              "data",
+              "groupBy",
+              "metaData",
+              "statistic",
+              "title"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "source": "publicaties.md",
+      "passed": 6,
+      "total": 6,
+      "status": "pass",
+      "checks": [
+        {
+          "check": "publications index page",
+          "status": "pass",
+          "details": {
+            "url": "https://iknl.nl/onderzoek/publicaties",
+            "title": "Publicaties",
+            "markdown_length": 13449
+          }
+        },
+        {
+          "check": "bundled local reports exist",
+          "status": "pass",
+          "details": {
+            "count": 3
+          }
+        },
+        {
+          "check": "bundled scientific publications exist",
+          "status": "pass",
+          "details": {
+            "count": 5
+          }
+        },
+        {
+          "check": "report page https://iknl.nl/uitgezaaide-kanker-2025",
+          "status": "pass",
+          "details": {
+            "title": "Uitgezaaide kanker 2025",
+            "markdown_length": 15416
+          }
+        },
+        {
+          "check": "report page https://iknl.nl/eierstokkanker-nederland-2025",
+          "status": "pass",
+          "details": {
+            "title": "Eierstokkanker in Nederland 2025",
+            "markdown_length": 32107
+          }
+        },
+        {
+          "check": "local report pdf parse",
+          "status": "pass",
+          "details": {
+            "source": "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/reports/rapport_UItgezaaide-kanker_2025_cijfers-inzichten-en-uitdagingen.pdf",
+            "text_length": 299309
+          }
+        }
+      ]
+    },
+    {
+      "source": "richtlijnendatabase.nl.md",
+      "passed": 1,
+      "total": 1,
+      "status": "pass",
+      "checks": [
+        {
+          "check": "richtlijn example guideline page",
+          "status": "pass",
+          "details": {
+            "url": "https://richtlijnendatabase.nl/richtlijn/prostaatcarcinoom/prostaatcarcinoom_-_korte_beschrijving.html",
+            "title": "Startpagina - Prostaatcarcinoom - Richtlijn - Richtlijnendatabase",
+            "markdown_length": 8446
+          }
+        }
+      ]
+    }
+  ]
+}

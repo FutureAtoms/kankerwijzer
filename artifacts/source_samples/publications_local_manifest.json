@@ -1,0 +1,18 @@
+{
+  "reports": [
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/reports/rapport_UItgezaaide-kanker_2025_cijfers-inzichten-en-uitdagingen.pdf",
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/reports/rapport_manvrouwverschillenbij-kanker_definitief2.pdf",
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/reports/trendrapport_darmkanker_def.pdf"
+  ],
+  "scientific_publications": [
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/scientific_publications/comorbidities_medication_use_and_overall_survival_in_eight_cancers.pdf",
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/scientific_publications/head_and_neck_cancers_survival_in_europe_taiwan_and_japan.pdf",
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/scientific_publications/ovarian_cancer_recurrence_prediction.pdf",
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/scientific_publications/trends_and_variations_in_the_treatment_of_stage_I_III_non_small_cell_lung_cancer.pdf",
+    "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/data/scientific_publications/trends_and_variations_in_the_treatment_of_stage_I_III_small_cell_lung_cancer.pdf"
+  ],
+  "web_report_pages": [
+    "https://iknl.nl/uitgezaaide-kanker-2025",
+    "https://iknl.nl/eierstokkanker-nederland-2025"
+  ]
+}

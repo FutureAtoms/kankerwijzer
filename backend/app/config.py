@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     neo4j_username: str = "neo4j"
     neo4j_password: str = "medical-rag-password"
 
+    qdrant_url: str = "http://localhost:6333"
+    qdrant_collection: str = "iknl_cancer_knowledge"
+
+    postgres_url: str = "postgresql://kankerwijzer:kankerwijzer@localhost:5432/kankerwijzer"
+
+    embedding_model: str = "intfloat/multilingual-e5-large"
+    embedding_dim: int = 1024
+
+    abstention_threshold: float = 0.45  # calibrated in Step 12
+
     request_timeout_seconds: float = 30.0
     local_search_default_limit: int = 5
 
