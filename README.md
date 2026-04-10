@@ -3,6 +3,7 @@
 ## Team
 - Team: Uncloud
 - Focus: provenance-first, medical-grade cancer information assistant for the IKNL hackathon
+- Presentation overview: [`PRESENTATION.md`](./PRESENTATION.md)
 
 ## Problem
 Trusted cancer information is spread across patient pages, registry statistics, regional atlas data, guideline pages, reports, and publications. Users get speed from general AI tools, but not reliable provenance. IKNL's brief makes the bar explicit: trusted sources only, clear citations, refusal on unsupported questions, and no distortion of medical information.
