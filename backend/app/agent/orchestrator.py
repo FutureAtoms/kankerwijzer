@@ -9,7 +9,7 @@ from typing import Any
 
 from app.config import Settings
 from app.lastmeter import DOMAIN_RESOURCES, LASTMETER_DOMAINS, _get_dataset
-from app.models import AnswerResponse, ClarificationData, ContactInfo, Provenance
+from app.models import AnswerResponse, ContactInfo, Provenance
 from app.retrieval.hybrid import HybridMedicalRetriever
 from app.safety.red_flags import check_red_flags, get_routing_info
 
@@ -31,41 +31,6 @@ REGELS:
 
 Bij onvoldoende bewijs: zeg eerlijk dat je het niet kunt vinden.
 Verwijs bij persoonlijke vragen naar de huisarts of KWF Kanker Infolijn (0800-022 66 22).
-
-STATISTIEKEN — PROGRESSIEVE VERDUIDELIJKING (VERPLICHT):
-Voor ELKE statistiekvraag MOET je ALLE drie filters kennen voordat je query_nkr_statistics aanroept:
-1. Kankersoort (welke kanker precies?)
-2. Type statistiek (incidentie / stadiumverdeling / prevalentie / sterfte / overleving)
-3. Jaar (welk diagnosejaar?)
-
-WERKWIJZE BIJ STATISTIEKVRAGEN:
-- Als de gebruiker ALLE drie filters noemt → roep query_nkr_statistics DIRECT aan
-  Voorbeeld: "Hoeveel prostaatkanker diagnoses in 2022?" → cancer_type=prostaatkanker, stat_type=incidentie, year=2022
-
-- Als ÉÉN of MEER filters ontbreken → gebruik ask_clarification om de ontbrekende te vragen
-  Geef ALTIJD klikbare opties zodat de gebruiker niet hoeft te typen.
-
-  STAP-VOOR-STAP VOORBEELD:
-  Vraag: "statistieken over kanker"
-  → Stap 1: ask_clarification — "Over welke kankersoort wilt u statistieken zien?"
-    opties: ["Borstkanker", "Longkanker", "Darmkanker", "Prostaatkanker", "Melanoom", "Blaaskanker", "Alle kankersoorten"]
-  → Gebruiker klikt "Prostaatkanker"
-  → Stap 2: ask_clarification — "Welk type statistiek wilt u over prostaatkanker?"
-    opties: ["Incidentie (nieuwe diagnoses)", "Stadiumverdeling", "Overleving (5-jaars)", "Prevalentie", "Sterfte"]
-  → Gebruiker klikt "Incidentie"
-  → Stap 3: ask_clarification — "Over welk jaar wilt u de incidentiecijfers van prostaatkanker?"
-    opties: ["2024", "2023", "2022", "2021", "2020"]
-  → Gebruiker klikt "2023"
-  → Nu heb je ALLES → roep query_nkr_statistics aan met cancer_type=prostaatkanker, stat_type=incidentie, year=2023
-
-  SLIM COMBINEREN: Als de gebruiker in één vraag twee van de drie noemt, vraag alleen het ontbrekende.
-  Voorbeeld: "Overleving bij longkanker" → je weet kankersoort + stat_type, vraag alleen het jaar.
-
-EXTRA FILTERS (optioneel, niet verplicht vragen):
-- Geslacht: als de gebruiker "bij mannen" of "bij vrouwen" zegt, vul sex in. Anders sex="alle".
-
-BELANGRIJK: Roep query_nkr_statistics NOOIT aan zonder specifieke kankersoort tenzij de gebruiker
-expliciet "alle kankersoorten" zegt. "Kanker" alleen is niet specifiek genoeg.
 
 LASTMETER (PRIORITEIT — ALTIJD CONTROLEREN):
 De Lastmeter (Distress Thermometer) is een gevalideerd instrument voor kankerpatiënten.
@@ -159,47 +124,22 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "query_nkr_statistics",
         "description": (
-            "Query the NKR (Nederlandse Kankerregistratie) for cancer statistics. "
-            "BELANGRIJK: Gebruik ALLEEN als je ALLE vereiste filters kent: cancer_type, year, en stat_type. "
-            "Als een van deze ontbreekt in de vraag, gebruik dan EERST ask_clarification om te vragen."
+            "Query the NKR (Nederlandse Kankerregistratie) for cancer statistics such as "
+            "incidence, stage distribution, survival rates, and trends over time."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "cancer_type": {
+                "query": {
                     "type": "string",
-                    "description": (
-                        "Kankersoort. Beschikbare waarden: alle, borstkanker, longkanker, "
-                        "darmkanker, dikkedarmkanker, endeldarmkanker, prostaatkanker, blaaskanker, "
-                        "nierkanker, melanoom, huidkanker, maagkanker, slokdarmkanker, "
-                        "alvleesklierkanker, leverkanker, eierstokkanker, baarmoederhalskanker, "
-                        "baarmoederkanker, schildklierkanker, leukemie, hodgkinlymfoom, "
-                        "non-hodgkinlymfoom, hersenkanker, keelkanker."
-                    ),
+                    "description": "Description of the statistics requested.",
                 },
                 "year": {
                     "type": "integer",
-                    "description": "Jaar van diagnose (bijv. 2020, 2023). Standaard: 2024.",
-                },
-                "sex": {
-                    "type": "string",
-                    "enum": ["alle", "man", "vrouw"],
-                    "description": "Geslachtsfilter. Standaard: alle.",
-                },
-                "stat_type": {
-                    "type": "string",
-                    "enum": ["incidentie", "stadiumverdeling", "prevalentie", "sterfte", "overleving"],
-                    "description": (
-                        "Type statistiek. "
-                        "incidentie = aantal nieuwe diagnoses, "
-                        "stadiumverdeling = verdeling per stadium (0/I/II/III/IV), "
-                        "prevalentie = aantal levende patiënten, "
-                        "sterfte = aantal sterfgevallen, "
-                        "overleving = 5-jaars relatieve overleving."
-                    ),
+                    "description": "Year for the statistics (default: 2024).",
                 },
             },
-            "required": ["cancer_type", "stat_type"],
+            "required": ["query"],
         },
     },
     {
@@ -487,7 +427,7 @@ class MedicalAnswerOrchestrator:
             )
 
         # ---- Step 4: Handle tool_use blocks (if Claude wants to call tools)
-        answer_text, clarification = self._process_response(
+        answer_text = self._process_response(
             client, response, query, audience, evidence_lines, notes
         )
 
@@ -509,7 +449,6 @@ class MedicalAnswerOrchestrator:
             confidence=confidence,
             confidence_label=confidence_label,
             notes=notes,
-            clarification=clarification,
         )
 
     # ------------------------------------------------------------------
@@ -524,29 +463,16 @@ class MedicalAnswerOrchestrator:
         audience: str,
         evidence_lines: list[str],
         notes: list[str],
-    ) -> tuple[str | None, ClarificationData | None]:
-        """Extract answer text, handling tool_use if Claude requests it.
-
-        Returns (answer_text, clarification_data).
-        """
+    ) -> str | None:
+        """Extract answer text, handling tool_use if Claude requests it."""
 
         text_parts: list[str] = []
         tool_results: list[dict[str, Any]] = []
-        clarification: ClarificationData | None = None
 
         for block in response.content:
             if getattr(block, "type", None) == "text":
                 text_parts.append(block.text)
             elif getattr(block, "type", None) == "tool_use":
-                # Capture clarification data before executing
-                if block.name == "ask_clarification":
-                    clarification = ClarificationData(
-                        brief_answer=block.input.get("brief_answer"),
-                        question=block.input.get("clarification_question", ""),
-                        options=block.input.get("options", []),
-                        category=block.input.get("category", "other"),
-                        suggested_search=block.input.get("suggested_search"),
-                    )
                 # Execute the tool call server-side
                 tool_result = self._execute_tool(block.name, block.input, notes)
                 tool_results.append(
@@ -583,23 +509,13 @@ class MedicalAnswerOrchestrator:
                 for block in follow_up.content:
                     if getattr(block, "type", None) == "text":
                         text_parts.append(block.text)
-                    elif getattr(block, "type", None) == "tool_use":
-                        if block.name == "ask_clarification":
-                            clarification = ClarificationData(
-                                brief_answer=block.input.get("brief_answer"),
-                                question=block.input.get("clarification_question", ""),
-                                options=block.input.get("options", []),
-                                category=block.input.get("category", "other"),
-                                suggested_search=block.input.get("suggested_search"),
-                            )
 
                 notes.append("Tool-use round completed.")
             except Exception as exc:
                 logger.exception("Follow-up Claude call failed")
                 notes.append(f"Tool follow-up error: {exc}")
 
-        answer_text = "\n".join(text_parts).strip() if text_parts else None
-        return answer_text, clarification
+        return "\n".join(text_parts).strip() if text_parts else None
 
     # ------------------------------------------------------------------
     # Tool execution
@@ -643,28 +559,11 @@ class MedicalAnswerOrchestrator:
         return {"hits": hits, "count": len(hits)}
 
     def _tool_query_nkr_statistics(self, input_data: dict[str, Any]) -> dict[str, Any]:
-        """Execute query_nkr_statistics tool via NKR API with specific filters."""
-        cancer_type = input_data.get("cancer_type", "alle")
+        """Execute query_nkr_statistics tool via NKR API."""
         year = input_data.get("year", 2024)
-        sex = input_data.get("sex", "alle")
-        stat_type = input_data.get("stat_type", "incidentie")
         try:
-            data = self.retriever.nkr.query_statistics(
-                cancer_type=cancer_type,
-                year=year,
-                sex=sex,
-                stat_type=stat_type,
-            )
-            return {
-                "data": str(data)[:3000],
-                "filters_used": {
-                    "cancer_type": cancer_type,
-                    "year": year,
-                    "sex": sex,
-                    "stat_type": stat_type,
-                },
-                "source": "NKR Cijfers IKNL",
-            }
+            data = self.retriever.nkr.example_stage_distribution(year=year)
+            return {"data": str(data)[:3000], "source": "NKR Cijfers IKNL"}
         except Exception as exc:
             return {"error": f"NKR API unavailable: {exc}"}
 

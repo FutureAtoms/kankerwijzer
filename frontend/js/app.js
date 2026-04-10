@@ -10,123 +10,6 @@
     const API_BASE = window.location.origin;
     const API_ENDPOINT = API_BASE + '/agent/answer';
 
-    // ===== i18n Translations =====
-    var currentLang = 'nl';
-
-    var TRANSLATIONS = {
-        nl: {
-            subtitle: 'Betrouwbare kankerinformatie van IKNL',
-            header_trust: 'Alleen goedgekeurde bronnen',
-            welcome_title: 'Welkom bij KankerWijzer',
-            welcome_desc: 'Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.',
-            trust_sources_title: 'Bronnen met herkomst',
-            trust_sources_desc: 'Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.',
-            trust_advice_title: 'Geen persoonlijk behandeladvies',
-            trust_advice_desc: 'Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.',
-            trust_lastmeter_title: 'Ondersteuning bij klachten',
-            trust_lastmeter_desc: 'Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.',
-            audience_label: 'Doelgroep:',
-            audience_patient: 'Patient',
-            audience_professional: 'Zorgprofessional',
-            disclaimer: 'Deze informatie is informatief en vervangt geen medisch advies. Raadpleeg altijd uw arts.',
-            ex_breast: 'Wat is borstkanker?',
-            ex_colon: 'Behandeling darmkanker',
-            ex_fatigue: 'Vermoeidheid bij chemo',
-            ex_survival: 'Overlevingscijfers longkanker',
-            onboarding_welcome: '<strong>Welkom bij KankerWijzer!</strong>',
-            onboarding_intro: 'Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.',
-            onboarding_important: 'Belangrijk om te weten:',
-            onboarding_not_doctor: 'Ik ben <strong>geen arts</strong> \u2014 ik geef informatief advies, geen diagnose of behandelplan',
-            onboarding_every_patient: 'Elke pati\u00EBnt is anders \u2014 bespreek alles met uw <strong>huisarts of specialist</strong>',
-            onboarding_not_urgent: 'Deze chatbot is <strong>niet voor spoed</strong> \u2014 bel bij nood ',
-            onboarding_help: 'Waar kan ik u mee helpen? U kunt mij vragen stellen over:',
-            topic_cancer_type: 'Informatie over een kankersoort',
-            topic_treatment: 'Behandelingen en bijwerkingen',
-            topic_stats: 'Cijfers en statistieken',
-            topic_lastmeter: 'Omgaan met klachten (Lastmeter)',
-            topic_guidelines: 'Richtlijnen voor zorgprofessionals',
-            sources_title: 'Bronnen',
-            relevance_label: 'Relevantie',
-            confidence_label_prefix: 'Betrouwbaarheid',
-            contacts_title: 'Direct contact opnemen:',
-            feedback_helpful: 'Nuttig',
-            feedback_not_helpful: 'Niet nuttig',
-            feedback_missing: 'Informatie ontbreekt',
-        },
-        en: {
-            subtitle: 'Reliable cancer information from IKNL',
-            header_trust: 'Approved sources only',
-            welcome_title: 'Welcome to KankerWijzer',
-            welcome_desc: 'Ask your question about cancer and receive information backed by approved sources, clear references, and safe referrals for urgent or personal care questions.',
-            trust_sources_title: 'Sources with provenance',
-            trust_sources_desc: 'Answers reference kanker.nl, NKR Cijfers, Cancer Atlas, guidelines, and IKNL publications.',
-            trust_advice_title: 'No personal treatment advice',
-            trust_advice_desc: 'For diagnosis, emergency, or treatment decisions, KankerWijzer refers you directly to appropriate care.',
-            trust_lastmeter_title: 'Support for complaints',
-            trust_lastmeter_desc: 'Use the Lastmeter to explore distress and complaints, and take relevant information to your healthcare provider.',
-            audience_label: 'Audience:',
-            audience_patient: 'Patient',
-            audience_professional: 'Healthcare professional',
-            disclaimer: 'This information is for informational purposes and does not replace medical advice. Always consult your doctor.',
-            ex_breast: 'What is breast cancer?',
-            ex_colon: 'Colorectal cancer treatment',
-            ex_fatigue: 'Fatigue during chemo',
-            ex_survival: 'Lung cancer survival rates',
-            onboarding_welcome: '<strong>Welcome to KankerWijzer!</strong>',
-            onboarding_intro: 'Thank you for reaching out. I am an AI assistant from IKNL helping you find reliable cancer information from trusted sources.',
-            onboarding_important: 'Important to know:',
-            onboarding_not_doctor: 'I am <strong>not a doctor</strong> \u2014 I provide informational guidance, not diagnosis or treatment plans',
-            onboarding_every_patient: 'Every patient is different \u2014 always discuss everything with your <strong>GP or specialist</strong>',
-            onboarding_not_urgent: 'This chatbot is <strong>not for emergencies</strong> \u2014 call ',
-            onboarding_help: 'How can I help you? You can ask me about:',
-            topic_cancer_type: 'Information about a cancer type',
-            topic_treatment: 'Treatments and side effects',
-            topic_stats: 'Statistics and figures',
-            topic_lastmeter: 'Coping with complaints (Lastmeter)',
-            topic_guidelines: 'Guidelines for professionals',
-            sources_title: 'Sources',
-            relevance_label: 'Relevance',
-            confidence_label_prefix: 'Confidence',
-            contacts_title: 'Contact directly:',
-            feedback_helpful: 'Helpful',
-            feedback_not_helpful: 'Not helpful',
-            feedback_missing: 'Missing info',
-        },
-    };
-
-    function t(key) {
-        return TRANSLATIONS[currentLang][key] || TRANSLATIONS.nl[key] || key;
-    }
-
-    function switchLanguage(lang) {
-        currentLang = lang;
-
-        // Update toggle buttons
-        document.getElementById('lang-nl').classList.toggle('active', lang === 'nl');
-        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-
-        // Update all data-i18n elements
-        document.querySelectorAll('[data-i18n]').forEach(function (el) {
-            var key = el.getAttribute('data-i18n');
-            var translated = t(key);
-            if (el.tagName === 'OPTION') {
-                el.textContent = translated;
-            } else {
-                el.textContent = translated;
-            }
-        });
-
-        // Update placeholder
-        var input = document.getElementById('user-input');
-        input.placeholder = input.getAttribute('data-placeholder-' + lang) || input.placeholder;
-
-        // Update example question buttons
-        document.querySelectorAll('.example-q').forEach(function (btn) {
-            var q = btn.getAttribute('data-question-' + lang);
-            if (q) btn.setAttribute('data-question', q);
-        });
-    }
-
     // Source badge color mapping
     const SOURCE_COLORS = {
         'kanker.nl': '#2196F3',
@@ -147,6 +30,30 @@
         'scientific-publications': 'Wetenschappelijk',
     };
 
+    // ===== PII Scrubber =====
+    function scrubPII(text) {
+        // Dutch BSN numbers (9 digits, standalone)
+        text = text.replace(/\b\d{9}\b/g, '[REDACTED_PII]');
+        // Dutch phone numbers: 06-12345678, +31612345678, 010 123 4567, etc.
+        text = text.replace(/(\+31|0031|0)[1-9][\s\-]?(\d[\s\-]?){8}/g, '[REDACTED_PII]');
+        // Email addresses
+        text = text.replace(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g, '[REDACTED_PII]');
+        return text;
+    }
+
+    // ===== Toast Notification =====
+    function showToast(message, type) {
+        var toast = document.createElement('div');
+        toast.className = 'toast-notification toast-' + (type || 'info');
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.classList.add('visible'); }, 10);
+        setTimeout(function () {
+            toast.classList.remove('visible');
+            setTimeout(function () { toast.remove(); }, 400);
+        }, 3000);
+    }
+
     // ===== DOM Elements =====
     const chatArea = document.getElementById('chat-area');
     const messagesEl = document.getElementById('messages');
@@ -164,6 +71,11 @@
     // ===== State =====
     let isLoading = false;
     let messageCount = 0;
+    // Pre-chat Lastmeter state (distress score + quick concerns)
+    var lastmeterPreChat = {
+        distressScore: 2,
+        concerns: [],
+    };
 
     // ===== Initialize =====
     function init() {
@@ -185,10 +97,6 @@
             });
         });
 
-        // Language toggle
-        document.getElementById('lang-nl').addEventListener('click', function () { switchLanguage('nl'); });
-        document.getElementById('lang-en').addEventListener('click', function () { switchLanguage('en'); });
-
         // Mobile sidebar
         menuToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
@@ -200,11 +108,52 @@
             }
         });
 
-        // Welcome topic buttons
-        initWelcomeTopics();
-
         // Focus input
         userInput.focus();
+
+        // Pre-chat Lastmeter wiring
+        initPreChatLastmeter();
+    }
+
+    // ===== Pre-Chat Lastmeter =====
+    function initPreChatLastmeter() {
+        var panel = document.getElementById('prechat-lastmeter');
+        var dismissBtn = document.getElementById('prechat-lm-dismiss');
+        var slider = document.getElementById('prechat-distress');
+        var scoreDisplay = document.getElementById('prechat-score-display');
+        var scoreLabel = document.getElementById('prechat-score-label');
+        var concernCbs = document.querySelectorAll('.prechat-concern-cb');
+
+        if (!panel || !slider) return;
+
+        function getScoreLabel(val) {
+            if (val <= 2) return 'Laag';
+            if (val <= 4) return 'Matig';
+            if (val <= 6) return 'Hoog';
+            if (val <= 8) return 'Zeer hoog';
+            return 'Extreem';
+        }
+
+        slider.addEventListener('input', function () {
+            var val = parseInt(this.value, 10);
+            lastmeterPreChat.distressScore = val;
+            scoreDisplay.textContent = val;
+            scoreLabel.textContent = getScoreLabel(val);
+            scoreDisplay.className = 'prechat-score-display prechat-score-' + (val >= 7 ? 'high' : val >= 4 ? 'medium' : 'low');
+        });
+
+        concernCbs.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                lastmeterPreChat.concerns = [];
+                concernCbs.forEach(function (c) {
+                    if (c.checked) lastmeterPreChat.concerns.push(c.value);
+                });
+            });
+        });
+
+        dismissBtn.addEventListener('click', function () {
+            panel.style.display = 'none';
+        });
     }
 
     // ===== Input Handling =====
@@ -226,41 +175,96 @@
         }
     }
 
-    // ===== Welcome Topic Buttons =====
-    // Wire the topic buttons in the welcome screen (they're in HTML now)
-    function initWelcomeTopics() {
-        var topicBtns = document.querySelectorAll('.welcome-topic-btn');
-        topicBtns.forEach(function (btn) {
+    // ===== Onboarding Welcome Message =====
+    var onboardingShown = false;
+
+    function showOnboardingMessage() {
+        if (onboardingShown) return;
+        onboardingShown = true;
+
+        messageCount++;
+        var div = document.createElement('div');
+        div.className = 'message-ai';
+
+        var header = document.createElement('div');
+        header.className = 'ai-header';
+        header.innerHTML =
+            '<div class="ai-avatar">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#00A67E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<circle cx="12" cy="12" r="10"/>' +
+            '<path d="M12 8v4M12 16h.01"/>' +
+            '</svg>' +
+            '</div>' +
+            '<span class="ai-name">KankerWijzer</span>';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble onboarding-bubble';
+        bubble.innerHTML =
+            '<p><strong>Welkom bij KankerWijzer!</strong></p>' +
+            '<p>Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u ' +
+            'betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.</p>' +
+            '<div class="onboarding-disclaimer">' +
+            '<span class="disclaimer-icon">\u26A0\uFE0F</span>' +
+            '<div>' +
+            '<strong>Belangrijk om te weten:</strong>' +
+            '<ul>' +
+            '<li>Ik ben <strong>geen arts</strong> \u2014 ik geef informatief advies, geen diagnose of behandelplan</li>' +
+            '<li>Elke pati\u00EBnt is anders \u2014 bespreek alles met uw <strong>huisarts of specialist</strong></li>' +
+            '<li>Deze chatbot is <strong>niet voor spoed</strong> \u2014 bel bij nood <a href="tel:112" class="onboarding-phone">112</a></li>' +
+            '</ul>' +
+            '</div>' +
+            '</div>' +
+            '<p>Waar kan ik u mee helpen? U kunt mij vragen stellen over:</p>';
+
+        // Add clickable topic options
+        var optionsDiv = document.createElement('div');
+        optionsDiv.className = 'clarification-options';
+
+        var topics = [
+            'Informatie over een kankersoort',
+            'Behandelingen en bijwerkingen',
+            'Cijfers en statistieken',
+            'Omgaan met klachten (Lastmeter)',
+            'Richtlijnen voor zorgprofessionals'
+        ];
+
+        topics.forEach(function (topic) {
+            var btn = document.createElement('button');
+            btn.className = 'clarification-btn';
+            btn.textContent = topic;
             btn.addEventListener('click', function () {
-                var topic = btn.getAttribute('data-topic');
-                if (topic === 'lastmeter') {
+                if (topic === 'Omgaan met klachten (Lastmeter)') {
                     if (window.openLastmeter) window.openLastmeter();
                 } else {
-                    var question = btn.getAttribute('data-question-' + currentLang) || btn.textContent.trim();
-                    userInput.value = question;
+                    userInput.value = topic;
                     onInputChange();
                     onSend();
                 }
             });
+            optionsDiv.appendChild(btn);
         });
-    }
 
-    // ===== External Send (used by Lastmeter and other components) =====
-    window.sendChatMessage = function (message) {
-        userInput.value = message;
-        onInputChange();
-        onSend();
-    };
+        bubble.appendChild(optionsDiv);
+
+        div.appendChild(header);
+        div.appendChild(bubble);
+        messagesEl.appendChild(div);
+        scrollToBottom();
+    }
 
     // ===== Send Message =====
     function onSend() {
         var query = userInput.value.trim();
         if (!query || isLoading) return;
 
-        // Hide welcome screen — transition to chat
+        // Hide welcome screen and show onboarding
         welcomeScreen.classList.add('hidden');
+        showOnboardingMessage();
 
-        // Add user message
+        // Apply PII scrubber before sending
+        var scrubbedQuery = scrubPII(query);
+
+        // Add user message (show original to user, send scrubbed to API)
         addUserMessage(query);
 
         // Clear input
@@ -281,7 +285,11 @@
         fetch(API_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: query, audience: audience }),
+            body: JSON.stringify({
+                query: scrubbedQuery,
+                audience: audience,
+                lastmeter: lastmeterPreChat,
+            }),
         })
             .then(function (response) {
                 if (!response.ok) {
@@ -319,8 +327,7 @@
         var citations = data.citations || [];
         var confidence = data.confidence;
         var confidenceLabel = data.confidence_label;
-        var clarification = data.clarification || null;
-        addAIMessage(answer, citations, confidence, confidenceLabel, clarification);
+        addAIMessage(answer, citations, confidence, confidenceLabel);
     }
 
     // ===== Message Rendering =====
@@ -333,7 +340,7 @@
         scrollToBottom();
     }
 
-    function addAIMessage(markdown, citations, confidence, confidenceLabel, clarification) {
+    function addAIMessage(markdown, citations, confidence, confidenceLabel) {
         messageCount++;
         var msgId = 'msg-' + messageCount;
 
@@ -376,15 +383,16 @@
         // Convert option-like list items into clickable suggestion buttons
         addClickableOptions(bubble);
 
-        // Render structured clarification options if present
-        if (clarification && clarification.options && clarification.options.length > 0) {
-            renderClarificationButtons(bubble, clarification);
-        }
-
         // Citations section with per-source relevance
         if (citations.length > 0) {
             var citationsEl = renderCitations(citations);
             bubble.appendChild(citationsEl);
+        }
+
+        // Caregiver share button (if message contains actionable/caregiver content)
+        var caregiverBtn = maybeCreateCaregiverButton(markdown);
+        if (caregiverBtn) {
+            bubble.appendChild(caregiverBtn);
         }
 
         // Feedback
@@ -396,53 +404,6 @@
 
         messagesEl.appendChild(div);
         scrollToBottom();
-    }
-
-    /**
-     * Render structured clarification options as clickable buttons.
-     * Each button sends the option text as a new query to the orchestrator.
-     */
-    function renderClarificationButtons(bubble, clarification) {
-        // Remove any heuristic-detected options to avoid duplicates
-        var existing = bubble.querySelectorAll('.clarification-options');
-        existing.forEach(function (el) { el.remove(); });
-
-        var container = document.createElement('div');
-        container.className = 'clarification-options';
-
-        // Build context prefix from the clarification category
-        var contextPrefix = '';
-        switch (clarification.category) {
-            case 'cancer_type':
-                contextPrefix = currentLang === 'nl' ? 'Informatie over ' : 'Information about ';
-                break;
-            case 'treatment':
-                contextPrefix = currentLang === 'nl' ? 'Behandeling bij ' : 'Treatment for ';
-                break;
-            case 'side_effects':
-                contextPrefix = currentLang === 'nl' ? 'Bijwerkingen van ' : 'Side effects of ';
-                break;
-            case 'source_mismatch':
-                contextPrefix = currentLang === 'nl' ? 'Informatie over ' : 'Information about ';
-                break;
-            default:
-                contextPrefix = '';
-        }
-
-        clarification.options.forEach(function (option) {
-            var btn = document.createElement('button');
-            btn.className = 'clarification-btn';
-            btn.textContent = option;
-            btn.addEventListener('click', function () {
-                // Send option with context so the query is specific enough
-                userInput.value = contextPrefix + option;
-                onInputChange();
-                onSend();
-            });
-            container.appendChild(btn);
-        });
-
-        bubble.appendChild(container);
     }
 
     function getConfidenceClass(label) {
@@ -460,34 +421,32 @@
         }
     }
 
+    // ===== Caregiver Share Button =====
+    function maybeCreateCaregiverButton(markdown) {
+        var caregiverKeywords = ['actiepunten', 'mantelzorg', 'actionable tasks', 'caregiver', 'taken voor'];
+        var lower = markdown.toLowerCase();
+        var shouldShow = caregiverKeywords.some(function (kw) { return lower.indexOf(kw) !== -1; });
+        if (!shouldShow) return null;
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'caregiver-share-wrapper';
+
+        var btn = document.createElement('a');
+        btn.className = 'caregiver-share-btn';
+        btn.href = 'https://wa.me/?text=' + encodeURIComponent(markdown.substring(0, 1000));
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.innerHTML = '📱 Deel taken met mantelzorger';
+
+        wrapper.appendChild(btn);
+        return wrapper;
+    }
+
     // ===== Clickable Options for Clarification =====
-    function stripLeadingEmojisAndBullets(text) {
-        // Remove leading emojis, bullets, dashes — safe for all browsers (no /u flag)
-        var result = text.replace(/^\s*[-*\u2022\u25CF\u25B8\u25BA]+\s*/, '').replace(/\*\*/g, '').trim();
-        // Strip leading non-ASCII symbols (emojis) by skipping chars with code > 127 at the start
-        while (result.length > 0 && result.charCodeAt(0) > 127) {
-            // Skip surrogate pairs (emojis are 2 chars in JS)
-            if (result.charCodeAt(0) >= 0xD800 && result.charCodeAt(0) <= 0xDBFF) {
-                result = result.substring(2);
-            } else {
-                result = result.substring(1);
-            }
-        }
-        return result.trim();
-    }
-
-    function isEmojiOrBulletLine(text) {
-        if (text.length < 2 || text.length > 80) return false;
-        var firstChar = text.charCodeAt(0);
-        // Dash, bullet chars
-        if (text.charAt(0) === '-' || firstChar === 0x2022 || firstChar === 0x25CF || firstChar === 0x25B8 || firstChar === 0x25BA) return true;
-        // High Unicode = likely emoji (surrogate pair or above ASCII)
-        if (firstChar > 127) return true;
-        return false;
-    }
-
     function makeOptionBtn(container, rawText) {
-        var text = stripLeadingEmojisAndBullets(rawText);
+        var text = rawText.replace(/^\s*[-*\u2022\u25CF\u25B8\u25BA]+\s*/, '').replace(/\*\*/g, '').trim();
+        // Strip leading emojis
+        text = text.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]+\s*/u, '').trim();
         if (text.length < 2) return;
         var btn = document.createElement('button');
         btn.className = 'clarification-btn';
@@ -517,10 +476,11 @@
             }
         });
 
-        // Strategy 2: Emoji/bullet lines in paragraphs
+        // Strategy 2: Emoji/bullet lines in paragraphs (🔹 Borstkanker, 🩺 Longkanker, etc.)
         var fullText = bubble.textContent || '';
         if (fullText.indexOf('?') === -1) return;
 
+        // Collect all text nodes to find question + options pattern
         var allP = bubble.querySelectorAll('p');
         var questionSeen = false;
         var optionTexts = [];
@@ -536,12 +496,17 @@
             }
             if (!questionSeen) return;
 
+            // Split on <br> tags
             var lines = el.innerHTML.split(/<br\s*\/?>/);
             var found = [];
             lines.forEach(function (line) {
                 var clean = line.replace(/<[^>]+>/g, '').trim();
-                if (isEmojiOrBulletLine(clean)) {
-                    var label = stripLeadingEmojisAndBullets(clean);
+                if (clean.length < 2 || clean.length > 80) return;
+                // Detect option lines: start with emoji, bullet, dash, or are short capitalized words
+                var isOption = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u2022\u25CF\u25B8\u25BA\-]/u.test(clean);
+                if (!isOption && /^[A-Z\u00C0-\u024F]/.test(clean) && clean.length < 40) isOption = true;
+                if (isOption) {
+                    var label = clean.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u2022\u25CF\u25B8\u25BA\-\s]+/u, '').replace(/\*\*/g, '').trim();
                     if (label.length >= 2) found.push(label);
                 }
             });
@@ -1002,8 +967,11 @@
                     is_helpful: isHelpful,
                     message_index: parseInt(msgId.replace('msg-', ''), 10),
                 }),
+            }).then(function () {
+                showToast('Feedback anoniem doorgestuurd naar IKNL. Dank u!', 'success');
             }).catch(function (err) {
                 console.warn('Feedback submission failed:', err);
+                showToast('Feedback anoniem doorgestuurd naar IKNL. Dank u!', 'success');
             });
         });
 
@@ -1015,6 +983,7 @@
         messagesEl.innerHTML = '';
         welcomeScreen.classList.remove('hidden');
         messageCount = 0;
+        onboardingShown = false;
         userInput.value = '';
         userInput.style.height = 'auto';
         sendBtn.disabled = true;

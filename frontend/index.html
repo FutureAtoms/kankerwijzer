@@ -37,15 +37,11 @@
                 </button>
             </nav>
             <div class="sidebar-footer">
-                <div class="language-toggle">
-                    <button class="lang-btn active" id="lang-nl" title="Nederlands">NL</button>
-                    <button class="lang-btn" id="lang-en" title="English">EN</button>
-                </div>
                 <div class="audience-selector">
-                    <label for="audience" data-i18n="audience_label">Doelgroep:</label>
+                    <label for="audience">Doelgroep:</label>
                     <select id="audience">
-                        <option value="patient" selected data-i18n="audience_patient">Patient</option>
-                        <option value="professional" data-i18n="audience_professional">Zorgprofessional</option>
+                        <option value="patient" selected>Patient</option>
+                        <option value="professional">Zorgprofessional</option>
                     </select>
                 </div>
             </div>
@@ -64,9 +60,9 @@
                 </button>
                 <div class="header-info">
                     <h1>KankerWijzer</h1>
-                    <p class="subtitle" data-i18n="subtitle">Betrouwbare kankerinformatie van IKNL</p>
+                    <p class="subtitle">Betrouwbare kankerinformatie van IKNL</p>
                 </div>
-                <div class="header-trust" data-i18n="header_trust">Alleen goedgekeurde bronnen</div>
+                <div class="header-trust">Alleen goedgekeurde bronnen</div>
                 <div class="header-actions">
                     <button class="btn-icon" id="btn-new-chat" title="Nieuw gesprek">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -81,36 +77,87 @@
             <div class="chat-area" id="chat-area">
                 <!-- Welcome Message -->
                 <div class="welcome-screen" id="welcome-screen">
-                    <div class="welcome-onboarding">
-                        <h2 data-i18n="welcome_title">Welkom bij KankerWijzer</h2>
-                        <p data-i18n="onboarding_intro">Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.</p>
-
-                        <div class="onboarding-disclaimer">
-                            <span class="disclaimer-icon">&#x26A0;&#xFE0F;</span>
-                            <div>
-                                <strong data-i18n="onboarding_important">Belangrijk om te weten:</strong>
-                                <ul>
-                                    <li data-i18n="onboarding_not_doctor">Ik ben <strong>geen arts</strong> &#x2014; ik geef informatief advies, geen diagnose of behandelplan</li>
-                                    <li data-i18n="onboarding_every_patient">Elke pati&euml;nt is anders &#x2014; bespreek alles met uw <strong>huisarts of specialist</strong></li>
-                                    <li><span data-i18n="onboarding_not_urgent">Deze chatbot is <strong>niet voor spoed</strong> &#x2014; bel bij nood </span><a href="tel:112" class="onboarding-phone">112</a></li>
-                                </ul>
-                            </div>
+                    <div class="welcome-icon">
+                        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                            <circle cx="32" cy="32" r="30" stroke="#00A67E" stroke-width="2.5" opacity="0.3"/>
+                            <circle cx="32" cy="32" r="22" stroke="#00A67E" stroke-width="2" opacity="0.5"/>
+                            <circle cx="32" cy="32" r="14" fill="#00A67E" opacity="0.1"/>
+                            <path d="M32 22v12M28 30l4 4 4-4" stroke="#00A67E" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <circle cx="32" cy="40" r="2" fill="#00A67E"/>
+                        </svg>
+                    </div>
+                    <h2>Welkom bij KankerWijzer</h2>
+                    <p>Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.</p>
+                    <div class="welcome-trust-grid">
+                        <div class="trust-card">
+                            <div class="trust-card-title">Bronnen met herkomst</div>
+                            <p>Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.</p>
                         </div>
-
-                        <p data-i18n="onboarding_help">Waar kan ik u mee helpen? U kunt mij vragen stellen over:</p>
-
-                        <div class="welcome-topics" id="welcome-topics">
-                            <button class="clarification-btn welcome-topic-btn" data-topic="cancer_type" data-question-nl="Informatie over een kankersoort" data-question-en="Information about a cancer type" data-i18n="topic_cancer_type">Informatie over een kankersoort</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="treatment" data-question-nl="Behandelingen en bijwerkingen" data-question-en="Treatments and side effects" data-i18n="topic_treatment">Behandelingen en bijwerkingen</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="stats" data-question-nl="Cijfers en statistieken" data-question-en="Statistics and figures" data-i18n="topic_stats">Cijfers en statistieken</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="lastmeter" data-question-nl="Omgaan met klachten (Lastmeter)" data-question-en="Coping with complaints (Lastmeter)" data-i18n="topic_lastmeter">Omgaan met klachten (Lastmeter)</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="guidelines" data-question-nl="Richtlijnen voor zorgprofessionals" data-question-en="Guidelines for professionals" data-i18n="topic_guidelines">Richtlijnen voor zorgprofessionals</button>
+                        <div class="trust-card">
+                            <div class="trust-card-title">Geen persoonlijk behandeladvies</div>
+                            <p>Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.</p>
                         </div>
+                        <div class="trust-card">
+                            <div class="trust-card-title">Ondersteuning bij klachten</div>
+                            <p>Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.</p>
+                        </div>
+                    </div>
+                    <div class="welcome-source-list" aria-label="Beschikbare bronfamilies">
+                        <span class="source-chip">kanker.nl</span>
+                        <span class="source-chip">NKR Cijfers</span>
+                        <span class="source-chip">Kanker Atlas</span>
+                        <span class="source-chip">Richtlijnendatabase</span>
+                        <span class="source-chip">IKNL rapporten</span>
+                        <span class="source-chip">Wetenschappelijke publicaties</span>
+                    </div>
+                    <div class="example-questions">
+                        <button class="example-q" data-question="Wat is borstkanker en hoe wordt het vastgesteld?">
+                            Wat is borstkanker?
+                        </button>
+                        <button class="example-q" data-question="Wat zijn de behandelmogelijkheden bij darmkanker?">
+                            Behandeling darmkanker
+                        </button>
+                        <button class="example-q" data-question="Hoe kan ik omgaan met vermoeidheid tijdens chemotherapie?">
+                            Vermoeidheid bij chemo
+                        </button>
+                        <button class="example-q" data-question="Wat zijn de overlevingscijfers voor longkanker in Nederland?">
+                            Overlevingscijfers longkanker
+                        </button>
                     </div>
                 </div>
 
                 <!-- Messages Container -->
                 <div class="messages" id="messages" aria-live="polite"></div>
+            </div>
+
+            <!-- Pre-Chat Lastmeter Assessment (Requirement 1) -->
+            <div class="prechat-lastmeter" id="prechat-lastmeter">
+                <div class="prechat-lm-header">
+                    <span class="prechat-lm-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                        Hoe voelt u zich vandaag? <span class="prechat-lm-optional">(optioneel)</span>
+                    </span>
+                    <button class="prechat-lm-dismiss" id="prechat-lm-dismiss" title="Verbergen">×</button>
+                </div>
+                <div class="prechat-lm-body">
+                    <div class="prechat-lm-slider-group">
+                        <label for="prechat-distress">Distress score:</label>
+                        <input type="range" id="prechat-distress" min="0" max="10" step="1" value="2" class="prechat-slider" />
+                        <span class="prechat-score-display" id="prechat-score-display">2</span>
+                        <span class="prechat-score-label" id="prechat-score-label">Laag</span>
+                    </div>
+                    <div class="prechat-lm-concerns">
+                        <label class="prechat-concern-label">
+                            <input type="checkbox" value="childcare" class="prechat-concern-cb" /> 👶 Kinderopvang
+                        </label>
+                        <label class="prechat-concern-label">
+                            <input type="checkbox" value="work" class="prechat-concern-cb" /> 💼 Werk/Financiën
+                        </label>
+                        <label class="prechat-concern-label">
+                            <input type="checkbox" value="fatigue" class="prechat-concern-cb" /> 😴 Ernstige vermoeidheid
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Input Area -->
@@ -119,8 +166,6 @@
                     <textarea
                         id="user-input"
                         placeholder="Stel uw vraag over kanker..."
-                        data-placeholder-nl="Stel uw vraag over kanker..."
-                        data-placeholder-en="Ask your question about cancer..."
                         rows="1"
                         aria-label="Uw vraag"
                     ></textarea>
@@ -131,7 +176,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="disclaimer" data-i18n="disclaimer">
+                <div class="disclaimer">
                     Deze informatie is informatief en vervangt geen medisch advies. Raadpleeg altijd uw arts.
                 </div>
             </div>

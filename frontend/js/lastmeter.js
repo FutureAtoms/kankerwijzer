@@ -284,7 +284,7 @@
         html += '<div class="lm-summary-actions">' +
             '<button class="lm-btn lm-btn-secondary" id="lm-summary-restart">Opnieuw</button>' +
             '<button class="lm-btn lm-btn-secondary" id="lm-summary-print">Afdrukken</button>' +
-            '<button class="lm-btn lm-btn-primary" id="lm-summary-chat">\uD83D\uDCAC Bespreek in chat</button>' +
+            '<button class="lm-btn lm-btn-primary" id="lm-summary-close">Sluiten</button>' +
             '</div>' +
             '</div>';
 
@@ -299,37 +299,7 @@
             window.print();
         });
 
-        document.getElementById('lm-summary-chat').addEventListener('click', function () {
-            sendResultsToChat();
-            closePanel();
-        });
-    }
-
-    // ===== Send Lastmeter results into the chat =====
-    function sendResultsToChat() {
-        // Build a summary message from the Lastmeter results
-        var parts = [];
-        parts.push('Lastmeter resultaat: score ' + state.score + '/10.');
-
-        if (state.checkedDomains.length > 0) {
-            var domainDescriptions = [];
-            for (var i = 0; i < state.checkedDomains.length; i++) {
-                var keyParts = state.checkedDomains[i].split(':');
-                var domainLabel = getDomainLabel(keyParts[0]);
-                var itemLabel = getItemLabel(keyParts[0], keyParts[1]);
-                domainDescriptions.push(domainLabel + ': ' + itemLabel);
-            }
-            parts.push('Probleemgebieden: ' + domainDescriptions.join(', ') + '.');
-        }
-
-        parts.push('Kun je me helpen met informatie en tips over deze klachten?');
-
-        var message = parts.join(' ');
-
-        // Use the global chat send function
-        if (window.sendChatMessage) {
-            window.sendChatMessage(message);
-        }
+        document.getElementById('lm-summary-close').addEventListener('click', closePanel);
     }
 
     // ===== Helpers =====

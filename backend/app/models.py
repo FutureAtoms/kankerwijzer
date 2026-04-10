@@ -72,15 +72,6 @@ class ContactInfo(BaseModel):
     icon: str | None = None
 
 
-class ClarificationData(BaseModel):
-    """Structured clarification data returned when the agent needs more info."""
-    brief_answer: str | None = None
-    question: str
-    options: list[str] = Field(default_factory=list)
-    category: str = "other"
-    suggested_search: str | None = None
-
-
 class AnswerResponse(BaseModel):
     query: str
     audience: Audience
@@ -92,7 +83,6 @@ class AnswerResponse(BaseModel):
     severity: str | None = Field(None, description="Severity level: critical/urgent/info")
     notes: list[str] = Field(default_factory=list)
     refusal_reason: str | None = None
-    clarification: ClarificationData | None = Field(None, description="Structured clarification when the agent needs more info")
 
 
 class FirecrawlRequest(BaseModel):

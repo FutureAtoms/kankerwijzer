@@ -53,202 +53,47 @@ class NKRCijfersClient:
     def data(self, body: dict[str, Any]) -> Any:
         return self._post("data", body)
 
-    # -----------------------------------------------------------------
-    # Cancer type code mapping (common cancers → NKR API codes)
-    # -----------------------------------------------------------------
-    CANCER_TYPE_CODES: dict[str, str] = {
-        "alle": "kankersoort/totaal/alle",
-        "borstkanker": "kankersoort/hoofdgroep/500000",
-        "mammacarcinoom": "kankersoort/subgroep/501300",
-        "longkanker": "kankersoort/subgroep/302000",
-        "darmkanker": "kankersoort/subgroep/205000",
-        "dikkedarmkanker": "kankersoort/205310",
-        "endeldarmkanker": "kankersoort/205330",
-        "prostaatkanker": "kankersoort/subgroep/702000",
-        "blaaskanker": "kankersoort/subgroep/713000",
-        "nierkanker": "kankersoort/subgroep/711000",
-        "melanoom": "kankersoort/subgroep/441300",
-        "huidkanker": "kankersoort/hoofdgroep/400000",
-        "maagkanker": "kankersoort/subgroep/203000",
-        "slokdarmkanker": "kankersoort/subgroep/201000",
-        "alvleesklierkanker": "kankersoort/subgroep/209000",
-        "leverkanker": "kankersoort/subgroep/207000",
-        "eierstokkanker": "kankersoort/subgroep/606000",
-        "baarmoederhalskanker": "kankersoort/subgroep/603000",
-        "baarmoederkanker": "kankersoort/subgroep/604000",
-        "schildklierkanker": "kankersoort/subgroep/901000",
-        "leukemie": "kankersoort/subgroep/811000",
-        "hodgkinlymfoom": "kankersoort/subgroep/801000",
-        "non-hodgkinlymfoom": "kankersoort/subgroep/804000",
-        "hersenkanker": "kankersoort/subgroep/950000",
-        "keelkanker": "kankersoort/subgroep/103000",
-    }
-
-    # Sex filter mapping
-    SEX_CODES: dict[str, str] = {
-        "alle": "geslacht/totaal/alle",
-        "man": "geslacht/man",
-        "vrouw": "geslacht/vrouw",
-    }
-
-    def query_statistics(
-        self,
-        cancer_type: str = "alle",
-        year: int = 2024,
-        sex: str = "alle",
-        stat_type: str = "incidentie",
-    ) -> Any:
-        """Query NKR statistics with specific filters.
-
-        Args:
-            cancer_type: Cancer type key (e.g. 'prostaatkanker', 'borstkanker').
-            year: Diagnosis year.
-            sex: 'alle', 'man', or 'vrouw'.
-            stat_type: 'incidentie', 'stadiumverdeling', 'prevalentie', 'sterfte', 'overleving'.
-        """
-        cancer_code = self.CANCER_TYPE_CODES.get(
-            cancer_type.lower(), self.CANCER_TYPE_CODES["alle"]
-        )
-        sex_code = self.SEX_CODES.get(sex.lower(), self.SEX_CODES["alle"])
-
-        # Each stat type uses a different navigation + statistic code + groupBy
-        st = stat_type.lower()
-
-        if st == "stadiumverdeling":
-            return self._query_stadiumverdeling(cancer_code, year, sex_code)
-        elif st == "overleving":
-            return self._query_overleving(cancer_code, year, sex_code)
-        else:
-            # incidentie, prevalentie, sterfte all use the same pattern
-            return self._query_incidentie_type(st, cancer_code, year, sex_code)
-
-    def _query_incidentie_type(
-        self, stat_type: str, cancer_code: str, year: int, sex_code: str
-    ) -> Any:
-        """Query incidentie/prevalentie/sterfte — single year, single number."""
-        nav_map = {
-            "incidentie": "incidentie/periode",
-            "prevalentie": "prevalentie/periode",
-            "sterfte": "sterfte/periode",
-        }
-        nav_code = nav_map.get(stat_type, "incidentie/periode")
-
-        return self.data({
-            "language": "nl-NL",
-            "navigation": {"code": nav_code},
-            "groupBy": [
-                {
-                    "code": "filter/periode-van-diagnose",
-                    "values": [{"code": f"periode/1-jaar/{year}"}],
-                }
-            ],
-            "aggregateBy": [
-                {
-                    "code": "filter/kankersoort",
-                    "values": [{"code": cancer_code}],
-                },
-                {
-                    "code": "filter/geslacht",
-                    "values": [{"code": sex_code}],
-                },
-                {
-                    "code": "filter/leeftijdsgroep",
-                    "values": [{"code": "leeftijdsgroep/totaal/alle"}],
-                },
-                {
-                    "code": "filter/regio",
-                    "values": [{"code": "regio/totaal/alle"}],
-                },
-                {
-                    "code": "filter/stadium",
-                    "values": [{"code": "stadium/totaal/alle"}],
-                },
-            ],
-            "statistic": {"code": "statistiek/aantal"},
-        })
-
-    def _query_stadiumverdeling(
-        self, cancer_code: str, year: int, sex_code: str
-    ) -> Any:
-        """Query stage distribution for a specific cancer type and year."""
-        return self.data({
-            "language": "nl-NL",
-            "navigation": {"code": "incidentie/verdeling-per-stadium"},
-            "groupBy": [
-                {
-                    "code": "filter/stadium",
-                    "values": [
-                        {"code": "stadium/0"},
-                        {"code": "stadium/i"},
-                        {"code": "stadium/ii"},
-                        {"code": "stadium/iii"},
-                        {"code": "stadium/iv"},
-                        {"code": "stadium/x"},
-                        {"code": "stadium/nvt"},
-                    ],
-                }
-            ],
-            "aggregateBy": [
-                {
-                    "code": "filter/kankersoort",
-                    "values": [{"code": cancer_code}],
-                },
-                {
-                    "code": "filter/periode-van-diagnose",
-                    "values": [{"code": f"periode/1-jaar/{year}"}],
-                },
-                {
-                    "code": "filter/geslacht",
-                    "values": [{"code": sex_code}],
-                },
-                {
-                    "code": "filter/leeftijdsgroep",
-                    "values": [{"code": "leeftijdsgroep/totaal/alle"}],
-                },
-                {
-                    "code": "filter/regio",
-                    "values": [{"code": "regio/totaal/alle"}],
-                },
-            ],
-            "statistic": {"code": "statistiek/verdeling"},
-        })
-
-    def _query_overleving(
-        self, cancer_code: str, year: int, sex_code: str
-    ) -> Any:
-        """Query 5-year relative survival for a specific cancer type."""
-        return self.data({
-            "language": "nl-NL",
-            "navigation": {"code": "overleving/periode"},
-            "groupBy": [
-                {
-                    "code": "filter/periode-van-diagnose",
-                    "values": [{"code": f"periode/1-jaar/{year}"}],
-                }
-            ],
-            "aggregateBy": [
-                {
-                    "code": "filter/kankersoort",
-                    "values": [{"code": cancer_code}],
-                },
-                {
-                    "code": "filter/geslacht",
-                    "values": [{"code": sex_code}],
-                },
-                {
-                    "code": "filter/leeftijdsgroep",
-                    "values": [{"code": "leeftijdsgroep/totaal/alle"}],
-                },
-                {
-                    "code": "filter/regio",
-                    "values": [{"code": "regio/totaal/alle"}],
-                },
-            ],
-            "statistic": {"code": "statistiek/5-jaars"},
-        })
-
     def example_stage_distribution(self, year: int = 2024) -> Any:
-        """Legacy helper — delegates to query_statistics."""
-        return self.query_statistics(
-            cancer_type="alle", year=year, stat_type="stadiumverdeling"
+        return self.data(
+            {
+                "language": "nl-NL",
+                "navigation": {"code": "incidentie/verdeling-per-stadium"},
+                "groupBy": [
+                    {
+                        "code": "filter/stadium",
+                        "values": [
+                            {"code": "stadium/0"},
+                            {"code": "stadium/i"},
+                            {"code": "stadium/ii"},
+                            {"code": "stadium/iii"},
+                            {"code": "stadium/iv"},
+                            {"code": "stadium/x"},
+                            {"code": "stadium/nvt"},
+                        ],
+                    }
+                ],
+                "aggregateBy": [
+                    {
+                        "code": "filter/kankersoort",
+                        "values": [{"code": "kankersoort/totaal/alle"}],
+                    },
+                    {
+                        "code": "filter/periode-van-diagnose",
+                        "values": [{"code": f"periode/1-jaar/{year}"}],
+                    },
+                    {
+                        "code": "filter/geslacht",
+                        "values": [{"code": "geslacht/totaal/alle"}],
+                    },
+                    {
+                        "code": "filter/leeftijdsgroep",
+                        "values": [{"code": "leeftijdsgroep/totaal/alle"}],
+                    },
+                    {
+                        "code": "filter/regio",
+                        "values": [{"code": "regio/totaal/alle"}],
+                    },
+                ],
+                "statistic": {"code": "statistiek/verdeling"},
+            }
         )
