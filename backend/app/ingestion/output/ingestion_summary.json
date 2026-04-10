@@ -1,5 +1,5 @@
 {
-  "started_at": "2026-04-10T10:36:44.025335+00:00",
+  "started_at": "2026-04-10T11:28:31.389839+00:00",
   "phases": {
     "kanker.nl": {
       "documents": 2816,
@@ -22,8 +22,8 @@
       "chunks": 26
     }
   },
-  "elapsed_seconds": 4.04,
-  "finished_at": "2026-04-10T10:36:48.068521+00:00",
+  "elapsed_seconds": 4.18,
+  "finished_at": "2026-04-10T11:28:35.566733+00:00",
   "totals": {
     "sources": 5,
     "documents": 2861,

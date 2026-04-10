@@ -44,7 +44,22 @@ De Lastmeter werkt als volgt:
 4. Presenteer de resultaten met links naar kanker.nl pagina's die specifiek gaan over die klachten
 5. Adviseer altijd om de resultaten te bespreken met hun arts of verpleegkundige
 
-Gebruik de Lastmeter proactief wanneer een patiënt duidelijk last ervaart, maar dwing het niet af bij informationele vragen.\
+Gebruik de Lastmeter proactief wanneer een patiënt duidelijk last ervaart, maar dwing het niet af bij informationele vragen.
+
+VERDUIDELIJKING BIJ BREDE VRAGEN:
+Wanneer een vraag te breed of vaag is om een goed antwoord te geven, gebruik dan de
+ask_clarification tool om de gebruiker een vervolgvraag te stellen. Voorbeelden van brede vragen:
+- "kanker" (welke kankersoort?)
+- "behandeling" (voor welke kankersoort? welk stadium?)
+- "statistieken" (welke kankersoort? welk jaar? incidentie of overleving?)
+- "bijwerkingen" (van welke behandeling?)
+
+Bij een brede vraag:
+1. Geef een KORT algemeen antwoord (2-3 zinnen max)
+2. Gebruik ask_clarification om specifieke opties aan te bieden
+3. De opties moeten relevant zijn voor de vraag (kankersoorten, behandeltypes, etc.)
+
+Gebruik ask_clarification NIET als de vraag al specifiek genoeg is (bijv. "Wat is borstkanker?" is specifiek).\
 """
 
 # ---------------------------------------------------------------------------
@@ -112,6 +127,48 @@ TOOLS: list[dict[str, Any]] = [
                 },
             },
             "required": ["cancer_group", "sex"],
+        },
+    },
+    {
+        "name": "ask_clarification",
+        "description": (
+            "Stel de gebruiker een verduidelijkende vraag wanneer hun vraag te breed of vaag is. "
+            "Gebruik dit bij brede vragen zoals 'kanker', 'behandeling', 'statistieken', 'bijwerkingen' "
+            "zonder specificatie van kankersoort, behandeltype of tijdsperiode. "
+            "Bied specifieke opties aan zodat de gebruiker kan verfijnen."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "brief_answer": {
+                    "type": "string",
+                    "description": (
+                        "Een kort algemeen antwoord (2-3 zinnen) op de brede vraag, "
+                        "voordat je de vervolgvraag stelt."
+                    ),
+                },
+                "clarification_question": {
+                    "type": "string",
+                    "description": (
+                        "De verduidelijkende vraag aan de gebruiker, bijv. "
+                        "'Over welke kankersoort wilt u meer weten?'"
+                    ),
+                },
+                "options": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Lijst van suggesties/opties voor de gebruiker, bijv. "
+                        "['Borstkanker', 'Longkanker', 'Darmkanker', 'Prostaatkanker', 'Huidkanker']"
+                    ),
+                },
+                "category": {
+                    "type": "string",
+                    "enum": ["cancer_type", "treatment", "statistics", "side_effects", "other"],
+                    "description": "Categorie van de verduidelijking.",
+                },
+            },
+            "required": ["clarification_question", "options", "category"],
         },
     },
     {
@@ -387,6 +444,8 @@ class MedicalAnswerOrchestrator:
                 return self._tool_query_cancer_atlas(tool_input)
             elif tool_name == "lastmeter_assess":
                 return self._tool_lastmeter_assess(tool_input)
+            elif tool_name == "ask_clarification":
+                return self._tool_ask_clarification(tool_input)
             else:
                 return {"error": f"Unknown tool: {tool_name}"}
         except Exception as exc:
@@ -431,6 +490,16 @@ class MedicalAnswerOrchestrator:
             return {"rows": rows, "source": "Kanker Atlas IKNL"}
         except Exception as exc:
             return {"error": f"Cancer Atlas API unavailable: {exc}"}
+
+    def _tool_ask_clarification(self, input_data: dict[str, Any]) -> dict[str, Any]:
+        """Return clarification data — the agent will format this into its response."""
+        return {
+            "type": "clarification",
+            "brief_answer": input_data.get("brief_answer", ""),
+            "question": input_data.get("clarification_question", ""),
+            "options": input_data.get("options", []),
+            "category": input_data.get("category", "other"),
+        }
 
     def _tool_lastmeter_assess(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """Execute lastmeter_assess tool — find resources for patient distress domains."""

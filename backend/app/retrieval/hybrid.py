@@ -17,7 +17,7 @@ from app.models import (
     SourceDocument,
 )
 from app.retrieval.simple import FIRST_PERSON_PATTERNS, UNSAFE_PATTERNS
-from app.safety.abstention import check_evidence_threshold
+from app.safety.abstention import check_evidence_threshold, check_low_coverage
 from app.safety.red_flags import check_red_flags
 from app.safety.source_policy import get_publisher_note, validate_source
 from app.vectorstore.embedder import Embedder
@@ -162,6 +162,17 @@ class HybridMedicalRetriever:
             logger.exception("Vector search failed")
             vector_hits = []
             notes.append("Vector search encountered an error; falling back to empty results.")
+
+        # ---- 4.5 Low-coverage refusal for specific cancer types ------
+        low_coverage = check_low_coverage(query, vector_hits)
+        if low_coverage:
+            notes.append("Requested cancer type is not supported by the retrieved evidence.")
+            return RetrievalResponse(
+                query=query,
+                audience=audience,
+                refusal_reason="Onvoldoende bewijs gevonden voor deze specifieke kankersoort.",
+                notes=notes,
+            )
 
         # ---- 5. Evidence-threshold abstention -------------------------
         refusal = check_evidence_threshold(vector_hits, self.settings.abstention_threshold)

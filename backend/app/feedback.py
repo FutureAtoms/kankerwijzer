@@ -16,17 +16,27 @@ logger = logging.getLogger(__name__)
 _feedback_store: list[dict] = []
 
 
-def _try_postgres_insert(record: dict) -> bool:
-    """Try to insert a feedback record into Postgres. Returns True on success."""
+def _try_postgres_insert(record: dict) -> int | None:
+    """Try to insert a feedback record into Postgres. Returns feedback_id on success."""
     settings = get_settings()
     try:
         import psycopg
 
         with psycopg.connect(settings.postgres_url, autocommit=True) as conn:
-            conn.execute(
+            row = conn.execute(
                 """
-                INSERT INTO user_feedback (query_text, answer_excerpt, citation_urls, is_helpful, notes)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO user_feedback (
+                    query_text,
+                    answer_excerpt,
+                    citation_urls,
+                    is_helpful,
+                    notes,
+                    feedback_type,
+                    conversation_id,
+                    message_index
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                RETURNING feedback_id
                 """,
                 (
                     record["query_text"],
@@ -34,12 +44,15 @@ def _try_postgres_insert(record: dict) -> bool:
                     record.get("citation_urls", []),
                     record.get("is_helpful"),
                     record.get("notes"),
+                    record.get("feedback_type", "general"),
+                    record.get("conversation_id"),
+                    record.get("message_index"),
                 ),
-            )
-        return True
+            ).fetchone()
+        return int(row[0]) if row else None
     except Exception:
         logger.debug("Postgres unavailable for feedback; using in-memory store", exc_info=True)
-        return False
+        return None
 
 
 def _try_postgres_stats() -> dict | None:
@@ -62,17 +75,29 @@ def _try_postgres_stats() -> dict | None:
             ).fetchone()
             not_helpful = not_helpful_row[0] if not_helpful_row else 0
 
+            breakdown_rows = conn.execute(
+                """
+                SELECT feedback_type, COUNT(*)
+                FROM user_feedback
+                GROUP BY feedback_type
+                ORDER BY COUNT(*) DESC, feedback_type ASC
+                """
+            ).fetchall()
+            breakdown = {row[0]: row[1] for row in breakdown_rows}
+
             return {
                 "total": total,
                 "helpful": helpful,
                 "not_helpful": not_helpful,
                 "percent_helpful": round(helpful / total * 100, 1) if total > 0 else 0,
+                "breakdown_by_type": breakdown,
                 "source": "postgres",
             }
     except Exception:
         return None
 
 
+@router.post("")
 @router.post("/")
 def submit_feedback(body: dict) -> dict:
     """Store feedback. Required: query_text, feedback_type.
@@ -87,7 +112,7 @@ def submit_feedback(body: dict) -> dict:
             detail="query_text and feedback_type are required",
         )
 
-    valid_types = {"helpful", "missing_info", "incorrect", "unclear"}
+    valid_types = {"helpful", "missing_info", "incorrect", "unclear", "general"}
     if feedback_type not in valid_types:
         raise HTTPException(
             status_code=422,
@@ -110,13 +135,14 @@ def submit_feedback(body: dict) -> dict:
         "created_at": datetime.now(timezone.utc).isoformat(),
     }
 
-    stored_in_pg = _try_postgres_insert(record)
-    if not stored_in_pg:
+    feedback_id = _try_postgres_insert(record)
+    if feedback_id is None:
         _feedback_store.append(record)
 
     return {
         "status": "ok",
-        "stored_in": "postgres" if stored_in_pg else "memory",
+        "stored_in": "postgres" if feedback_id is not None else "memory",
+        "feedback_id": feedback_id,
         "feedback_type": feedback_type,
     }
 
@@ -132,11 +158,16 @@ def feedback_stats() -> dict:
     total = len(_feedback_store)
     helpful = sum(1 for f in _feedback_store if f.get("is_helpful"))
     not_helpful = sum(1 for f in _feedback_store if f.get("is_helpful") is False)
+    breakdown: dict[str, int] = {}
+    for record in _feedback_store:
+        feedback_type = record.get("feedback_type", "general")
+        breakdown[feedback_type] = breakdown.get(feedback_type, 0) + 1
 
     return {
         "total": total,
         "helpful": helpful,
         "not_helpful": not_helpful,
         "percent_helpful": round(helpful / total * 100, 1) if total > 0 else 0,
+        "breakdown_by_type": breakdown,
         "source": "memory",
     }

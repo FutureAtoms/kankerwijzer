@@ -1271,6 +1271,35 @@ body {
     }
 }
 
+/* ===== CLARIFICATION OPTIONS ===== */
+.clarification-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+    padding: 8px 0;
+}
+.clarification-btn {
+    padding: 8px 16px;
+    border: 2px solid #00A67E;
+    border-radius: 20px;
+    background: #f0faf6;
+    color: #004D40;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.clarification-btn:hover {
+    background: #00A67E;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,166,126,0.3);
+}
+.clarification-btn:active {
+    transform: translateY(0);
+}
+
 /* ===== CONFIDENCE BADGE ===== */
 .confidence-badge {
     display: inline-flex;

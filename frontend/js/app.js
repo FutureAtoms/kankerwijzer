@@ -219,6 +219,9 @@
         htmlContent = replaceSrcReferences(htmlContent, citations);
         bubble.innerHTML = htmlContent;
 
+        // Convert option-like list items into clickable suggestion buttons
+        addClickableOptions(bubble);
+
         // Citations section with per-source relevance
         if (citations.length > 0) {
             var citationsEl = renderCitations(citations);
@@ -244,6 +247,46 @@
             case 'zeer laag': return '\u274C';
             default: return '\u2139\uFE0F';
         }
+    }
+
+    // ===== Clickable Options for Clarification =====
+    function addClickableOptions(bubble) {
+        // Find list items that look like clarification options
+        // Pattern: short list items (< 60 chars) in a <ul> or <ol> that follow a question mark
+        var lists = bubble.querySelectorAll('ul, ol');
+        lists.forEach(function (list) {
+            // Check if the text before this list contains a question mark
+            var prev = list.previousElementSibling;
+            var isAfterQuestion = prev && prev.textContent && prev.textContent.indexOf('?') !== -1;
+
+            var items = list.querySelectorAll('li');
+            var allShort = true;
+            items.forEach(function (li) {
+                if (li.textContent.length > 80) allShort = false;
+            });
+
+            // If it's a short list after a question, convert to clickable buttons
+            if (isAfterQuestion && allShort && items.length >= 2 && items.length <= 10) {
+                var optionsDiv = document.createElement('div');
+                optionsDiv.className = 'clarification-options';
+
+                items.forEach(function (li) {
+                    var btn = document.createElement('button');
+                    btn.className = 'clarification-btn';
+                    // Clean text: remove bold markers, leading dashes/bullets
+                    var text = li.textContent.replace(/^\s*[-*•]\s*/, '').trim();
+                    btn.textContent = text;
+                    btn.addEventListener('click', function () {
+                        // Send this option as a new user message
+                        userInput.value = text;
+                        sendMessage();
+                    });
+                    optionsDiv.appendChild(btn);
+                });
+
+                list.replaceWith(optionsDiv);
+            }
+        });
     }
 
     function addRefusalMessage(reason) {

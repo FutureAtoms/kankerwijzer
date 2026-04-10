@@ -61,5 +61,8 @@ CREATE TABLE IF NOT EXISTS user_feedback (
   citation_urls TEXT[] NOT NULL DEFAULT ARRAY[]::TEXT[],
   is_helpful BOOLEAN,
   notes TEXT,
+  feedback_type TEXT NOT NULL DEFAULT 'general',
+  conversation_id TEXT,
+  message_index INTEGER,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

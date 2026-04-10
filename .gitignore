@@ -1,6 +1,46 @@
 vendor/
 *.pyc
 __pycache__/
-.env
-uv.lock
 *.egg-info/
+uv.lock
+
+# Secrets and keys
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+credentials.json
+service-account*.json
+*secret*
+*SECRET*
+
+# API keys in any config
+.anthropic
+.firecrawl
+*.api_key
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Python virtual env
+.venv/
+venv/
+env/
+
+# Data artifacts (large files)
+*.sqlite
+*.db
+neo4j_data/
+qdrant_data/
+postgres_data/
