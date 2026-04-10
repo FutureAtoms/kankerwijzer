@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 
 from app.agent.orchestrator import MedicalAnswerOrchestrator
 from app.config import get_settings
@@ -212,3 +213,7 @@ def agent_answer(request: QuestionRequest):
         audience=request.audience,
         limit=request.limit,
     )
+
+
+# --- Static frontend (must be LAST, after all API routes) ---
+app.mount("/app", StaticFiles(directory=str(settings.team_root / "frontend"), html=True), name="frontend")
