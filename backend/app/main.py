@@ -222,4 +222,4 @@ app.include_router(lastmeter_router)
 app.include_router(feedback_router)
 
 # --- Static frontend (must be LAST, after all API routes) ---
-app.mount("/app", StaticFiles(directory=str(settings.team_root / "frontend"), html=True), name="frontend")
+app.mount("/app", StaticFiles(directory=str(settings.team_root / "generated-frontend"), html=True), name="frontend")

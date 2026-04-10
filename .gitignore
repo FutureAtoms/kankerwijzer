@@ -1,46 +1,115 @@
-vendor/
-*.pyc
-__pycache__/
-*.egg-info/
-uv.lock
+# --- Dependencies / environments ---
 
-# Secrets and keys
+vendor/
 .env
 .env.*
 !.env.example
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# --- Python cache / compiled files ---
+
+__pycache__/
+**pycache**/
+*.pyc
+*.py[cod]
+*$py.class
+
+# --- Packaging / build artifacts ---
+
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+share/python-wheels/
+
+# --- Installer / lock files ---
+
+uv.lock
+poetry.lock
+Pipfile.lock
+
+# --- Test / coverage ---
+
+.coverage
+.coverage.*
+.cache/
+pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+htmlcov/
+
+# --- Type checkers / linters ---
+
+.mypy_cache/
+.pyre/
+.pytype/
+.ruff_cache/
+
+# --- Jupyter ---
+
+.ipynb_checkpoints/
+
+# --- Logs ---
+
+*.log
+
+# --- OS files ---
+
+.DS_Store
+Thumbs.db
+
+# --- IDE / editors ---
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# --- Secrets / credentials ---
+
 *.pem
 *.key
 *.p12
 *.pfx
 *.jks
 *.keystore
+*.crt
 credentials.json
 service-account*.json
 *secret*
 *SECRET*
+secrets.*
+.env.local
+.env.production
+.env.development
 
 # API keys in any config
 .anthropic
 .firecrawl
 *.api_key
 
-# IDE / OS
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
+# --- Data artifacts (large files) ---
 
-# Python virtual env
-.venv/
-venv/
-env/
-
-# Data artifacts (large files)
 *.sqlite
 *.db
 neo4j_data/
 qdrant_data/
 postgres_data/
+
+# --- Misc ---
+
+tmp/
+temp/
+*.bak
+*.orig
