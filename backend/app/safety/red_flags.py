@@ -6,8 +6,8 @@ import re
 
 RED_FLAG_PATTERNS: list[tuple[str, str]] = [
     # Emergency symptoms
-    (r"bloed\s*(braken|spugen|ophoesten)", "emergency"),
-    (r"(braak|spuug|hoest)\s*(bloed|op\s*bloed)", "emergency"),
+    (r"bloed\s*(braken|braaksel|spugen|spuug|ophoesten|opgehoest|hoesten)", "emergency"),
+    (r"(braak|braaksel|spuug|spugen|hoest|hoesten|ophoest|opgehoest)\s*(bloed|op\s*bloed)", "emergency"),
     (r"bewusteloos", "emergency"),
     (r"ernstige\s*(pijn|bloeding)", "emergency"),
     (r"(hartaanval|beroerte|hartinfarct)", "emergency"),

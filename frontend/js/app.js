@@ -102,13 +102,91 @@
         }
     }
 
+    // ===== Onboarding Welcome Message =====
+    var onboardingShown = false;
+
+    function showOnboardingMessage() {
+        if (onboardingShown) return;
+        onboardingShown = true;
+
+        messageCount++;
+        var div = document.createElement('div');
+        div.className = 'message-ai';
+
+        var header = document.createElement('div');
+        header.className = 'ai-header';
+        header.innerHTML =
+            '<div class="ai-avatar">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#00A67E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<circle cx="12" cy="12" r="10"/>' +
+            '<path d="M12 8v4M12 16h.01"/>' +
+            '</svg>' +
+            '</div>' +
+            '<span class="ai-name">KankerWijzer</span>';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble onboarding-bubble';
+        bubble.innerHTML =
+            '<p><strong>Welkom bij KankerWijzer!</strong></p>' +
+            '<p>Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u ' +
+            'betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.</p>' +
+            '<div class="onboarding-disclaimer">' +
+            '<span class="disclaimer-icon">\u26A0\uFE0F</span>' +
+            '<div>' +
+            '<strong>Belangrijk om te weten:</strong>' +
+            '<ul>' +
+            '<li>Ik ben <strong>geen arts</strong> \u2014 ik geef informatief advies, geen diagnose of behandelplan</li>' +
+            '<li>Elke pati\u00EBnt is anders \u2014 bespreek alles met uw <strong>huisarts of specialist</strong></li>' +
+            '<li>Deze chatbot is <strong>niet voor spoed</strong> \u2014 bel bij nood <a href="tel:112" class="onboarding-phone">112</a></li>' +
+            '</ul>' +
+            '</div>' +
+            '</div>' +
+            '<p>Waar kan ik u mee helpen? U kunt mij vragen stellen over:</p>';
+
+        // Add clickable topic options
+        var optionsDiv = document.createElement('div');
+        optionsDiv.className = 'clarification-options';
+
+        var topics = [
+            'Informatie over een kankersoort',
+            'Behandelingen en bijwerkingen',
+            'Cijfers en statistieken',
+            'Omgaan met klachten (Lastmeter)',
+            'Richtlijnen voor zorgprofessionals'
+        ];
+
+        topics.forEach(function (topic) {
+            var btn = document.createElement('button');
+            btn.className = 'clarification-btn';
+            btn.textContent = topic;
+            btn.addEventListener('click', function () {
+                if (topic === 'Omgaan met klachten (Lastmeter)') {
+                    if (window.openLastmeter) window.openLastmeter();
+                } else {
+                    userInput.value = topic;
+                    onInputChange();
+                    onSend();
+                }
+            });
+            optionsDiv.appendChild(btn);
+        });
+
+        bubble.appendChild(optionsDiv);
+
+        div.appendChild(header);
+        div.appendChild(bubble);
+        messagesEl.appendChild(div);
+        scrollToBottom();
+    }
+
     // ===== Send Message =====
     function onSend() {
         var query = userInput.value.trim();
         if (!query || isLoading) return;
 
-        // Hide welcome screen
+        // Hide welcome screen and show onboarding
         welcomeScreen.classList.add('hidden');
+        showOnboardingMessage();
 
         // Add user message
         addUserMessage(query);
@@ -795,6 +873,7 @@
         messagesEl.innerHTML = '';
         welcomeScreen.classList.remove('hidden');
         messageCount = 0;
+        onboardingShown = false;
         userInput.value = '';
         userInput.style.height = 'auto';
         sendBtn.disabled = true;

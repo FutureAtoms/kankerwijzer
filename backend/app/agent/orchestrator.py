@@ -32,20 +32,38 @@ REGELS:
 Bij onvoldoende bewijs: zeg eerlijk dat je het niet kunt vinden.
 Verwijs bij persoonlijke vragen naar de huisarts of KWF Kanker Infolijn (0800-022 66 22).
 
-LASTMETER:
-Wanneer een gebruiker praat over hoe zij zich voelen, hun last, klachten, zorgen,
-vermoeidheid, angst, pijn, somberheid, slaapproblemen, of andere vormen van distress
-gerelateerd aan kanker, gebruik dan de lastmeter_assess tool. Dit is de Nederlandse
-Lastmeter (Distress Thermometer) — een gevalideerd instrument voor kankerpatiënten.
+LASTMETER (PRIORITEIT — ALTIJD CONTROLEREN):
+De Lastmeter (Distress Thermometer) is een gevalideerd instrument voor kankerpatiënten.
+Je MOET de lastmeter_assess tool gebruiken wanneer je OOK MAAR EEN HINT van distress detecteert.
 
-De Lastmeter werkt als volgt:
-1. Vraag de patiënt: "Op een schaal van 0-10, hoeveel last heeft u ervaren in de afgelopen week?" (0=geen last, 10=extreme last)
-2. Als de score >= 4: vraag op welke gebieden de patiënt last ervaart (lichamelijk, emotioneel, praktisch, sociaal, zingeving)
-3. Gebruik de lastmeter_assess tool met de geselecteerde domeinen om relevante hulpbronnen op te halen
-4. Presenteer de resultaten met links naar kanker.nl pagina's die specifiek gaan over die klachten
+TRIGGER-SIGNALEN — gebruik lastmeter_assess bij ELK van deze signalen:
+- Emotioneel: angst, bang, bezorgd, zorgen, stress, somber, depressief, verdrietig,
+  boos, gefrustreerd, eenzaam, machteloos, hopeloos, onzeker, ongerust, paniek,
+  huilen, emotioneel, overweldigd, niet meer weten, het niet meer zien zitten
+- Lichamelijk: pijn, moe, vermoeid, uitgeput, misselijk, slapeloosheid, slaapproblemen,
+  niet kunnen slapen, geen eetlust, gewichtsverlies, gewichtstoename, kortademig,
+  duizelig, zwak, tintelingen, jeuk, haaruitval, bijwerkingen, klachten, last,
+  niet lekker voelen, ziek voelen
+- Praktisch: werk, financieel, geld, verzekering, kinderopvang, vervoer, administratie,
+  regelen, mantelzorg
+- Sociaal: relatie, partner, gezin, familie, vrienden, isolatie, alleen, eenzaam,
+  seksualiteit, intimiteit
+- Zingeving: waarom, zinloos, geloof, dood, angst voor de dood, afscheid,
+  levensvragen, spiritueel, betekenis
+- Algemeen: hoe gaat het, hoe voel je je, het gaat niet goed, ik heb het moeilijk,
+  het valt me zwaar, ik kan het niet aan, het is te veel, alles is anders
+
+WERKWIJZE:
+1. Detecteer de relevante domeinen uit het bericht van de patiënt
+2. Schat een distress_score in op basis van de toon en ernst (0-10)
+3. Roep DIRECT lastmeter_assess aan met de gedetecteerde domeinen — je hoeft NIET
+   eerst te vragen of de patiënt de Lastmeter wil invullen
+4. Combineer de gevonden hulpbronnen met een empathisch antwoord
 5. Adviseer altijd om de resultaten te bespreken met hun arts of verpleegkundige
 
-Gebruik de Lastmeter proactief wanneer een patiënt duidelijk last ervaart, maar dwing het niet af bij informationele vragen.
+BIJ TWIJFEL: gebruik de Lastmeter. Het is beter om relevante hulpbronnen aan te bieden
+dan om een patiënt in nood te missen. De enige uitzondering is een puur informatieve vraag
+zonder enige persoonlijke context (bijv. "wat is chemotherapie?").
 
 VERDUIDELIJKING — GEBRUIK ask_clarification IN DEZE GEVALLEN:
 
@@ -201,8 +219,12 @@ TOOLS: list[dict[str, Any]] = [
         "name": "lastmeter_assess",
         "description": (
             "De Lastmeter (Distress Thermometer) — een gevalideerd instrument voor kankerpatiënten. "
-            "Gebruik dit wanneer een patiënt praat over hun klachten, last, vermoeidheid, angst, pijn, "
-            "somberheid, slaapproblemen, zorgen, of andere vormen van distress. "
+            "GEBRUIK DIT PROACTIEF bij elke hint van distress, klachten, of emotionele last. "
+            "Trigger-woorden: pijn, moe, vermoeid, angst, bang, zorgen, somber, stress, slapen, "
+            "misselijk, eenzaam, boos, niet goed voelen, het is moeilijk, ik kan het niet aan, "
+            "bijwerkingen, last, klachten, hoe gaat het, het gaat niet goed, overweldigd, huilen, "
+            "zwaar, relatie, werk, financieel, betekenis, dood, afscheid. "
+            "BIJ TWIJFEL: gebruik deze tool — het is beter om hulpbronnen te bieden dan te missen. "
             "Geeft relevante hulpbronnen van kanker.nl terug op basis van de geselecteerde probleemgebieden. "
             "Domein-opties: physical:pain, physical:fatigue, physical:sleep, physical:nausea, "
             "physical:appetite, physical:breathing, physical:mobility, physical:appearance, "
@@ -346,6 +368,9 @@ class MedicalAnswerOrchestrator:
         # ---- Step 2.5: Detect source mismatch -------------------------
         mismatch_hint = self._detect_source_mismatch(query, retrieval.hits)
 
+        # ---- Step 2.6: Detect distress signals (proactive Lastmeter) --
+        distress_domains, distress_hint = self._detect_distress_signals(query)
+
         # ---- Step 3: Call Claude with evidence + tools ----------------
         try:
             client = self._client()
@@ -373,6 +398,12 @@ class MedicalAnswerOrchestrator:
                 "om meer specifieke informatie. Doe GEEN herhaalde zoekopdrachten — "
                 "die geven dezelfde resultaten. Citeer de bovenstaande bronnen NIET "
                 "als ze niet bij de vraag passen."
+            )
+
+        if distress_hint:
+            user_message += (
+                f"\n\n🔔 LASTMETER ACTIVATIE: {distress_hint}\n"
+                "Je MOET de lastmeter_assess tool aanroepen voor deze patiënt."
             )
 
         try:
@@ -549,6 +580,78 @@ class MedicalAnswerOrchestrator:
             return {"rows": rows, "source": "Kanker Atlas IKNL"}
         except Exception as exc:
             return {"error": f"Cancer Atlas API unavailable: {exc}"}
+
+    # ------------------------------------------------------------------
+    # Distress signal detection (proactive lastmeter trigger)
+    # ------------------------------------------------------------------
+
+    _DISTRESS_KEYWORDS: list[tuple[str, str]] = [
+        # (keyword, suggested domain)
+        ("pijn", "physical:pain"), ("zeer", "physical:pain"), ("zeer doen", "physical:pain"),
+        ("moe", "physical:fatigue"), ("vermoeid", "physical:fatigue"), ("uitgeput", "physical:fatigue"),
+        ("zwak", "physical:fatigue"), ("geen energie", "physical:fatigue"),
+        ("slapen", "physical:sleep"), ("slaap", "physical:sleep"), ("slapeloosheid", "physical:sleep"),
+        ("wakker", "physical:sleep"), ("niet kunnen slapen", "physical:sleep"),
+        ("misselijk", "physical:nausea"), ("overgeven", "physical:nausea"), ("braken", "physical:nausea"),
+        ("eetlust", "physical:appetite"), ("niet eten", "physical:appetite"), ("gewicht", "physical:appetite"),
+        ("adem", "physical:breathing"), ("kortademig", "physical:breathing"), ("benauwd", "physical:breathing"),
+        ("bewegen", "physical:mobility"), ("lopen", "physical:mobility"),
+        ("haaruitval", "physical:appearance"), ("uiterlijk", "physical:appearance"),
+        ("angst", "emotional:anxiety"), ("bang", "emotional:anxiety"), ("paniek", "emotional:anxiety"),
+        ("ongerust", "emotional:anxiety"), ("bezorgd", "emotional:anxiety"),
+        ("somber", "emotional:depression"), ("depressief", "emotional:depression"),
+        ("verdrietig", "emotional:depression"), ("huilen", "emotional:depression"),
+        ("hopeloos", "emotional:depression"), ("machteloos", "emotional:depression"),
+        ("zorgen", "emotional:worry"), ("onzeker", "emotional:worry"), ("piekeren", "emotional:worry"),
+        ("boos", "emotional:anger"), ("gefrustreerd", "emotional:anger"), ("kwaad", "emotional:anger"),
+        ("geen zin", "emotional:loss_of_interest"), ("nergens zin", "emotional:loss_of_interest"),
+        ("werk", "practical:work"), ("baan", "practical:work"),
+        ("geld", "practical:financial"), ("financ", "practical:financial"), ("verzekering", "practical:financial"),
+        ("kinderen", "practical:childcare"), ("kinderopvang", "practical:childcare"),
+        ("vervoer", "practical:transport"),
+        ("partner", "social:partner"), ("relatie", "social:partner"), ("intimiteit", "social:partner"),
+        ("gezin", "social:family"), ("familie", "social:family"),
+        ("vrienden", "social:friends"), ("alleen", "social:friends"), ("eenzaam", "social:friends"),
+        ("isolatie", "social:friends"),
+        ("waarom", "spiritual:meaning"), ("zinloos", "spiritual:meaning"), ("betekenis", "spiritual:meaning"),
+        ("geloof", "spiritual:faith"),
+        ("dood", "spiritual:death"), ("afscheid", "spiritual:death"), ("doodgaan", "spiritual:death"),
+        # General distress phrases
+        ("last", "emotional:worry"), ("klachten", "physical:pain"),
+        ("het gaat niet goed", "emotional:depression"), ("moeilijk", "emotional:worry"),
+        ("zwaar", "emotional:worry"), ("niet meer", "emotional:depression"),
+        ("kan het niet aan", "emotional:worry"), ("te veel", "emotional:worry"),
+        ("overweldigd", "emotional:anxiety"), ("stress", "emotional:anxiety"),
+        ("emotioneel", "emotional:worry"), ("niet lekker", "physical:pain"),
+        ("ziek", "physical:pain"), ("bijwerkingen", "physical:pain"),
+    ]
+
+    @staticmethod
+    def _detect_distress_signals(query: str) -> tuple[list[str], str | None]:
+        """Detect distress signals in the query and return suggested domains + hint.
+
+        Returns (matched_domains, hint_text). If no distress detected, returns ([], None).
+        """
+        q_lower = query.lower()
+        matched_domains: list[str] = []
+        seen: set[str] = set()
+
+        for keyword, domain in MedicalAnswerOrchestrator._DISTRESS_KEYWORDS:
+            if keyword in q_lower and domain not in seen:
+                matched_domains.append(domain)
+                seen.add(domain)
+
+        if not matched_domains:
+            return [], None
+
+        domain_list = ", ".join(matched_domains[:8])
+        hint = (
+            f"De patiënt toont tekenen van distress. "
+            f"Gedetecteerde probleemgebieden: {domain_list}. "
+            f"GEBRUIK de lastmeter_assess tool met deze domeinen om relevante hulpbronnen "
+            f"op te halen. Schat een passende distress_score in op basis van de toon."
+        )
+        return matched_domains, hint
 
     # ------------------------------------------------------------------
     # Source mismatch detection
