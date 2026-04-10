@@ -759,8 +759,8 @@
         var box = document.createElement('div');
         box.className = 'refusal-box refusal-' + severity;
 
-        var severityIcon = severity === 'critical' ? '\u{1F6A8}' :
-                          severity === 'urgent' ? '\u{1F49C}' : '\u26A0\uFE0F';
+        var severityIcon = severity === 'critical' ? '\uD83D\uDEA8' :
+                          severity === 'urgent' ? '\uD83D\uDC9C' : '\u26A0\uFE0F';
         box.innerHTML =
             '<div class="refusal-heading">' + getSeverityLabel(severity) + '</div>' +
             '<div><span class="refusal-icon">' + severityIcon + '</span> ' + escapeHtml(reason) + '</div>';
@@ -1194,9 +1194,9 @@
         var row = document.createElement('div');
         row.className = 'feedback-row';
 
-        var thumbsUp = createFeedbackButton('\u{1F44D}', 'Nuttig', 'positive', msgId);
-        var thumbsDown = createFeedbackButton('\u{1F44E}', 'Niet nuttig', 'negative', msgId);
-        var missing = createFeedbackButton('\u2753', 'Informatie ontbreekt', 'missing', msgId);
+        var thumbsUp = createFeedbackButton('\uD83D\uDC4D', t('feedback_helpful'), 'positive', msgId);
+        var thumbsDown = createFeedbackButton('\uD83D\uDC4E', t('feedback_not_helpful'), 'negative', msgId);
+        var missing = createFeedbackButton('\u2753', t('feedback_missing'), 'missing', msgId);
 
         row.appendChild(thumbsUp);
         row.appendChild(thumbsDown);
