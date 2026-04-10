@@ -6,7 +6,7 @@
 <title>KankerWijzer — Hackathon Pitch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Sora:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Karla:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -41,7 +41,291 @@
   --mono: 'JetBrains Mono', monospace;
 }
 
+/* ═══════ THEME: EDITORIAL WARM (default) ═══════ */
+/* Already defined in :root above */
+
+/* ═══════ THEME: SWISS PRECISION ═══════ */
+[data-theme="swiss"] {
+  --bg: #F7F8FA;
+  --bg-warm: #EEF0F4;
+  --bg-card: #FFFFFF;
+  --text: #111827;
+  --text-muted: #4B5563;
+  --text-light: #9CA3AF;
+  --accent: #1E3A5F;
+  --accent-soft: #8BADD4;
+  --accent-glow: rgba(30, 58, 95, 0.06);
+  --teal: #047857;
+  --teal-soft: #D1FAE5;
+  --blue: #1D4ED8;
+  --blue-soft: #DBEAFE;
+  --amber: #B45309;
+  --amber-soft: #FEF3C7;
+  --purple: #5B21B6;
+  --purple-soft: #EDE9FE;
+  --slate: #374151;
+  --border: #E5E7EB;
+  --border-strong: #D1D5DB;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+  --serif: 'Playfair Display', Georgia, serif;
+  --sans: 'DM Sans', system-ui, sans-serif;
+}
+
+[data-theme="swiss"] .slide::before {
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(30, 58, 95, 0.015) 0%, transparent 50%),
+    radial-gradient(circle at 85% 85%, rgba(4, 120, 87, 0.015) 0%, transparent 50%);
+}
+
+/* ═══════ THEME: BOTANICAL ═══════ */
+[data-theme="botanical"] {
+  --bg: #F6F9F4;
+  --bg-warm: #ECF2E8;
+  --bg-card: #FFFFFF;
+  --text: #1B2E1B;
+  --text-muted: #4A6349;
+  --text-light: #8AA488;
+  --accent: #2D6A4F;
+  --accent-soft: #95D5B2;
+  --accent-glow: rgba(45, 106, 79, 0.07);
+  --teal: #1B4332;
+  --teal-soft: #D8F3DC;
+  --blue: #3A6EA5;
+  --blue-soft: #D4E4F5;
+  --amber: #926C15;
+  --amber-soft: #FEFAE0;
+  --purple: #6B5B8A;
+  --purple-soft: #E4DFF0;
+  --slate: #40513B;
+  --border: #D5E2CF;
+  --border-strong: #B7CCAD;
+  --shadow-sm: 0 1px 3px rgba(27,46,27,0.04);
+  --shadow-md: 0 4px 20px rgba(27,46,27,0.06);
+  --shadow-lg: 0 12px 40px rgba(27,46,27,0.08);
+  --serif: 'Lora', Georgia, serif;
+  --sans: 'Source Sans 3', system-ui, sans-serif;
+}
+
+[data-theme="botanical"] .slide::before {
+  background-image:
+    radial-gradient(circle at 25% 30%, rgba(45, 106, 79, 0.025) 0%, transparent 50%),
+    radial-gradient(circle at 75% 70%, rgba(146, 108, 21, 0.015) 0%, transparent 50%);
+}
+
+/* ═══════ THEME: MODERNIST SAND ═══════ */
+[data-theme="modernist"] {
+  --bg: #FBF8F3;
+  --bg-warm: #F3ECE0;
+  --bg-card: #FFFEFA;
+  --text: #2C1810;
+  --text-muted: #6D5D50;
+  --text-light: #A89888;
+  --accent: #C84C09;
+  --accent-soft: #F0A878;
+  --accent-glow: rgba(200, 76, 9, 0.06);
+  --teal: #2A7F6E;
+  --teal-soft: #D0EBE4;
+  --blue: #4A6FA5;
+  --blue-soft: #D8E6F5;
+  --amber: #A67C00;
+  --amber-soft: #FFF2CC;
+  --purple: #7B5EA7;
+  --purple-soft: #EBE0F8;
+  --slate: #5C4F44;
+  --border: #E8DDD0;
+  --border-strong: #D4C5B2;
+  --shadow-sm: 0 1px 3px rgba(44,24,16,0.04);
+  --shadow-md: 0 4px 20px rgba(44,24,16,0.06);
+  --shadow-lg: 0 12px 40px rgba(44,24,16,0.08);
+  --serif: 'Fraunces', Georgia, serif;
+  --sans: 'Sora', system-ui, sans-serif;
+}
+
+[data-theme="modernist"] .slide::before {
+  background-image:
+    radial-gradient(circle at 30% 20%, rgba(200, 76, 9, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 70% 80%, rgba(166, 124, 0, 0.015) 0%, transparent 50%);
+}
+
+/* ═══════ THEME: COASTAL ═══════ */
+[data-theme="coastal"] {
+  --bg: #F5F8FA;
+  --bg-warm: #E8EFF5;
+  --bg-card: #FFFFFF;
+  --text: #14202E;
+  --text-muted: #4A6178;
+  --text-light: #8FA4B8;
+  --accent: #1565A8;
+  --accent-soft: #7FB3DE;
+  --accent-glow: rgba(21, 101, 168, 0.06);
+  --teal: #0D7377;
+  --teal-soft: #CCFBF1;
+  --blue: #1E40AF;
+  --blue-soft: #DBEAFE;
+  --amber: #B45309;
+  --amber-soft: #FEF3C7;
+  --purple: #5B21B6;
+  --purple-soft: #EDE9FE;
+  --slate: #334155;
+  --border: #D6E2EC;
+  --border-strong: #B8CCDC;
+  --shadow-sm: 0 1px 3px rgba(20,32,46,0.04);
+  --shadow-md: 0 4px 20px rgba(20,32,46,0.06);
+  --shadow-lg: 0 12px 40px rgba(20,32,46,0.08);
+  --serif: 'Libre Baskerville', Georgia, serif;
+  --sans: 'Karla', system-ui, sans-serif;
+}
+
+[data-theme="coastal"] .slide::before {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(21, 101, 168, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(13, 115, 119, 0.015) 0%, transparent 50%);
+}
+
+/* ═══════ THEME: CLASSICAL ═══════ */
+[data-theme="classical"] {
+  --bg: #FAF7F2;
+  --bg-warm: #F0EBE1;
+  --bg-card: #FFFDF8;
+  --text: #1C1410;
+  --text-muted: #5C4F42;
+  --text-light: #998A7A;
+  --accent: #8B2500;
+  --accent-soft: #D4907A;
+  --accent-glow: rgba(139, 37, 0, 0.06);
+  --teal: #3B6B5A;
+  --teal-soft: #D4E8DF;
+  --blue: #3A5A8C;
+  --blue-soft: #D4DFF0;
+  --amber: #8C6B20;
+  --amber-soft: #F5ECCA;
+  --purple: #5A3E7A;
+  --purple-soft: #E5D8F0;
+  --slate: #4A3F35;
+  --border: #E0D8CC;
+  --border-strong: #CCC0AE;
+  --shadow-sm: 0 1px 3px rgba(28,20,16,0.04);
+  --shadow-md: 0 4px 20px rgba(28,20,16,0.05);
+  --shadow-lg: 0 12px 40px rgba(28,20,16,0.07);
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --sans: 'Nunito Sans', system-ui, sans-serif;
+}
+
+[data-theme="classical"] .slide::before {
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(139, 37, 0, 0.015) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(59, 107, 90, 0.015) 0%, transparent 50%);
+}
+
+/* ═══════ THEME SWITCHER UI ═══════ */
+.theme-switcher {
+  position: fixed;
+  top: 16px;
+  right: 24px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.theme-switcher-label {
+  font-family: var(--sans);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  margin-right: 4px;
+  font-weight: 600;
+}
+
+.theme-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-btn:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.theme-btn.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  transform: scale(1.15);
+}
+
+.theme-btn .swatch {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* Swatch colors for each theme */
+.theme-btn[data-theme="editorial"] .swatch {
+  background: linear-gradient(135deg, #FAF8F5 50%, #C45A3C 50%);
+}
+.theme-btn[data-theme="swiss"] .swatch {
+  background: linear-gradient(135deg, #F7F8FA 50%, #1E3A5F 50%);
+}
+.theme-btn[data-theme="botanical"] .swatch {
+  background: linear-gradient(135deg, #F6F9F4 50%, #2D6A4F 50%);
+}
+.theme-btn[data-theme="modernist"] .swatch {
+  background: linear-gradient(135deg, #FBF8F3 50%, #C84C09 50%);
+}
+.theme-btn[data-theme="coastal"] .swatch {
+  background: linear-gradient(135deg, #F5F8FA 50%, #1565A8 50%);
+}
+.theme-btn[data-theme="classical"] .swatch {
+  background: linear-gradient(135deg, #FAF7F2 50%, #8B2500 50%);
+}
+
+.theme-btn-tooltip {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.6rem;
+  font-family: var(--sans);
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  padding: 2px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-btn:hover .theme-btn-tooltip {
+  opacity: 1;
+}
+
 html { font-size: 16px; }
+
+/* Smooth theme transitions */
+body, .card, .arch-container, .quote-block, .source-badge, .tag,
+.compare-table, .compare-table th, .compare-table td,
+.safety-banner, .team-badge, .pill, .criteria-check,
+.arch-node, .journey-num, .nav-dot, .progress-fill,
+h1, h2, h3, h4, p, .title-deco, .accent-line {
+  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
 
 body {
   font-family: var(--sans);
@@ -750,7 +1034,35 @@ p {
 
 <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
 
-<div class="key-hint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate</div>
+<div class="theme-switcher" id="themeSwitcher">
+  <span class="theme-switcher-label">Theme</span>
+  <button class="theme-btn active" data-theme="editorial" title="Editorial Warm">
+    <div class="swatch"></div>
+    <span class="theme-btn-tooltip">Editorial</span>
+  </button>
+  <button class="theme-btn" data-theme="swiss" title="Swiss Precision">
+    <div class="swatch"></div>
+    <span class="theme-btn-tooltip">Swiss</span>
+  </button>
+  <button class="theme-btn" data-theme="botanical" title="Botanical">
+    <div class="swatch"></div>
+    <span class="theme-btn-tooltip">Botanical</span>
+  </button>
+  <button class="theme-btn" data-theme="modernist" title="Modernist Sand">
+    <div class="swatch"></div>
+    <span class="theme-btn-tooltip">Modernist</span>
+  </button>
+  <button class="theme-btn" data-theme="coastal" title="Coastal">
+    <div class="swatch"></div>
+    <span class="theme-btn-tooltip">Coastal</span>
+  </button>
+  <button class="theme-btn" data-theme="classical" title="Classical">
+    <div class="swatch"></div>
+    <span class="theme-btn-tooltip">Classical</span>
+  </button>
+</div>
+
+<div class="key-hint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate &ensp; <kbd>T</kbd> cycle theme</div>
 <div class="nav-dots" id="navDots"></div>
 <div class="slide-counter" id="counter"></div>
 
@@ -1413,6 +1725,7 @@ p {
 
 <script>
 (function() {
+  /* ─── Slide Navigation ─── */
   const slides = document.querySelectorAll('.slide');
   const progress = document.getElementById('progress');
   const counter = document.getElementById('counter');
@@ -1420,7 +1733,6 @@ p {
   let current = 0;
   const total = slides.length;
 
-  // Build nav dots
   for (let i = 0; i < total; i++) {
     const dot = document.createElement('button');
     dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
@@ -1443,15 +1755,47 @@ p {
   function next() { goTo(current + 1); }
   function prev() { goTo(current - 1); }
 
-  // Keyboard
+  /* ─── Theme Switching ─── */
+  const themes = ['editorial', 'swiss', 'botanical', 'modernist', 'coastal', 'classical'];
+  const themeBtns = document.querySelectorAll('.theme-btn');
+  let currentTheme = 0;
+
+  function setTheme(name) {
+    if (name === 'editorial') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', name);
+    }
+    themeBtns.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.theme === name);
+    });
+    currentTheme = themes.indexOf(name);
+    // Smooth color transition on body
+    document.body.style.transition = 'background 0.4s ease, color 0.4s ease';
+  }
+
+  themeBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      setTheme(btn.dataset.theme);
+    });
+  });
+
+  function cycleTheme() {
+    currentTheme = (currentTheme + 1) % themes.length;
+    setTheme(themes[currentTheme]);
+  }
+
+  /* ─── Keyboard ─── */
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
     if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
     if (e.key === 'Home') { e.preventDefault(); goTo(0); }
     if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+    if (e.key === 't' || e.key === 'T') { e.preventDefault(); cycleTheme(); }
   });
 
-  // Touch
+  /* ─── Touch ─── */
   let touchStartX = 0;
   document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
   document.addEventListener('touchend', (e) => {
@@ -1459,14 +1803,14 @@ p {
     if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
   });
 
-  // Click left/right halves
+  /* ─── Click left/right halves ─── */
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.nav-dot, a, button, input, textarea')) return;
+    if (e.target.closest('.nav-dot, .theme-btn, .theme-switcher, a, button, input, textarea')) return;
     if (e.clientX > window.innerWidth * 0.65) next();
     else if (e.clientX < window.innerWidth * 0.35) prev();
   });
 
-  // Init
+  /* ─── Init ─── */
   progress.style.width = '0%';
   counter.textContent = '1 / ' + total;
 })();
