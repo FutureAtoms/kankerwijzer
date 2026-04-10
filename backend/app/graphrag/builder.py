@@ -18,6 +18,13 @@ import sys
 import time
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+# Load .env from backend directory (covers running as module or from CLI)
+_env_path = Path(__file__).resolve().parents[2] / ".env"
+if _env_path.exists():
+    load_dotenv(_env_path)
+
 import psycopg
 from psycopg.rows import dict_row
 from neo4j import GraphDatabase

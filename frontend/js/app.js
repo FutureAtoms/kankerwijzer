@@ -204,6 +204,9 @@
         // New chat
         newChatBtn.addEventListener('click', resetChat);
 
+        // Download report
+        document.getElementById('btn-download').addEventListener('click', downloadReport);
+
         // Example questions
         exampleButtons.forEach(function (btn) {
             btn.addEventListener('click', function () {
@@ -561,6 +564,7 @@
 
         messagesEl.appendChild(div);
         scrollToBottom();
+        showDownloadButton();
     }
 
     /**
@@ -816,6 +820,7 @@
 
         messagesEl.appendChild(div);
         scrollToBottom();
+        showDownloadButton();
     }
 
     function getSeverityLabel(severity) {
@@ -1263,8 +1268,176 @@
         userInput.value = '';
         userInput.style.height = 'auto';
         sendBtn.disabled = true;
+        document.getElementById('btn-download').style.display = 'none';
         userInput.focus();
         closeSidebar();
+    }
+
+    // ===== Download Chat Report =====
+    function showDownloadButton() {
+        document.getElementById('btn-download').style.display = '';
+    }
+
+    function downloadReport() {
+        var messages = messagesEl.querySelectorAll('.message-user, .message-ai');
+        if (messages.length === 0) return;
+
+        var now = new Date();
+        var dateStr = now.toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' });
+        var timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+
+        var entries = [];
+
+        messages.forEach(function (msg) {
+            if (msg.classList.contains('message-user')) {
+                var bubble = msg.querySelector('.bubble');
+                if (bubble) {
+                    entries.push({ role: 'patient', text: bubble.textContent.trim() });
+                }
+            } else if (msg.classList.contains('message-ai')) {
+                var aiBubble = msg.querySelector('.bubble');
+                var entry = { role: 'assistant', text: '', citations: [], confidence: '' };
+
+                // Get confidence
+                var confBadge = msg.querySelector('.confidence-badge');
+                if (confBadge) entry.confidence = confBadge.textContent.trim();
+
+                // Get answer text (exclude citations/graph sections)
+                if (aiBubble) {
+                    var clone = aiBubble.cloneNode(true);
+                    // Remove citations, graph, clarification buttons from clone
+                    clone.querySelectorAll('.citations-section, .graph-section, .clarification-options, .feedback-row').forEach(function (el) { el.remove(); });
+                    entry.text = clone.textContent.trim();
+                }
+
+                // Get citations
+                var citItems = msg.querySelectorAll('.citation-item');
+                citItems.forEach(function (item) {
+                    var title = item.querySelector('.title');
+                    var url = item.querySelector('.url');
+                    var relevance = item.querySelector('.relevance-label');
+                    entry.citations.push({
+                        title: title ? title.textContent.trim() : '',
+                        url: url ? url.textContent.trim() : '',
+                        relevance: relevance ? relevance.textContent.trim() : '',
+                    });
+                });
+
+                // Check refusal
+                var refusalBox = msg.querySelector('.refusal-box');
+                if (refusalBox) {
+                    entry.text = refusalBox.textContent.trim();
+                    entry.isRefusal = true;
+                }
+
+                // Check contacts
+                var contactCards = msg.querySelectorAll('.contact-card');
+                if (contactCards.length > 0) {
+                    entry.contacts = [];
+                    contactCards.forEach(function (card) {
+                        var name = card.querySelector('.contact-name');
+                        var desc = card.querySelector('.contact-desc');
+                        var phone = card.querySelector('.contact-btn-phone');
+                        entry.contacts.push({
+                            name: name ? name.textContent.trim() : '',
+                            description: desc ? desc.textContent.trim() : '',
+                            phone: phone ? phone.textContent.trim() : '',
+                        });
+                    });
+                }
+
+                entries.push(entry);
+            }
+        });
+
+        // Build HTML report
+        var html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">' +
+            '<title>OncologieWijzer Report - ' + dateStr + '</title>' +
+            '<style>' +
+            'body{font-family:Georgia,serif;max-width:700px;margin:40px auto;padding:20px;color:#333;line-height:1.6}' +
+            'h1{color:#00A67E;border-bottom:3px solid #00A67E;padding-bottom:10px;font-size:1.5rem}' +
+            '.meta{color:#666;font-size:0.9rem;margin-bottom:30px}' +
+            '.disclaimer-box{background:#fff8e1;border-left:4px solid #ffa000;padding:12px 16px;margin:20px 0;font-size:0.85rem;border-radius:4px}' +
+            '.exchange{margin:24px 0;page-break-inside:avoid}' +
+            '.patient-q{background:#f0faf6;border-left:4px solid #00A67E;padding:10px 16px;border-radius:4px;font-weight:600;margin-bottom:8px}' +
+            '.assistant-a{padding:0 16px}' +
+            '.confidence{display:inline-block;background:#e8f5e9;color:#2e7d32;padding:2px 10px;border-radius:12px;font-size:0.75rem;margin-bottom:8px}' +
+            '.refusal{background:#fff3e0;border-left:4px solid #ff9800;padding:10px 16px;border-radius:4px;color:#e65100}' +
+            '.sources{margin-top:10px;padding-top:8px;border-top:1px solid #eee}' +
+            '.sources h4{font-size:0.85rem;color:#666;margin:0 0 6px}' +
+            '.source-item{font-size:0.8rem;color:#555;margin:4px 0}' +
+            '.source-item a{color:#1976D2}' +
+            '.contacts{margin-top:12px;padding:10px;background:#f5f5f5;border-radius:6px}' +
+            '.contact{margin:6px 0;font-size:0.85rem}' +
+            '.contact-phone{font-weight:700;color:#4CAF50}' +
+            '.footer{margin-top:40px;padding-top:16px;border-top:2px solid #eee;font-size:0.8rem;color:#888}' +
+            '@media print{body{margin:20px}h1{font-size:1.3rem}.exchange{page-break-inside:avoid}}' +
+            '</style></head><body>' +
+            '<h1>OncologieWijzer &mdash; Chat Report</h1>' +
+            '<div class="meta">' +
+            '<strong>Date:</strong> ' + dateStr + ' at ' + timeStr + '<br>' +
+            '<strong>Purpose:</strong> For discussion with your healthcare provider (GP / specialist)<br>' +
+            '<strong>Source:</strong> OncologieWijzer by IKNL &mdash; <em>iknl.nl</em>' +
+            '</div>' +
+            '<div class="disclaimer-box">' +
+            '&#x26A0;&#xFE0F; <strong>Important:</strong> This report contains AI-generated information based on trusted IKNL sources. ' +
+            'It is for informational purposes only and does not replace professional medical advice. ' +
+            'Always discuss the content with your doctor.' +
+            '</div>';
+
+        entries.forEach(function (entry, idx) {
+            if (entry.role === 'patient') {
+                html += '<div class="exchange"><div class="patient-q">Patient: ' + escapeHtml(entry.text) + '</div>';
+            } else {
+                html += '<div class="assistant-a">';
+                if (entry.confidence) {
+                    html += '<span class="confidence">' + escapeHtml(entry.confidence) + '</span>';
+                }
+                if (entry.isRefusal) {
+                    html += '<div class="refusal">' + escapeHtml(entry.text) + '</div>';
+                } else {
+                    html += '<div>' + escapeHtml(entry.text).replace(/\n/g, '<br>') + '</div>';
+                }
+                if (entry.citations && entry.citations.length > 0) {
+                    html += '<div class="sources"><h4>Sources:</h4>';
+                    entry.citations.forEach(function (c, i) {
+                        html += '<div class="source-item">' + (i + 1) + '. ' + escapeHtml(c.title);
+                        if (c.url) html += ' &mdash; <a href="' + escapeHtml(c.url) + '">' + escapeHtml(c.url) + '</a>';
+                        if (c.relevance) html += ' (' + escapeHtml(c.relevance) + ')';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                if (entry.contacts && entry.contacts.length > 0) {
+                    html += '<div class="contacts"><strong>Emergency contacts:</strong>';
+                    entry.contacts.forEach(function (c) {
+                        html += '<div class="contact">' + escapeHtml(c.name);
+                        if (c.phone) html += ' &mdash; <span class="contact-phone">' + escapeHtml(c.phone) + '</span>';
+                        if (c.description) html += '<br><small>' + escapeHtml(c.description) + '</small>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+                html += '</div></div>';
+            }
+        });
+
+        html += '<div class="footer">' +
+            'Generated by OncologieWijzer (IKNL) on ' + dateStr + ' at ' + timeStr + '.<br>' +
+            'All information sourced from kanker.nl, NKR Cijfers, Cancer Atlas, Richtlijnendatabase, and IKNL publications.<br>' +
+            'This report is not a medical document. Please discuss its contents with your healthcare provider.' +
+            '</div></body></html>';
+
+        // Trigger download
+        var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'oncologiewijzer-report-' + now.toISOString().slice(0, 10) + '.html';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 
     // ===== Sidebar =====

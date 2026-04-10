@@ -476,6 +476,19 @@ def run_pipeline() -> dict[str, Any]:
     result = ingest_kankeratlas_metadata(writer, settings)
     summary["phases"]["kankeratlas"] = result
 
+    # Phase 6: Knowledge graph (Neo4j) — optional, requires Anthropic API key
+    try:
+        from app.graphrag.builder import build_graph
+        print("\n--- Phase 6: Knowledge Graph (Neo4j) ---")
+        build_graph()
+        summary["phases"]["knowledge-graph"] = {"status": "ok"}
+    except SystemExit:
+        print("  Skipped: ANTHROPIC_API_KEY not set or Neo4j unavailable")
+        summary["phases"]["knowledge-graph"] = {"status": "skipped"}
+    except Exception as exc:
+        print(f"  Graph build failed (non-fatal): {exc}")
+        summary["phases"]["knowledge-graph"] = {"status": "error", "error": str(exc)}
+
     elapsed = time.time() - start_time
     summary["elapsed_seconds"] = round(elapsed, 2)
     summary["finished_at"] = datetime.now(timezone.utc).isoformat()
