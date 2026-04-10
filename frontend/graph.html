@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KankerWijzer - Kennisgraaf</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #0f1117; --surface: #1a1d27; --border: #2a2d3a;
+            --text: #e4e4e7; --text-muted: #9ca3af; --accent: #00A67E;
+            --accent-dim: rgba(0,166,126,.15);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg); color: var(--text); overflow: hidden; height: 100vh;
+        }
+        .header {
+            position: fixed; top: 0; left: 0; right: 0; height: 56px;
+            display: flex; align-items: center; gap: 16px; padding: 0 24px;
+            background: var(--surface); border-bottom: 1px solid var(--border); z-index: 100;
+        }
+        .header .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--text); }
+        .header .logo-text { font-weight: 700; font-size: 18px; }
+        .header .sep { color: var(--border); font-size: 20px; }
+        .header .page-title { font-size: 15px; color: var(--text-muted); }
+        .header .spacer { flex: 1; }
+        .header a.back-link {
+            font-size: 13px; color: var(--accent); text-decoration: none;
+            padding: 6px 14px; border: 1px solid var(--accent); border-radius: 6px;
+        }
+        .header a.back-link:hover { background: var(--accent-dim); }
+        .controls {
+            position: fixed; top: 72px; left: 16px;
+            display: flex; flex-direction: column; gap: 8px; z-index: 90;
+        }
+        .controls button, .controls select {
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+            border-radius: 6px; padding: 7px 14px; font-size: 13px; cursor: pointer;
+        }
+        .controls button:hover { border-color: var(--accent); background: var(--accent-dim); }
+        .legend {
+            position: fixed; bottom: 16px; left: 16px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px;
+            z-index: 90; max-width: 260px;
+        }
+        .legend h3 { font-size: 13px; margin-bottom: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 13px; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+        .info-panel {
+            position: fixed; top: 72px; right: 16px; width: 320px; max-height: calc(100vh - 88px);
+            background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+            padding: 20px; z-index: 90; overflow-y: auto;
+            transform: translateX(360px); transition: transform .25s ease;
+        }
+        .info-panel.open { transform: translateX(0); }
+        .info-panel h3 { font-size: 16px; margin-bottom: 4px; }
+        .info-panel .node-type { font-size: 12px; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; }
+        .info-panel .field { margin-bottom: 10px; }
+        .info-panel .field-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+        .info-panel .field-value { font-size: 14px; margin-top: 2px; }
+        .info-panel .close-btn {
+            position: absolute; top: 12px; right: 12px; background: none; border: none;
+            color: var(--text-muted); font-size: 20px; cursor: pointer;
+        }
+        .info-panel .connections { margin-top: 16px; }
+        .info-panel .connections h4 { font-size: 13px; color: var(--text-muted); margin-bottom: 8px; }
+        .info-panel .conn-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 13px; cursor: pointer; }
+        .info-panel .conn-item:hover { color: var(--accent); }
+        .info-panel .conn-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+        .tooltip {
+            position: fixed; pointer-events: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px;
+            font-size: 12px; color: var(--text); box-shadow: 0 4px 12px rgba(0,0,0,.4);
+            opacity: 0; transition: opacity .12s; z-index: 200; max-width: 240px;
+        }
+        .tooltip.visible { opacity: 1; }
+        svg#graph { position: fixed; top: 56px; left: 0; width: 100vw; height: calc(100vh - 56px); }
+        .loading-overlay {
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: var(--bg); z-index: 500; transition: opacity .3s;
+        }
+        .loading-overlay.hidden { opacity: 0; pointer-events: none; }
+        .loading-spinner {
+            width: 40px; height: 40px; border: 3px solid var(--border);
+            border-top-color: var(--accent); border-radius: 50%; animation: spin .8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a class="logo" href="/app/">
+        <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="15" stroke="#00A67E" stroke-width="2"/>
+            <path d="M16 8v10M12 14l4 4 4-4" stroke="#00A67E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="22" r="1.5" fill="#00A67E"/>
+        </svg>
+        <span class="logo-text">KankerWijzer</span>
+    </a>
+    <span class="sep">|</span>
+    <span class="page-title">Kennisgraaf &mdash; Bronnen &amp; Relaties</span>
+    <span class="spacer"></span>
+    <a class="back-link" href="/app/">&larr; Terug naar chat</a>
+</div>
+
+<div class="controls">
+    <select id="filter-type" title="Filter op knooppunttype"><option value="all">Alle typen</option></select>
+    <button id="btn-reset" title="Reset weergave">&#x27F3; Reset</button>
+</div>
+
+<div class="legend" id="legend"><h3>Legenda</h3></div>
+
+<div class="info-panel" id="info-panel">
+    <button class="close-btn" id="info-close">&times;</button>
+    <div id="info-content"></div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+<div class="loading-overlay" id="loading"><div class="loading-spinner"></div></div>
+
+<svg id="graph"></svg>
+
+<script>
+(function () {
+    'use strict';
+
+    var API = window.location.origin;
+
+    var TYPE_COLORS = {
+        Source: '#00A67E', Document: '#2196F3', CancerType: '#f44336',
+        Treatment: '#FF9800', Symptom: '#E91E63', Stage: '#9C27B0',
+        Region: '#4CAF50', Audience: '#00BCD4', Publication: '#795548', Chunk: '#607D8B'
+    };
+    var TYPE_LABELS = {
+        Source: 'Bron', Document: 'Document', CancerType: 'Kankersoort',
+        Treatment: 'Behandeling', Symptom: 'Symptoom', Stage: 'Stadium',
+        Region: 'Regio', Audience: 'Doelgroep', Publication: 'Publicatie', Chunk: 'Tekstfragment'
+    };
+    var TYPE_RADIUS = {
+        Source: 22, Document: 14, CancerType: 18, Treatment: 16,
+        Symptom: 14, Stage: 14, Region: 14, Audience: 14, Publication: 16, Chunk: 8
+    };
+
+    function buildGraph(sources) {
+        var nodes = [], links = [], nodeMap = {};
+
+        function addNode(id, type, label, data) {
+            if (nodeMap[id]) return;
+            var n = { id: id, type: type, label: label, data: data || {} };
+            nodes.push(n);
+            nodeMap[id] = n;
+        }
+        function addLink(s, t, rel) {
+            links.push({ source: s, target: t, rel: rel });
+        }
+
+        // Sources
+        if (sources && sources.length > 0) {
+            sources.forEach(function (s) { addNode('src-' + s.source_id, 'Source', s.name, s); });
+        } else {
+            [
+                { source_id: 'kanker.nl', name: 'kanker.nl', publisher: 'KWF / NFK / IKNL', description: 'Patiëntinformatie over kanker' },
+                { source_id: 'iknl.nl', name: 'IKNL website', publisher: 'IKNL', description: 'Professionele informatie' },
+                { source_id: 'nkr-cijfers', name: 'NKR Cijfers', publisher: 'IKNL', description: 'Kankerregistratie statistieken' },
+                { source_id: 'kankeratlas', name: 'Kanker Atlas', publisher: 'IKNL', description: 'Regionale incidentie' },
+                { source_id: 'richtlijnendatabase', name: 'Richtlijnendatabase', publisher: 'FMS', description: 'Oncologische richtlijnen' },
+                { source_id: 'iknl-reports', name: 'IKNL rapporten', publisher: 'IKNL', description: 'Analyses en rapporten' },
+                { source_id: 'scientific-publications', name: 'Wetenschappelijke publicaties', publisher: 'IKNL', description: 'Peer-reviewed artikelen' }
+            ].forEach(function (s) { addNode('src-' + s.source_id, 'Source', s.name, s); });
+        }
+
+        // Cancer types
+        ['Borstkanker','Darmkanker','Longkanker','Prostaatkanker','Huidkanker','Blaaskanker',
+         'Eierstokkanker','Hoofd-halskanker','Leukemie','Lymfoom','Maagkanker','Alvleesklierkanker'
+        ].forEach(function (c) { addNode('cancer-' + c, 'CancerType', c, { name: c }); });
+
+        // Treatments
+        ['Chirurgie','Chemotherapie','Bestraling','Immunotherapie','Hormoontherapie','Doelgerichte therapie','Stamceltransplantatie'
+        ].forEach(function (t) { addNode('treat-' + t, 'Treatment', t, { name: t }); });
+
+        // Symptoms
+        ['Vermoeidheid','Pijn','Misselijkheid','Gewichtsverlies','Koorts','Bloed bij ontlasting','Hoesten','Knobbel'
+        ].forEach(function (s) { addNode('symp-' + s, 'Symptom', s, { name: s }); });
+
+        // Stages
+        ['Stadium I','Stadium II','Stadium III','Stadium IV'].forEach(function (st) {
+            addNode('stage-' + st, 'Stage', st, { name: st });
+        });
+
+        // Audiences
+        ['Patiënt','Zorgprofessional'].forEach(function (a) {
+            addNode('aud-' + a, 'Audience', a, { name: a });
+        });
+
+        // Regions
+        ['Noord-Holland','Zuid-Holland','Noord-Brabant','Gelderland','Limburg'].forEach(function (r) {
+            addNode('reg-' + r, 'Region', r, { name: r });
+        });
+
+        // Documents
+        [
+            { id: 'doc-darmkanker', title: 'Trendrapport Darmkanker', source: 'iknl-reports' },
+            { id: 'doc-uitgezaaid', title: 'Uitgezaaide Kanker 2025', source: 'iknl-reports' },
+            { id: 'doc-manvrouw', title: 'Man-vrouwverschillen bij kanker', source: 'iknl-reports' },
+            { id: 'doc-ovarian', title: 'Ovarian Cancer Recurrence', source: 'scientific-publications' },
+            { id: 'doc-nsclc', title: 'Treatment NSCLC', source: 'scientific-publications' },
+            { id: 'doc-sclc', title: 'Treatment SCLC', source: 'scientific-publications' },
+            { id: 'doc-headneck', title: 'Head & Neck Survival', source: 'scientific-publications' },
+            { id: 'doc-comorb', title: 'Comorbidities & Survival', source: 'scientific-publications' }
+        ].forEach(function (d) {
+            addNode(d.id, 'Document', d.title, d);
+            addLink('src-' + d.source, d.id, 'PUBLISHES');
+        });
+
+        // Publications
+        [
+            { id: 'pub-ovarian', title: 'Ovarian Cancer Recurrence', cancer: 'Eierstokkanker' },
+            { id: 'pub-lung', title: 'Lung Cancer Trends', cancer: 'Longkanker' },
+            { id: 'pub-headneck', title: 'Head & Neck Survival', cancer: 'Hoofd-halskanker' }
+        ].forEach(function (p) {
+            addNode(p.id, 'Publication', p.title, p);
+            addLink(p.id, 'cancer-' + p.cancer, 'SUPPORTS');
+        });
+
+        // Source -> Cancer links
+        [
+            ['kanker.nl','Borstkanker'],['kanker.nl','Darmkanker'],['kanker.nl','Longkanker'],
+            ['kanker.nl','Prostaatkanker'],['kanker.nl','Huidkanker'],['kanker.nl','Blaaskanker'],
+            ['kanker.nl','Eierstokkanker'],['kanker.nl','Leukemie'],['kanker.nl','Lymfoom'],
+            ['kanker.nl','Maagkanker'],['kanker.nl','Alvleesklierkanker'],['kanker.nl','Hoofd-halskanker'],
+            ['nkr-cijfers','Borstkanker'],['nkr-cijfers','Darmkanker'],['nkr-cijfers','Longkanker'],
+            ['nkr-cijfers','Prostaatkanker'],['nkr-cijfers','Huidkanker'],
+            ['kankeratlas','Borstkanker'],['kankeratlas','Darmkanker'],['kankeratlas','Longkanker'],
+            ['richtlijnendatabase','Borstkanker'],['richtlijnendatabase','Darmkanker'],
+            ['richtlijnendatabase','Longkanker'],['richtlijnendatabase','Prostaatkanker']
+        ].forEach(function (p) { addLink('src-' + p[0], 'cancer-' + p[1], 'COVERS'); });
+
+        // Cancer -> Treatment
+        [
+            ['Borstkanker','Chirurgie'],['Borstkanker','Chemotherapie'],['Borstkanker','Bestraling'],
+            ['Borstkanker','Hormoontherapie'],['Borstkanker','Immunotherapie'],
+            ['Darmkanker','Chirurgie'],['Darmkanker','Chemotherapie'],['Darmkanker','Doelgerichte therapie'],
+            ['Longkanker','Chirurgie'],['Longkanker','Chemotherapie'],['Longkanker','Bestraling'],
+            ['Longkanker','Immunotherapie'],['Longkanker','Doelgerichte therapie'],
+            ['Prostaatkanker','Chirurgie'],['Prostaatkanker','Bestraling'],['Prostaatkanker','Hormoontherapie'],
+            ['Leukemie','Chemotherapie'],['Leukemie','Stamceltransplantatie'],
+            ['Lymfoom','Chemotherapie'],['Lymfoom','Bestraling'],['Lymfoom','Immunotherapie']
+        ].forEach(function (p) { addLink('cancer-' + p[0], 'treat-' + p[1], 'TREATED_WITH'); });
+
+        // Cancer -> Symptom
+        [
+            ['Borstkanker','Knobbel'],['Borstkanker','Pijn'],['Borstkanker','Vermoeidheid'],
+            ['Darmkanker','Bloed bij ontlasting'],['Darmkanker','Gewichtsverlies'],['Darmkanker','Pijn'],
+            ['Longkanker','Hoesten'],['Longkanker','Gewichtsverlies'],['Longkanker','Pijn'],
+            ['Leukemie','Vermoeidheid'],['Leukemie','Koorts'],
+            ['Maagkanker','Misselijkheid'],['Maagkanker','Gewichtsverlies']
+        ].forEach(function (p) { addLink('cancer-' + p[0], 'symp-' + p[1], 'HAS_SYMPTOM'); });
+
+        // Cancer -> Stage (first 6 cancers)
+        ['Borstkanker','Darmkanker','Longkanker','Prostaatkanker','Huidkanker','Blaaskanker'].forEach(function (c) {
+            ['Stadium I','Stadium II','Stadium III','Stadium IV'].forEach(function (st) {
+                addLink('cancer-' + c, 'stage-' + st, 'HAS_STAGE');
+            });
+        });
+
+        // Source -> Audience
+        addLink('src-kanker.nl', 'aud-Patiënt', 'TARGETS');
+        addLink('src-richtlijnendatabase', 'aud-Zorgprofessional', 'TARGETS');
+        addLink('src-nkr-cijfers', 'aud-Zorgprofessional', 'TARGETS');
+
+        // Atlas -> Region
+        ['Noord-Holland','Zuid-Holland','Noord-Brabant','Gelderland','Limburg'].forEach(function (r) {
+            addLink('src-kankeratlas', 'reg-' + r, 'COVERS_REGION');
+        });
+
+        return { nodes: nodes, links: links };
+    }
+
+    function getLinkedIds(links, nodeId) {
+        var ids = new Set();
+        ids.add(nodeId);
+        links.forEach(function (l) {
+            var sid = typeof l.source === 'object' ? l.source.id : l.source;
+            var tid = typeof l.target === 'object' ? l.target.id : l.target;
+            if (sid === nodeId) ids.add(tid);
+            if (tid === nodeId) ids.add(sid);
+        });
+        return ids;
+    }
+
+    function init() {
+        fetch(API + '/sources').then(function (r) { return r.ok ? r.json() : []; }).catch(function () { return []; }).then(function (sources) {
+            var graph = buildGraph(sources);
+            renderGraph(graph);
+            document.getElementById('loading').classList.add('hidden');
+        });
+    }
+
+    function renderGraph(graph) {
+        var nodes = graph.nodes;
+        var links = graph.links;
+
+        var svg = d3.select('#graph');
+        var width = window.innerWidth;
+        var height = window.innerHeight - 56;
+        svg.attr('viewBox', [0, 0, width, height]);
+
+        var g = svg.append('g');
+        var zoomBehavior = d3.zoom().scaleExtent([0.1, 4]).on('zoom', function (event) {
+            g.attr('transform', event.transform);
+        });
+        svg.call(zoomBehavior);
+
+        // Arrow markers
+        var defs = svg.append('defs');
+        Object.keys(TYPE_COLORS).forEach(function (type) {
+            defs.append('marker').attr('id', 'arrow-' + type)
+                .attr('viewBox', '0 -5 10 10').attr('refX', 20).attr('refY', 0)
+                .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+                .append('path').attr('d', 'M0,-4L10,0L0,4')
+                .attr('fill', TYPE_COLORS[type]).attr('opacity', 0.5);
+        });
+
+        // Simulation
+        var simulation = d3.forceSimulation(nodes)
+            .force('link', d3.forceLink(links).id(function (d) { return d.id; }).distance(90))
+            .force('charge', d3.forceManyBody().strength(-250))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collision', d3.forceCollide().radius(function (d) { return (TYPE_RADIUS[d.type] || 12) + 4; }));
+
+        // Links
+        var link = g.append('g').selectAll('line').data(links).join('line')
+            .attr('stroke', function (d) {
+                var sn = typeof d.source === 'object' ? d.source : nodes.find(function (n) { return n.id === d.source; });
+                return TYPE_COLORS[sn ? sn.type : 'Chunk'] || '#607D8B';
+            })
+            .attr('stroke-opacity', 0.2).attr('stroke-width', 1.2);
+
+        // Nodes group
+        var node = g.append('g').selectAll('g').data(nodes).join('g')
+            .call(d3.drag()
+                .on('start', function (event, d) {
+                    if (!event.active) simulation.alphaTarget(0.3).restart();
+                    d.fx = d.x; d.fy = d.y;
+                })
+                .on('drag', function (event, d) { d.fx = event.x; d.fy = event.y; })
+                .on('end', function (event, d) {
+                    if (!event.active) simulation.alphaTarget(0);
+                    d.fx = null; d.fy = null;
+                })
+            );
+
+        // Circles
+        node.append('circle')
+            .attr('r', function (d) { return TYPE_RADIUS[d.type] || 12; })
+            .attr('fill', function (d) { return TYPE_COLORS[d.type] || '#607D8B'; })
+            .attr('fill-opacity', 0.15)
+            .attr('stroke', function (d) { return TYPE_COLORS[d.type] || '#607D8B'; })
+            .attr('stroke-width', 2).attr('stroke-opacity', 0.7);
+
+        // Labels
+        node.append('text')
+            .text(function (d) { var l = d.label; return l.length > 18 ? l.substring(0, 16) + '\u2026' : l; })
+            .attr('font-size', function (d) { return d.type === 'Source' ? 11 : 10; })
+            .attr('fill', '#e4e4e7')
+            .attr('text-anchor', 'middle')
+            .attr('dy', function (d) { return (TYPE_RADIUS[d.type] || 12) + 14; })
+            .style('pointer-events', 'none');
+
+        // Tooltip
+        var tooltip = d3.select('#tooltip');
+
+        node.on('mouseover', function (event, d) {
+            tooltip.classed('visible', true)
+                .html('<strong>' + d.label + '</strong><br><span style="color:' + (TYPE_COLORS[d.type] || '#607D8B') + '">' + (TYPE_LABELS[d.type] || d.type) + '</span>');
+
+            var connected = getLinkedIds(links, d.id);
+            node.select('circle')
+                .attr('fill-opacity', function (n) { return connected.has(n.id) ? 0.35 : 0.04; })
+                .attr('stroke-opacity', function (n) { return connected.has(n.id) ? 1 : 0.12; });
+            node.select('text')
+                .style('opacity', function (n) { return connected.has(n.id) ? 1 : 0.15; });
+            link.attr('stroke-opacity', function (l) {
+                var sid = typeof l.source === 'object' ? l.source.id : l.source;
+                var tid = typeof l.target === 'object' ? l.target.id : l.target;
+                return (sid === d.id || tid === d.id) ? 0.7 : 0.03;
+            }).attr('stroke-width', function (l) {
+                var sid = typeof l.source === 'object' ? l.source.id : l.source;
+                var tid = typeof l.target === 'object' ? l.target.id : l.target;
+                return (sid === d.id || tid === d.id) ? 2.5 : 1;
+            });
+        })
+        .on('mousemove', function (event) {
+            tooltip.style('left', (event.clientX + 14) + 'px').style('top', (event.clientY - 10) + 'px');
+        })
+        .on('mouseout', function () {
+            tooltip.classed('visible', false);
+            node.select('circle').attr('fill-opacity', 0.15).attr('stroke-opacity', 0.7);
+            node.select('text').style('opacity', 1);
+            link.attr('stroke-opacity', 0.2).attr('stroke-width', 1.2);
+        });
+
+        // Click -> info panel
+        var infoPanel = document.getElementById('info-panel');
+        var infoContent = document.getElementById('info-content');
+
+        node.on('click', function (event, d) {
+            event.stopPropagation();
+            var color = TYPE_COLORS[d.type] || '#607D8B';
+            var html = '<div class="node-type" style="color:' + color + '">' + (TYPE_LABELS[d.type] || d.type) + '</div>';
+            html += '<h3>' + d.label + '</h3>';
+
+            if (d.data.description) html += '<div class="field"><div class="field-label">Beschrijving</div><div class="field-value">' + d.data.description + '</div></div>';
+            if (d.data.publisher) html += '<div class="field"><div class="field-label">Uitgever</div><div class="field-value">' + d.data.publisher + '</div></div>';
+            if (d.data.trust_tier) html += '<div class="field"><div class="field-label">Vertrouwensniveau</div><div class="field-value">' + d.data.trust_tier + '</div></div>';
+            if (d.data.access_mode) html += '<div class="field"><div class="field-label">Toegangsmethode</div><div class="field-value">' + d.data.access_mode + '</div></div>';
+            if (d.data.domains) html += '<div class="field"><div class="field-label">Domeinen</div><div class="field-value">' + d.data.domains.join(', ') + '</div></div>';
+            if (d.data.notes) html += '<div class="field"><div class="field-label">Opmerkingen</div><div class="field-value">' + d.data.notes + '</div></div>';
+
+            // Connections
+            var conns = [];
+            links.forEach(function (l) {
+                var sid = typeof l.source === 'object' ? l.source.id : l.source;
+                var tid = typeof l.target === 'object' ? l.target.id : l.target;
+                if (sid === d.id) {
+                    var tn = nodes.find(function (n) { return n.id === tid; });
+                    if (tn) conns.push({ node: tn, rel: l.rel, dir: '\u2192' });
+                }
+                if (tid === d.id) {
+                    var sn = nodes.find(function (n) { return n.id === sid; });
+                    if (sn) conns.push({ node: sn, rel: l.rel, dir: '\u2190' });
+                }
+            });
+
+            if (conns.length > 0) {
+                html += '<div class="connections"><h4>Verbindingen (' + conns.length + ')</h4>';
+                conns.forEach(function (c) {
+                    var cc = TYPE_COLORS[c.node.type] || '#607D8B';
+                    html += '<div class="conn-item"><span class="conn-dot" style="background:' + cc + '"></span>' +
+                        c.dir + ' <strong>' + c.rel + '</strong> ' + c.node.label + '</div>';
+                });
+                html += '</div>';
+            }
+
+            infoContent.innerHTML = html;
+            infoPanel.classList.add('open');
+
+            // Highlight selected node and its connections
+            var connected = getLinkedIds(links, d.id);
+            node.select('circle')
+                .attr('fill-opacity', function (n) { return connected.has(n.id) ? 0.35 : 0.04; })
+                .attr('stroke-opacity', function (n) { return connected.has(n.id) ? 1 : 0.12; });
+            node.select('text')
+                .style('opacity', function (n) { return connected.has(n.id) ? 1 : 0.15; });
+            link.attr('stroke-opacity', function (l) {
+                var sid = typeof l.source === 'object' ? l.source.id : l.source;
+                var tid = typeof l.target === 'object' ? l.target.id : l.target;
+                return (sid === d.id || tid === d.id) ? 0.7 : 0.03;
+            }).attr('stroke-width', function (l) {
+                var sid = typeof l.source === 'object' ? l.source.id : l.source;
+                var tid = typeof l.target === 'object' ? l.target.id : l.target;
+                return (sid === d.id || tid === d.id) ? 2.5 : 1;
+            });
+        });
+
+        // Click on connection item in info panel to navigate to that node
+        document.getElementById('info-content').addEventListener('click', function (e) {
+            var item = e.target.closest('.conn-item');
+            if (!item) return;
+            var idx = Array.from(item.parentNode.children).indexOf(item) - 1; // -1 for h4
+            if (idx < 0) return;
+            // Re-derive connections for the currently displayed node
+            // Trigger click on the target node
+            var label = item.textContent.trim().split(/\s+/).slice(-1)[0]; // rough label match
+            node.each(function (nd) {
+                if (nd.label === label || item.textContent.indexOf(nd.label) !== -1) {
+                    d3.select(this).dispatch('click');
+                }
+            });
+        });
+
+        // Close info panel
+        document.getElementById('info-close').addEventListener('click', function () {
+            infoPanel.classList.remove('open');
+            // Reset highlights
+            node.select('circle').attr('fill-opacity', 0.15).attr('stroke-opacity', 0.7);
+            node.select('text').style('opacity', 1);
+            link.attr('stroke-opacity', 0.2).attr('stroke-width', 1.2);
+        });
+
+        // Click on background to close panel and reset
+        svg.on('click', function () {
+            infoPanel.classList.remove('open');
+            node.select('circle').attr('fill-opacity', 0.15).attr('stroke-opacity', 0.7);
+            node.select('text').style('opacity', 1);
+            link.attr('stroke-opacity', 0.2).attr('stroke-width', 1.2);
+        });
+
+        // Populate legend
+        var legendEl = document.getElementById('legend');
+        Object.keys(TYPE_COLORS).forEach(function (type) {
+            var hasNodes = nodes.some(function (n) { return n.type === type; });
+            if (!hasNodes) return;
+            var item = document.createElement('div');
+            item.className = 'legend-item';
+            item.innerHTML = '<span class="legend-dot" style="background:' + TYPE_COLORS[type] + '"></span>' +
+                (TYPE_LABELS[type] || type);
+            legendEl.appendChild(item);
+        });
+
+        // Populate filter dropdown
+        var filterSelect = document.getElementById('filter-type');
+        Object.keys(TYPE_COLORS).forEach(function (type) {
+            var hasNodes = nodes.some(function (n) { return n.type === type; });
+            if (!hasNodes) return;
+            var opt = document.createElement('option');
+            opt.value = type;
+            opt.textContent = TYPE_LABELS[type] || type;
+            filterSelect.appendChild(opt);
+        });
+
+        // Filter by type
+        filterSelect.addEventListener('change', function () {
+            var val = this.value;
+            if (val === 'all') {
+                node.style('display', null);
+                link.style('display', null);
+            } else {
+                node.style('display', function (d) { return d.type === val ? null : 'none'; });
+                link.style('display', function (l) {
+                    var sn = typeof l.source === 'object' ? l.source : nodes.find(function (n) { return n.id === l.source; });
+                    var tn = typeof l.target === 'object' ? l.target : nodes.find(function (n) { return n.id === l.target; });
+                    var sType = sn ? (sn.type || sn) : '';
+                    var tType = tn ? (tn.type || tn) : '';
+                    return (sType === val || tType === val) ? null : 'none';
+                });
+            }
+        });
+
+        // Reset button
+        document.getElementById('btn-reset').addEventListener('click', function () {
+            filterSelect.value = 'all';
+            filterSelect.dispatchEvent(new Event('change'));
+            infoPanel.classList.remove('open');
+            node.select('circle').attr('fill-opacity', 0.15).attr('stroke-opacity', 0.7);
+            node.select('text').style('opacity', 1);
+            link.attr('stroke-opacity', 0.2).attr('stroke-width', 1.2);
+            // Reset zoom
+            svg.transition().duration(500).call(zoomBehavior.transform, d3.zoomIdentity);
+            // Reheat simulation briefly
+            simulation.alpha(0.3).restart();
+        });
+
+        // Tick
+        simulation.on('tick', function () {
+            link
+                .attr('x1', function (d) { return d.source.x; })
+                .attr('y1', function (d) { return d.source.y; })
+                .attr('x2', function (d) { return d.target.x; })
+                .attr('y2', function (d) { return d.target.y; });
+            node.attr('transform', function (d) { return 'translate(' + d.x + ',' + d.y + ')'; });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function () {
+            var w = window.innerWidth;
+            var h = window.innerHeight - 56;
+            svg.attr('viewBox', [0, 0, w, h]);
+            simulation.force('center', d3.forceCenter(w / 2, h / 2));
+            simulation.alpha(0.1).restart();
+        });
+    }
+
+    // Start
+    init();
+})();
+</script>
+</body>
+</html>
