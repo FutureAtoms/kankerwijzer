@@ -1270,3 +1270,70 @@ body {
         padding: 8px 14px;
     }
 }
+
+/* ===== CONFIDENCE BADGE ===== */
+.confidence-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: help;
+}
+.confidence-badge .conf-icon {
+    font-size: 0.85rem;
+}
+.confidence-badge .conf-label {
+    font-weight: 400;
+    opacity: 0.8;
+}
+.confidence-hoog {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+}
+.confidence-gemiddeld {
+    background: #fff3e0;
+    color: #e65100;
+    border: 1px solid #ffcc80;
+}
+.confidence-laag {
+    background: #fce4ec;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+.confidence-zeer.laag, .confidence-zeer\ laag {
+    background: #ffebee;
+    color: #b71c1c;
+    border: 1px solid #e57373;
+}
+
+/* ===== PER-SOURCE RELEVANCE BAR ===== */
+.relevance-bar-container {
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.relevance-label {
+    font-size: 0.7rem;
+    color: #666;
+    white-space: nowrap;
+    min-width: 90px;
+}
+.relevance-bar {
+    flex: 1;
+    height: 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    max-width: 120px;
+}
+.relevance-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}

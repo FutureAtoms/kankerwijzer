@@ -165,7 +165,9 @@
 
         var answer = data.answer_markdown || 'Geen antwoord ontvangen.';
         var citations = data.citations || [];
-        addAIMessage(answer, citations);
+        var confidence = data.confidence;
+        var confidenceLabel = data.confidence_label;
+        addAIMessage(answer, citations, confidence, confidenceLabel);
     }
 
     // ===== Message Rendering =====
@@ -178,7 +180,7 @@
         scrollToBottom();
     }
 
-    function addAIMessage(markdown, citations) {
+    function addAIMessage(markdown, citations, confidence, confidenceLabel) {
         messageCount++;
         var msgId = 'msg-' + messageCount;
 
@@ -198,6 +200,17 @@
             '</div>' +
             '<span class="ai-name">KankerWijzer</span>';
 
+        // Confidence badge next to name
+        if (confidence !== null && confidence !== undefined) {
+            var confBadge = document.createElement('span');
+            confBadge.className = 'confidence-badge confidence-' + (confidenceLabel || 'gemiddeld');
+            var pct = Math.round(confidence * 100);
+            confBadge.innerHTML = '<span class="conf-icon">' + getConfidenceIcon(confidenceLabel) + '</span> ' +
+                'Betrouwbaarheid: ' + pct + '% <span class="conf-label">(' + (confidenceLabel || '?') + ')</span>';
+            confBadge.title = 'Betrouwbaarheidsscore gebaseerd op relevantie van bronnen: ' + pct + '%';
+            header.appendChild(confBadge);
+        }
+
         // Bubble with content
         var bubble = document.createElement('div');
         bubble.className = 'bubble';
@@ -206,7 +219,7 @@
         htmlContent = replaceSrcReferences(htmlContent, citations);
         bubble.innerHTML = htmlContent;
 
-        // Citations section
+        // Citations section with per-source relevance
         if (citations.length > 0) {
             var citationsEl = renderCitations(citations);
             bubble.appendChild(citationsEl);
@@ -221,6 +234,16 @@
 
         messagesEl.appendChild(div);
         scrollToBottom();
+    }
+
+    function getConfidenceIcon(label) {
+        switch (label) {
+            case 'hoog': return '\u2705';
+            case 'gemiddeld': return '\u26A0\uFE0F';
+            case 'laag': return '\u26A0\uFE0F';
+            case 'zeer laag': return '\u274C';
+            default: return '\u2139\uFE0F';
+        }
     }
 
     function addRefusalMessage(reason) {
@@ -390,6 +413,18 @@
 
             info.appendChild(titleEl);
             info.appendChild(sourceLabelEl);
+
+            // Per-source relevance score bar
+            if (cite.relevance_score !== null && cite.relevance_score !== undefined) {
+                var scoreBar = document.createElement('div');
+                scoreBar.className = 'relevance-bar-container';
+                var pct = Math.round(cite.relevance_score * 100);
+                var barColor = pct >= 75 ? '#4CAF50' : pct >= 50 ? '#FF9800' : '#f44336';
+                scoreBar.innerHTML =
+                    '<span class="relevance-label">Relevantie: ' + pct + '%</span>' +
+                    '<div class="relevance-bar"><div class="relevance-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>';
+                info.appendChild(scoreBar);
+            }
 
             if (cite.url) {
                 var urlEl = document.createElement('a');

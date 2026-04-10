@@ -214,14 +214,18 @@ class MedicalAnswerOrchestrator:
 
         # ---- Step 2: Build [SRC-N] evidence blocks --------------------
         all_provenances: list[Provenance] = []
+        hit_scores: list[float] = []
         evidence_lines: list[str] = []
 
         for idx, hit in enumerate(retrieval.hits, start=1):
             prov = hit.document.provenance
+            prov.relevance_score = round(hit.score, 3)
             all_provenances.append(prov)
+            hit_scores.append(hit.score)
             evidence_lines.append(
                 f"[SRC-{idx}] {hit.document.title}\n"
                 f"Bron: {prov.publisher or prov.source_id}\n"
+                f"Relevantie: {hit.score:.0%}\n"
                 f"Fragment: {hit.excerpt}\n"
             )
 
@@ -285,11 +289,18 @@ class MedicalAnswerOrchestrator:
             answer_text, all_provenances
         )
 
+        # ---- Step 6: Compute overall answer confidence ---------------
+        confidence, confidence_label = self._compute_confidence(
+            hit_scores, cited_provenances or all_provenances
+        )
+
         return AnswerResponse(
             query=query,
             audience=audience,
             answer_markdown=answer_text,
             citations=cited_provenances if cited_provenances else all_provenances,
+            confidence=confidence,
+            confidence_label=confidence_label,
             notes=notes,
         )
 
@@ -470,6 +481,64 @@ class MedicalAnswerOrchestrator:
                 "Adviseer de patiënt om deze resultaten te bespreken met hun arts of verpleegkundige."
             ),
         }
+
+    # ------------------------------------------------------------------
+    # Confidence scoring
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _compute_confidence(
+        hit_scores: list[float],
+        cited_provenances: list[Provenance],
+    ) -> tuple[float, str]:
+        """Compute overall answer confidence from retrieval scores.
+
+        Factors:
+        - Top retrieval score (how well the best source matches)
+        - Average of top-3 scores (consistency of evidence)
+        - Source diversity (multiple distinct sources = higher confidence)
+        - Number of citations (more evidence = more confident)
+
+        Returns (confidence_float, label_string).
+        """
+        if not hit_scores:
+            return 0.0, "geen"
+
+        top_score = max(hit_scores)
+        top3 = sorted(hit_scores, reverse=True)[:3]
+        avg_top3 = sum(top3) / len(top3)
+
+        # Source diversity bonus: unique source families cited
+        unique_sources = set()
+        for p in cited_provenances:
+            if p.relevance_score and p.relevance_score > 0.3:
+                unique_sources.add(p.source_id)
+        diversity_bonus = min(len(unique_sources) * 0.05, 0.15)
+
+        # Citation count factor
+        n_cited = len(cited_provenances)
+        citation_factor = min(n_cited / 5.0, 1.0)  # caps at 5 citations
+
+        # Weighted combination
+        confidence = (
+            top_score * 0.40
+            + avg_top3 * 0.30
+            + citation_factor * 0.15
+            + diversity_bonus
+        )
+        confidence = round(min(confidence, 1.0), 2)
+
+        # Label
+        if confidence >= 0.75:
+            label = "hoog"
+        elif confidence >= 0.55:
+            label = "gemiddeld"
+        elif confidence >= 0.35:
+            label = "laag"
+        else:
+            label = "zeer laag"
+
+        return confidence, label
 
     # ------------------------------------------------------------------
     # Citation mapping

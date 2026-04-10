@@ -33,6 +33,7 @@ class Provenance(BaseModel):
     excerpt: str | None = None
     checksum: str | None = None
     fetched_at: datetime | None = None
+    relevance_score: float | None = Field(None, description="Retrieval relevance score 0.0-1.0 for this source")
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -67,6 +68,8 @@ class AnswerResponse(BaseModel):
     audience: Audience
     answer_markdown: str | None = None
     citations: list[Provenance] = Field(default_factory=list)
+    confidence: float | None = Field(None, description="Overall answer confidence 0.0-1.0")
+    confidence_label: str | None = Field(None, description="Human-readable confidence: hoog/gemiddeld/laag")
     notes: list[str] = Field(default_factory=list)
     refusal_reason: str | None = None
 
