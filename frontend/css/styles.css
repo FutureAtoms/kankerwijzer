@@ -264,22 +264,43 @@ body {
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    text-align: center;
-    gap: 16px;
+    text-align: left;
+    gap: 0;
 }
 
 .welcome-screen.hidden {
     display: none;
 }
 
-.welcome-icon {
-    margin-bottom: 8px;
-    animation: pulse-gentle 3s ease-in-out infinite;
+.welcome-onboarding {
+    max-width: 560px;
+    width: 100%;
+    background: white;
+    border-radius: 16px;
+    padding: 28px 32px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+    border: 1px solid #e8e8e8;
 }
 
-@keyframes pulse-gentle {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.05); opacity: 0.9; }
+.welcome-onboarding h2 {
+    font-size: 1.4rem;
+    color: var(--primary-dark);
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.welcome-onboarding > p {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.welcome-topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
 }
 
 .welcome-screen h2 {
@@ -291,7 +312,7 @@ body {
 .welcome-screen p {
     font-size: 1rem;
     color: var(--text-light);
-    max-width: 480px;
+    max-width: 560px;
     line-height: 1.6;
 }
 

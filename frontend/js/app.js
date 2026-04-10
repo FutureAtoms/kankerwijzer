@@ -200,6 +200,9 @@
             }
         });
 
+        // Welcome topic buttons
+        initWelcomeTopics();
+
         // Focus input
         userInput.focus();
     }
@@ -223,80 +226,23 @@
         }
     }
 
-    // ===== Onboarding Welcome Message =====
-    var onboardingShown = false;
-
-    function showOnboardingMessage() {
-        if (onboardingShown) return;
-        onboardingShown = true;
-
-        messageCount++;
-        var div = document.createElement('div');
-        div.className = 'message-ai';
-
-        var header = document.createElement('div');
-        header.className = 'ai-header';
-        header.innerHTML =
-            '<div class="ai-avatar">' +
-            '<svg viewBox="0 0 24 24" fill="none" stroke="#00A67E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-            '<circle cx="12" cy="12" r="10"/>' +
-            '<path d="M12 8v4M12 16h.01"/>' +
-            '</svg>' +
-            '</div>' +
-            '<span class="ai-name">KankerWijzer</span>';
-
-        var bubble = document.createElement('div');
-        bubble.className = 'bubble onboarding-bubble';
-        bubble.innerHTML =
-            '<p>' + t('onboarding_welcome') + '</p>' +
-            '<p>' + t('onboarding_intro') + '</p>' +
-            '<div class="onboarding-disclaimer">' +
-            '<span class="disclaimer-icon">\u26A0\uFE0F</span>' +
-            '<div>' +
-            '<strong>' + t('onboarding_important') + '</strong>' +
-            '<ul>' +
-            '<li>' + t('onboarding_not_doctor') + '</li>' +
-            '<li>' + t('onboarding_every_patient') + '</li>' +
-            '<li>' + t('onboarding_not_urgent') + '<a href="tel:112" class="onboarding-phone">112</a></li>' +
-            '</ul>' +
-            '</div>' +
-            '</div>' +
-            '<p>' + t('onboarding_help') + '</p>';
-
-        // Add clickable topic options
-        var optionsDiv = document.createElement('div');
-        optionsDiv.className = 'clarification-options';
-
-        var topics = [
-            t('topic_cancer_type'),
-            t('topic_treatment'),
-            t('topic_stats'),
-            t('topic_lastmeter'),
-            t('topic_guidelines')
-        ];
-
-        topics.forEach(function (topic) {
-            var btn = document.createElement('button');
-            btn.className = 'clarification-btn';
-            btn.textContent = topic;
+    // ===== Welcome Topic Buttons =====
+    // Wire the topic buttons in the welcome screen (they're in HTML now)
+    function initWelcomeTopics() {
+        var topicBtns = document.querySelectorAll('.welcome-topic-btn');
+        topicBtns.forEach(function (btn) {
             btn.addEventListener('click', function () {
-                if (topic === t('topic_lastmeter')) {
+                var topic = btn.getAttribute('data-topic');
+                if (topic === 'lastmeter') {
                     if (window.openLastmeter) window.openLastmeter();
                 } else {
-                    userInput.value = topic;
+                    var question = btn.getAttribute('data-question-' + currentLang) || btn.textContent.trim();
+                    userInput.value = question;
                     onInputChange();
                     onSend();
                 }
             });
-            optionsDiv.appendChild(btn);
         });
-
-        bubble.appendChild(optionsDiv);
-
-        div.appendChild(header);
-        div.appendChild(bubble);
-        messagesEl.appendChild(div);
-        scrollToBottom();
     }
 
     // ===== External Send (used by Lastmeter and other components) =====
@@ -311,9 +257,8 @@
         var query = userInput.value.trim();
         if (!query || isLoading) return;
 
-        // Hide welcome screen and show onboarding
+        // Hide welcome screen — transition to chat
         welcomeScreen.classList.add('hidden');
-        showOnboardingMessage();
 
         // Add user message
         addUserMessage(query);
@@ -1033,7 +978,6 @@
         messagesEl.innerHTML = '';
         welcomeScreen.classList.remove('hidden');
         messageCount = 0;
-        onboardingShown = false;
         userInput.value = '';
         userInput.style.height = 'auto';
         sendBtn.disabled = true;
