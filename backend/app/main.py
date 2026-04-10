@@ -12,6 +12,7 @@ from app.connectors.nkr_cijfers import NKRCijfersClient
 from app.connectors.publications import PublicationsConnector
 from app.connectors.richtlijnendatabase import RichtlijnendatabaseConnector
 from app.models import FirecrawlRequest, ParsePdfRequest, QuestionRequest
+from app.retrieval.hybrid import HybridMedicalRetriever
 from app.retrieval.simple import SimpleMedicalRetriever
 from app.source_registry import list_approved_sources
 from app.verification import SourceVerifier
@@ -26,7 +27,8 @@ firecrawl_client = FirecrawlClient(settings)
 iknl_connector = IKNLWebConnector(firecrawl_client)
 richtlijn_connector = RichtlijnendatabaseConnector(firecrawl_client)
 publications_connector = PublicationsConnector(settings, firecrawl_client)
-retriever = SimpleMedicalRetriever(settings)
+simple_retriever = SimpleMedicalRetriever(settings)
+hybrid_retriever = HybridMedicalRetriever(settings)
 answerer = MedicalAnswerOrchestrator(settings)
 verifier = SourceVerifier(settings)
 
@@ -186,7 +188,17 @@ def verify_all_sources():
 
 @app.post("/agent/retrieve")
 def agent_retrieve(request: QuestionRequest):
-    return retriever.retrieve(
+    return hybrid_retriever.retrieve(
+        query=request.query,
+        audience=request.audience,
+        limit=request.limit,
+    )
+
+
+@app.post("/agent/retrieve/simple")
+def agent_retrieve_simple(request: QuestionRequest):
+    """Legacy endpoint using SimpleMedicalRetriever (for comparison/fallback)."""
+    return simple_retriever.retrieve(
         query=request.query,
         audience=request.audience,
         limit=request.limit,
