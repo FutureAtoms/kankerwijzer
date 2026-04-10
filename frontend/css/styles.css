@@ -1422,6 +1422,34 @@ body {
     background: #d32f2f;
 }
 
+/* ===== LANGUAGE TOGGLE ===== */
+.language-toggle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    justify-content: center;
+}
+.lang-btn {
+    padding: 6px 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: transparent;
+    color: #888;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.lang-btn:hover {
+    border-color: #00A67E;
+    color: #00A67E;
+}
+.lang-btn.active {
+    background: #00A67E;
+    border-color: #00A67E;
+    color: white;
+}
+
 /* ===== CONTACT CARDS ===== */
 .contacts-section {
     margin: 12px 0 4px;

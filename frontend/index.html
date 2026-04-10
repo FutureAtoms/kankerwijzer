@@ -37,11 +37,15 @@
                 </button>
             </nav>
             <div class="sidebar-footer">
+                <div class="language-toggle">
+                    <button class="lang-btn active" id="lang-nl" title="Nederlands">NL</button>
+                    <button class="lang-btn" id="lang-en" title="English">EN</button>
+                </div>
                 <div class="audience-selector">
-                    <label for="audience">Doelgroep:</label>
+                    <label for="audience" data-i18n="audience_label">Doelgroep:</label>
                     <select id="audience">
-                        <option value="patient" selected>Patient</option>
-                        <option value="professional">Zorgprofessional</option>
+                        <option value="patient" selected data-i18n="audience_patient">Patient</option>
+                        <option value="professional" data-i18n="audience_professional">Zorgprofessional</option>
                     </select>
                 </div>
             </div>
@@ -60,9 +64,9 @@
                 </button>
                 <div class="header-info">
                     <h1>KankerWijzer</h1>
-                    <p class="subtitle">Betrouwbare kankerinformatie van IKNL</p>
+                    <p class="subtitle" data-i18n="subtitle">Betrouwbare kankerinformatie van IKNL</p>
                 </div>
-                <div class="header-trust">Alleen goedgekeurde bronnen</div>
+                <div class="header-trust" data-i18n="header_trust">Alleen goedgekeurde bronnen</div>
                 <div class="header-actions">
                     <button class="btn-icon" id="btn-new-chat" title="Nieuw gesprek">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -86,20 +90,20 @@
                             <circle cx="32" cy="40" r="2" fill="#00A67E"/>
                         </svg>
                     </div>
-                    <h2>Welkom bij KankerWijzer</h2>
-                    <p>Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.</p>
+                    <h2 data-i18n="welcome_title">Welkom bij KankerWijzer</h2>
+                    <p data-i18n="welcome_desc">Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.</p>
                     <div class="welcome-trust-grid">
                         <div class="trust-card">
-                            <div class="trust-card-title">Bronnen met herkomst</div>
-                            <p>Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.</p>
+                            <div class="trust-card-title" data-i18n="trust_sources_title">Bronnen met herkomst</div>
+                            <p data-i18n="trust_sources_desc">Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.</p>
                         </div>
                         <div class="trust-card">
-                            <div class="trust-card-title">Geen persoonlijk behandeladvies</div>
-                            <p>Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.</p>
+                            <div class="trust-card-title" data-i18n="trust_advice_title">Geen persoonlijk behandeladvies</div>
+                            <p data-i18n="trust_advice_desc">Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.</p>
                         </div>
                         <div class="trust-card">
-                            <div class="trust-card-title">Ondersteuning bij klachten</div>
-                            <p>Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.</p>
+                            <div class="trust-card-title" data-i18n="trust_lastmeter_title">Ondersteuning bij klachten</div>
+                            <p data-i18n="trust_lastmeter_desc">Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.</p>
                         </div>
                     </div>
                     <div class="welcome-source-list" aria-label="Beschikbare bronfamilies">
@@ -110,17 +114,17 @@
                         <span class="source-chip">IKNL rapporten</span>
                         <span class="source-chip">Wetenschappelijke publicaties</span>
                     </div>
-                    <div class="example-questions">
-                        <button class="example-q" data-question="Wat is borstkanker en hoe wordt het vastgesteld?">
+                    <div class="example-questions" id="example-questions">
+                        <button class="example-q" data-question-nl="Wat is borstkanker en hoe wordt het vastgesteld?" data-question-en="What is breast cancer and how is it diagnosed?" data-question="Wat is borstkanker en hoe wordt het vastgesteld?" data-i18n="ex_breast">
                             Wat is borstkanker?
                         </button>
-                        <button class="example-q" data-question="Wat zijn de behandelmogelijkheden bij darmkanker?">
+                        <button class="example-q" data-question-nl="Wat zijn de behandelmogelijkheden bij darmkanker?" data-question-en="What are the treatment options for colorectal cancer?" data-question="Wat zijn de behandelmogelijkheden bij darmkanker?" data-i18n="ex_colon">
                             Behandeling darmkanker
                         </button>
-                        <button class="example-q" data-question="Hoe kan ik omgaan met vermoeidheid tijdens chemotherapie?">
+                        <button class="example-q" data-question-nl="Hoe kan ik omgaan met vermoeidheid tijdens chemotherapie?" data-question-en="How can I cope with fatigue during chemotherapy?" data-question="Hoe kan ik omgaan met vermoeidheid tijdens chemotherapie?" data-i18n="ex_fatigue">
                             Vermoeidheid bij chemo
                         </button>
-                        <button class="example-q" data-question="Wat zijn de overlevingscijfers voor longkanker in Nederland?">
+                        <button class="example-q" data-question-nl="Wat zijn de overlevingscijfers voor longkanker in Nederland?" data-question-en="What are the survival rates for lung cancer in the Netherlands?" data-question="Wat zijn de overlevingscijfers voor longkanker in Nederland?" data-i18n="ex_survival">
                             Overlevingscijfers longkanker
                         </button>
                     </div>
@@ -136,6 +140,8 @@
                     <textarea
                         id="user-input"
                         placeholder="Stel uw vraag over kanker..."
+                        data-placeholder-nl="Stel uw vraag over kanker..."
+                        data-placeholder-en="Ask your question about cancer..."
                         rows="1"
                         aria-label="Uw vraag"
                     ></textarea>
@@ -146,7 +152,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="disclaimer">
+                <div class="disclaimer" data-i18n="disclaimer">
                     Deze informatie is informatief en vervangt geen medisch advies. Raadpleeg altijd uw arts.
                 </div>
             </div>

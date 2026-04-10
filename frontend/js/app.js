@@ -10,6 +10,123 @@
     const API_BASE = window.location.origin;
     const API_ENDPOINT = API_BASE + '/agent/answer';
 
+    // ===== i18n Translations =====
+    var currentLang = 'nl';
+
+    var TRANSLATIONS = {
+        nl: {
+            subtitle: 'Betrouwbare kankerinformatie van IKNL',
+            header_trust: 'Alleen goedgekeurde bronnen',
+            welcome_title: 'Welkom bij KankerWijzer',
+            welcome_desc: 'Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.',
+            trust_sources_title: 'Bronnen met herkomst',
+            trust_sources_desc: 'Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.',
+            trust_advice_title: 'Geen persoonlijk behandeladvies',
+            trust_advice_desc: 'Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.',
+            trust_lastmeter_title: 'Ondersteuning bij klachten',
+            trust_lastmeter_desc: 'Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.',
+            audience_label: 'Doelgroep:',
+            audience_patient: 'Patient',
+            audience_professional: 'Zorgprofessional',
+            disclaimer: 'Deze informatie is informatief en vervangt geen medisch advies. Raadpleeg altijd uw arts.',
+            ex_breast: 'Wat is borstkanker?',
+            ex_colon: 'Behandeling darmkanker',
+            ex_fatigue: 'Vermoeidheid bij chemo',
+            ex_survival: 'Overlevingscijfers longkanker',
+            onboarding_welcome: '<strong>Welkom bij KankerWijzer!</strong>',
+            onboarding_intro: 'Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.',
+            onboarding_important: 'Belangrijk om te weten:',
+            onboarding_not_doctor: 'Ik ben <strong>geen arts</strong> \u2014 ik geef informatief advies, geen diagnose of behandelplan',
+            onboarding_every_patient: 'Elke pati\u00EBnt is anders \u2014 bespreek alles met uw <strong>huisarts of specialist</strong>',
+            onboarding_not_urgent: 'Deze chatbot is <strong>niet voor spoed</strong> \u2014 bel bij nood ',
+            onboarding_help: 'Waar kan ik u mee helpen? U kunt mij vragen stellen over:',
+            topic_cancer_type: 'Informatie over een kankersoort',
+            topic_treatment: 'Behandelingen en bijwerkingen',
+            topic_stats: 'Cijfers en statistieken',
+            topic_lastmeter: 'Omgaan met klachten (Lastmeter)',
+            topic_guidelines: 'Richtlijnen voor zorgprofessionals',
+            sources_title: 'Bronnen',
+            relevance_label: 'Relevantie',
+            confidence_label_prefix: 'Betrouwbaarheid',
+            contacts_title: 'Direct contact opnemen:',
+            feedback_helpful: 'Nuttig',
+            feedback_not_helpful: 'Niet nuttig',
+            feedback_missing: 'Informatie ontbreekt',
+        },
+        en: {
+            subtitle: 'Reliable cancer information from IKNL',
+            header_trust: 'Approved sources only',
+            welcome_title: 'Welcome to KankerWijzer',
+            welcome_desc: 'Ask your question about cancer and receive information backed by approved sources, clear references, and safe referrals for urgent or personal care questions.',
+            trust_sources_title: 'Sources with provenance',
+            trust_sources_desc: 'Answers reference kanker.nl, NKR Cijfers, Cancer Atlas, guidelines, and IKNL publications.',
+            trust_advice_title: 'No personal treatment advice',
+            trust_advice_desc: 'For diagnosis, emergency, or treatment decisions, KankerWijzer refers you directly to appropriate care.',
+            trust_lastmeter_title: 'Support for complaints',
+            trust_lastmeter_desc: 'Use the Lastmeter to explore distress and complaints, and take relevant information to your healthcare provider.',
+            audience_label: 'Audience:',
+            audience_patient: 'Patient',
+            audience_professional: 'Healthcare professional',
+            disclaimer: 'This information is for informational purposes and does not replace medical advice. Always consult your doctor.',
+            ex_breast: 'What is breast cancer?',
+            ex_colon: 'Colorectal cancer treatment',
+            ex_fatigue: 'Fatigue during chemo',
+            ex_survival: 'Lung cancer survival rates',
+            onboarding_welcome: '<strong>Welcome to KankerWijzer!</strong>',
+            onboarding_intro: 'Thank you for reaching out. I am an AI assistant from IKNL helping you find reliable cancer information from trusted sources.',
+            onboarding_important: 'Important to know:',
+            onboarding_not_doctor: 'I am <strong>not a doctor</strong> \u2014 I provide informational guidance, not diagnosis or treatment plans',
+            onboarding_every_patient: 'Every patient is different \u2014 always discuss everything with your <strong>GP or specialist</strong>',
+            onboarding_not_urgent: 'This chatbot is <strong>not for emergencies</strong> \u2014 call ',
+            onboarding_help: 'How can I help you? You can ask me about:',
+            topic_cancer_type: 'Information about a cancer type',
+            topic_treatment: 'Treatments and side effects',
+            topic_stats: 'Statistics and figures',
+            topic_lastmeter: 'Coping with complaints (Lastmeter)',
+            topic_guidelines: 'Guidelines for professionals',
+            sources_title: 'Sources',
+            relevance_label: 'Relevance',
+            confidence_label_prefix: 'Confidence',
+            contacts_title: 'Contact directly:',
+            feedback_helpful: 'Helpful',
+            feedback_not_helpful: 'Not helpful',
+            feedback_missing: 'Missing info',
+        },
+    };
+
+    function t(key) {
+        return TRANSLATIONS[currentLang][key] || TRANSLATIONS.nl[key] || key;
+    }
+
+    function switchLanguage(lang) {
+        currentLang = lang;
+
+        // Update toggle buttons
+        document.getElementById('lang-nl').classList.toggle('active', lang === 'nl');
+        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+
+        // Update all data-i18n elements
+        document.querySelectorAll('[data-i18n]').forEach(function (el) {
+            var key = el.getAttribute('data-i18n');
+            var translated = t(key);
+            if (el.tagName === 'OPTION') {
+                el.textContent = translated;
+            } else {
+                el.textContent = translated;
+            }
+        });
+
+        // Update placeholder
+        var input = document.getElementById('user-input');
+        input.placeholder = input.getAttribute('data-placeholder-' + lang) || input.placeholder;
+
+        // Update example question buttons
+        document.querySelectorAll('.example-q').forEach(function (btn) {
+            var q = btn.getAttribute('data-question-' + lang);
+            if (q) btn.setAttribute('data-question', q);
+        });
+    }
+
     // Source badge color mapping
     const SOURCE_COLORS = {
         'kanker.nl': '#2196F3',
@@ -67,6 +184,10 @@
                 onSend();
             });
         });
+
+        // Language toggle
+        document.getElementById('lang-nl').addEventListener('click', function () { switchLanguage('nl'); });
+        document.getElementById('lang-en').addEventListener('click', function () { switchLanguage('en'); });
 
         // Mobile sidebar
         menuToggle.addEventListener('click', toggleSidebar);
@@ -127,32 +248,31 @@
         var bubble = document.createElement('div');
         bubble.className = 'bubble onboarding-bubble';
         bubble.innerHTML =
-            '<p><strong>Welkom bij KankerWijzer!</strong></p>' +
-            '<p>Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u ' +
-            'betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.</p>' +
+            '<p>' + t('onboarding_welcome') + '</p>' +
+            '<p>' + t('onboarding_intro') + '</p>' +
             '<div class="onboarding-disclaimer">' +
             '<span class="disclaimer-icon">\u26A0\uFE0F</span>' +
             '<div>' +
-            '<strong>Belangrijk om te weten:</strong>' +
+            '<strong>' + t('onboarding_important') + '</strong>' +
             '<ul>' +
-            '<li>Ik ben <strong>geen arts</strong> \u2014 ik geef informatief advies, geen diagnose of behandelplan</li>' +
-            '<li>Elke pati\u00EBnt is anders \u2014 bespreek alles met uw <strong>huisarts of specialist</strong></li>' +
-            '<li>Deze chatbot is <strong>niet voor spoed</strong> \u2014 bel bij nood <a href="tel:112" class="onboarding-phone">112</a></li>' +
+            '<li>' + t('onboarding_not_doctor') + '</li>' +
+            '<li>' + t('onboarding_every_patient') + '</li>' +
+            '<li>' + t('onboarding_not_urgent') + '<a href="tel:112" class="onboarding-phone">112</a></li>' +
             '</ul>' +
             '</div>' +
             '</div>' +
-            '<p>Waar kan ik u mee helpen? U kunt mij vragen stellen over:</p>';
+            '<p>' + t('onboarding_help') + '</p>';
 
         // Add clickable topic options
         var optionsDiv = document.createElement('div');
         optionsDiv.className = 'clarification-options';
 
         var topics = [
-            'Informatie over een kankersoort',
-            'Behandelingen en bijwerkingen',
-            'Cijfers en statistieken',
-            'Omgaan met klachten (Lastmeter)',
-            'Richtlijnen voor zorgprofessionals'
+            t('topic_cancer_type'),
+            t('topic_treatment'),
+            t('topic_stats'),
+            t('topic_lastmeter'),
+            t('topic_guidelines')
         ];
 
         topics.forEach(function (topic) {
@@ -160,7 +280,7 @@
             btn.className = 'clarification-btn';
             btn.textContent = topic;
             btn.addEventListener('click', function () {
-                if (topic === 'Omgaan met klachten (Lastmeter)') {
+                if (topic === t('topic_lastmeter')) {
                     if (window.openLastmeter) window.openLastmeter();
                 } else {
                     userInput.value = topic;
