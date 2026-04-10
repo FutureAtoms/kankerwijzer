@@ -62,6 +62,7 @@
                     <h1>KankerWijzer</h1>
                     <p class="subtitle">Betrouwbare kankerinformatie van IKNL</p>
                 </div>
+                <div class="header-trust">Alleen goedgekeurde bronnen</div>
                 <div class="header-actions">
                     <button class="btn-icon" id="btn-new-chat" title="Nieuw gesprek">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -86,7 +87,29 @@
                         </svg>
                     </div>
                     <h2>Welkom bij KankerWijzer</h2>
-                    <p>Stel uw vraag over kanker en ontvang betrouwbare informatie gebaseerd op bronnen van IKNL, KWF en medische richtlijnen.</p>
+                    <p>Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.</p>
+                    <div class="welcome-trust-grid">
+                        <div class="trust-card">
+                            <div class="trust-card-title">Bronnen met herkomst</div>
+                            <p>Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.</p>
+                        </div>
+                        <div class="trust-card">
+                            <div class="trust-card-title">Geen persoonlijk behandeladvies</div>
+                            <p>Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.</p>
+                        </div>
+                        <div class="trust-card">
+                            <div class="trust-card-title">Ondersteuning bij klachten</div>
+                            <p>Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.</p>
+                        </div>
+                    </div>
+                    <div class="welcome-source-list" aria-label="Beschikbare bronfamilies">
+                        <span class="source-chip">kanker.nl</span>
+                        <span class="source-chip">NKR Cijfers</span>
+                        <span class="source-chip">Kanker Atlas</span>
+                        <span class="source-chip">Richtlijnendatabase</span>
+                        <span class="source-chip">IKNL rapporten</span>
+                        <span class="source-chip">Wetenschappelijke publicaties</span>
+                    </div>
                     <div class="example-questions">
                         <button class="example-q" data-question="Wat is borstkanker en hoe wordt het vastgesteld?">
                             Wat is borstkanker?
@@ -104,7 +127,7 @@
                 </div>
 
                 <!-- Messages Container -->
-                <div class="messages" id="messages"></div>
+                <div class="messages" id="messages" aria-live="polite"></div>
             </div>
 
             <!-- Input Area -->

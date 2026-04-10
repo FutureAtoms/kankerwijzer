@@ -205,11 +205,12 @@
         // Confidence badge next to name
         if (confidence !== null && confidence !== undefined) {
             var confBadge = document.createElement('span');
-            confBadge.className = 'confidence-badge confidence-' + (confidenceLabel || 'gemiddeld');
+            confBadge.className = 'confidence-badge confidence-' + getConfidenceClass(confidenceLabel);
             var pct = Math.round(confidence * 100);
-            confBadge.innerHTML = '<span class="conf-icon">' + getConfidenceIcon(confidenceLabel) + '</span> ' +
-                'Betrouwbaarheid: ' + pct + '% <span class="conf-label">(' + (confidenceLabel || '?') + ')</span>';
-            confBadge.title = 'Betrouwbaarheidsscore gebaseerd op relevantie van bronnen: ' + pct + '%';
+            confBadge.innerHTML =
+                'Onderbouwing: ' + getConfidenceDisplayLabel(confidenceLabel) +
+                ' <span class="conf-label">(' + pct + '% bronmatch)</span>';
+            confBadge.title = 'Deze score vat bronmatch, dekking en citaatdichtheid samen. Het is geen medische zekerheid.';
             header.appendChild(confBadge);
         }
 
@@ -241,54 +242,109 @@
         scrollToBottom();
     }
 
-    function getConfidenceIcon(label) {
+    function getConfidenceClass(label) {
+        if (label === 'zeer laag') return 'zeer-laag';
+        return label || 'gemiddeld';
+    }
+
+    function getConfidenceDisplayLabel(label) {
         switch (label) {
-            case 'hoog': return '\u2705';
-            case 'gemiddeld': return '\u26A0\uFE0F';
-            case 'laag': return '\u26A0\uFE0F';
-            case 'zeer laag': return '\u274C';
-            default: return '\u2139\uFE0F';
+            case 'hoog': return 'sterk';
+            case 'gemiddeld': return 'redelijk';
+            case 'laag': return 'beperkt';
+            case 'zeer laag': return 'zwak';
+            default: return 'onbekend';
         }
     }
 
     // ===== Clickable Options for Clarification =====
+    function makeOptionBtn(container, rawText) {
+        var text = rawText.replace(/^\s*[-*\u2022\u25CF\u25B8\u25BA]+\s*/, '').replace(/\*\*/g, '').trim();
+        // Strip leading emojis
+        text = text.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]+\s*/u, '').trim();
+        if (text.length < 2) return;
+        var btn = document.createElement('button');
+        btn.className = 'clarification-btn';
+        btn.textContent = text;
+        btn.addEventListener('click', function () {
+            userInput.value = text;
+            onInputChange();
+            onSend();
+        });
+        container.appendChild(btn);
+    }
+
     function addClickableOptions(bubble) {
-        // Find list items that look like clarification options
-        // Pattern: short list items (< 60 chars) in a <ul> or <ol> that follow a question mark
+        // Strategy 1: <ul>/<ol> lists after a question
         var lists = bubble.querySelectorAll('ul, ol');
         lists.forEach(function (list) {
-            // Check if the text before this list contains a question mark
             var prev = list.previousElementSibling;
             var isAfterQuestion = prev && prev.textContent && prev.textContent.indexOf('?') !== -1;
-
             var items = list.querySelectorAll('li');
             var allShort = true;
-            items.forEach(function (li) {
-                if (li.textContent.length > 80) allShort = false;
-            });
-
-            // If it's a short list after a question, convert to clickable buttons
-            if (isAfterQuestion && allShort && items.length >= 2 && items.length <= 10) {
-                var optionsDiv = document.createElement('div');
-                optionsDiv.className = 'clarification-options';
-
-                items.forEach(function (li) {
-                    var btn = document.createElement('button');
-                    btn.className = 'clarification-btn';
-                    // Clean text: remove bold markers, leading dashes/bullets
-                    var text = li.textContent.replace(/^\s*[-*•]\s*/, '').trim();
-                    btn.textContent = text;
-                    btn.addEventListener('click', function () {
-                        // Send this option as a new user message
-                        userInput.value = text;
-                        sendMessage();
-                    });
-                    optionsDiv.appendChild(btn);
-                });
-
-                list.replaceWith(optionsDiv);
+            items.forEach(function (li) { if (li.textContent.length > 80) allShort = false; });
+            if (isAfterQuestion && allShort && items.length >= 2 && items.length <= 12) {
+                var optDiv = document.createElement('div');
+                optDiv.className = 'clarification-options';
+                items.forEach(function (li) { makeOptionBtn(optDiv, li.textContent); });
+                list.replaceWith(optDiv);
             }
         });
+
+        // Strategy 2: Emoji/bullet lines in paragraphs (🔹 Borstkanker, 🩺 Longkanker, etc.)
+        var fullText = bubble.textContent || '';
+        if (fullText.indexOf('?') === -1) return;
+
+        // Collect all text nodes to find question + options pattern
+        var allP = bubble.querySelectorAll('p');
+        var questionSeen = false;
+        var optionTexts = [];
+        var elementsToReplace = [];
+
+        allP.forEach(function (el) {
+            var txt = el.textContent.trim();
+            if (txt.indexOf('?') !== -1 && txt.length > 10) {
+                questionSeen = true;
+                optionTexts = [];
+                elementsToReplace = [];
+                return;
+            }
+            if (!questionSeen) return;
+
+            // Split on <br> tags
+            var lines = el.innerHTML.split(/<br\s*\/?>/);
+            var found = [];
+            lines.forEach(function (line) {
+                var clean = line.replace(/<[^>]+>/g, '').trim();
+                if (clean.length < 2 || clean.length > 80) return;
+                // Detect option lines: start with emoji, bullet, dash, or are short capitalized words
+                var isOption = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u2022\u25CF\u25B8\u25BA\-]/u.test(clean);
+                if (!isOption && /^[A-Z\u00C0-\u024F]/.test(clean) && clean.length < 40) isOption = true;
+                if (isOption) {
+                    var label = clean.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u2022\u25CF\u25B8\u25BA\-\s]+/u, '').replace(/\*\*/g, '').trim();
+                    if (label.length >= 2) found.push(label);
+                }
+            });
+            if (found.length >= 2) {
+                optionTexts = optionTexts.concat(found);
+                elementsToReplace.push(el);
+            }
+        });
+
+        if (optionTexts.length >= 2 && optionTexts.length <= 15 && elementsToReplace.length > 0) {
+            var optDiv2 = document.createElement('div');
+            optDiv2.className = 'clarification-options';
+            var seen = {};
+            optionTexts.forEach(function (t) {
+                if (seen[t]) return;
+                seen[t] = true;
+                makeOptionBtn(optDiv2, t);
+            });
+            elementsToReplace[0].replaceWith(optDiv2);
+            for (var k = 1; k < elementsToReplace.length; k++) {
+                elementsToReplace[k].remove();
+            }
+        }
     }
 
     function addRefusalMessage(reason, contacts, severity) {
@@ -316,7 +372,9 @@
 
         var severityIcon = severity === 'critical' ? '\u{1F6A8}' :
                           severity === 'urgent' ? '\u{1F49C}' : '\u26A0\uFE0F';
-        box.innerHTML = '<span class="refusal-icon">' + severityIcon + '</span> ' + escapeHtml(reason);
+        box.innerHTML =
+            '<div class="refusal-heading">' + getSeverityLabel(severity) + '</div>' +
+            '<div><span class="refusal-icon">' + severityIcon + '</span> ' + escapeHtml(reason) + '</div>';
 
         div.appendChild(header);
         div.appendChild(box);
@@ -349,17 +407,17 @@
                 if (contact.phone) {
                     var cleanPhone = contact.phone.replace(/[\s-]/g, '');
                     cardContent += '<a href="tel:' + cleanPhone + '" class="contact-btn contact-btn-phone">' +
-                        '\u{1F4DE} ' + contact.phone + '</a>';
+                        'Bel ' + escapeHtml(contact.phone) + '</a>';
                 }
 
                 if (contact.email) {
-                    cardContent += '<a href="mailto:' + contact.email + '" class="contact-btn contact-btn-email">' +
-                        '\u{2709}\uFE0F ' + contact.email + '</a>';
+                    cardContent += '<a href="mailto:' + escapeAttr(contact.email) + '" class="contact-btn contact-btn-email">' +
+                        'Mail ' + escapeHtml(contact.email) + '</a>';
                 }
 
                 if (contact.url) {
-                    cardContent += '<a href="' + contact.url + '" target="_blank" rel="noopener" class="contact-btn contact-btn-web">' +
-                        '\u{1F310} Website</a>';
+                    cardContent += '<a href="' + escapeAttr(contact.url) + '" target="_blank" rel="noopener" class="contact-btn contact-btn-web">' +
+                        'Open website</a>';
                 }
 
                 cardContent += '</div></div>';
@@ -375,13 +433,21 @@
         scrollToBottom();
     }
 
+    function getSeverityLabel(severity) {
+        switch (severity) {
+            case 'critical': return 'Direct handelen';
+            case 'urgent': return 'Direct steun inschakelen';
+            default: return 'Bespreek dit met een zorgverlener';
+        }
+    }
+
     function getContactIcon(iconType) {
         switch (iconType) {
-            case 'emergency': return '\u{1F6A8}';
-            case 'crisis': return '\u{1F49C}';
-            case 'medical': return '\u{1FA7A}';
-            case 'support': return '\u{1F91D}';
-            default: return '\u{2139}\uFE0F';
+            case 'emergency': return '112';
+            case 'crisis': return '113';
+            case 'medical': return 'Arts';
+            case 'support': return 'Hulp';
+            default: return 'Info';
         }
     }
 
@@ -492,7 +558,7 @@
 
         var title = document.createElement('div');
         title.className = 'citations-title';
-        title.textContent = 'Bronnen';
+        title.textContent = 'Bronnen en onderbouwing';
         section.appendChild(title);
 
         var list = document.createElement('div');
@@ -526,6 +592,26 @@
             info.appendChild(titleEl);
             info.appendChild(sourceLabelEl);
 
+            var contextParts = [];
+            if (cite.page_number !== null && cite.page_number !== undefined) {
+                contextParts.push('Pagina ' + cite.page_number);
+            }
+            if (cite.section) {
+                contextParts.push('Sectie ' + cite.section);
+            }
+            if (cite.fetched_at) {
+                var formattedDate = formatDate(cite.fetched_at);
+                if (formattedDate) {
+                    contextParts.push('Vastgelegd ' + formattedDate);
+                }
+            }
+            if (contextParts.length > 0) {
+                var metaEl = document.createElement('div');
+                metaEl.className = 'citation-meta';
+                metaEl.textContent = contextParts.join(' • ');
+                info.appendChild(metaEl);
+            }
+
             // Per-source relevance score bar
             if (cite.relevance_score !== null && cite.relevance_score !== undefined) {
                 var scoreBar = document.createElement('div');
@@ -538,25 +624,46 @@
                 info.appendChild(scoreBar);
             }
 
-            if (cite.url) {
+            if (cite.excerpt) {
+                var excerptEl = document.createElement('div');
+                excerptEl.className = 'citation-excerpt';
+                excerptEl.textContent = cite.excerpt;
+                info.appendChild(excerptEl);
+            }
+
+            var policyNote = getSourcePolicyNote(sourceId);
+            if (policyNote) {
+                var noteEl = document.createElement('div');
+                noteEl.className = 'citation-note';
+                noteEl.textContent = policyNote;
+                info.appendChild(noteEl);
+            }
+
+            var citationUrl = getPrimaryCitationUrl(cite);
+            if (citationUrl) {
+                var actionsEl = document.createElement('div');
+                actionsEl.className = 'citation-actions';
+
                 var urlEl = document.createElement('a');
-                urlEl.className = 'url';
-                urlEl.href = cite.url;
+                urlEl.className = 'citation-link';
+                urlEl.href = citationUrl;
                 urlEl.target = '_blank';
                 urlEl.rel = 'noopener';
-                urlEl.textContent = cite.url;
-                info.appendChild(urlEl);
+                urlEl.textContent = 'Open bron';
+
+                actionsEl.appendChild(urlEl);
+                info.appendChild(actionsEl);
             }
 
             item.appendChild(badge);
             item.appendChild(info);
 
             // Make entire item clickable if URL exists
-            if (cite.url) {
+            if (citationUrl) {
                 item.style.cursor = 'pointer';
                 item.addEventListener('click', function (e) {
                     if (e.target.tagName !== 'A') {
-                        window.open(cite.url, '_blank', 'noopener');
+                        window.open(citationUrl, '_blank', 'noopener');
                     }
                 });
             }
@@ -588,6 +695,28 @@
             }
         }
         return sourceId;
+    }
+
+    function getSourcePolicyNote(sourceId) {
+        if (sourceId === 'richtlijnendatabase') {
+            return 'Deze richtlijn is opgesteld door de Federatie Medisch Specialisten en niet door IKNL.';
+        }
+        return '';
+    }
+
+    function getPrimaryCitationUrl(cite) {
+        return cite.canonical_url || cite.url || '';
+    }
+
+    function formatDate(value) {
+        if (!value) return '';
+        var date = new Date(value);
+        if (Number.isNaN(date.getTime())) return '';
+        return date.toLocaleDateString('nl-NL', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        });
     }
 
     // ===== Feedback =====
@@ -694,11 +823,15 @@
     // ===== Utilities =====
     function escapeHtml(text) {
         var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-        return text.replace(/[&<>"']/g, function (c) { return map[c]; });
+        return String(text).replace(/[&<>"']/g, function (c) { return map[c]; });
     }
 
     function escapeAttr(text) {
-        return text.replace(/"/g, '&quot;').replace(/'/g, '&#039;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return String(text)
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
     }
 
     // ===== Start =====
