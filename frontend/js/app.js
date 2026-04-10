@@ -441,10 +441,33 @@
     }
 
     // ===== Clickable Options for Clarification =====
+    function stripLeadingEmojisAndBullets(text) {
+        // Remove leading emojis, bullets, dashes — safe for all browsers (no /u flag)
+        var result = text.replace(/^\s*[-*\u2022\u25CF\u25B8\u25BA]+\s*/, '').replace(/\*\*/g, '').trim();
+        // Strip leading non-ASCII symbols (emojis) by skipping chars with code > 127 at the start
+        while (result.length > 0 && result.charCodeAt(0) > 127) {
+            // Skip surrogate pairs (emojis are 2 chars in JS)
+            if (result.charCodeAt(0) >= 0xD800 && result.charCodeAt(0) <= 0xDBFF) {
+                result = result.substring(2);
+            } else {
+                result = result.substring(1);
+            }
+        }
+        return result.trim();
+    }
+
+    function isEmojiOrBulletLine(text) {
+        if (text.length < 2 || text.length > 80) return false;
+        var firstChar = text.charCodeAt(0);
+        // Dash, bullet chars
+        if (text.charAt(0) === '-' || firstChar === 0x2022 || firstChar === 0x25CF || firstChar === 0x25B8 || firstChar === 0x25BA) return true;
+        // High Unicode = likely emoji (surrogate pair or above ASCII)
+        if (firstChar > 127) return true;
+        return false;
+    }
+
     function makeOptionBtn(container, rawText) {
-        var text = rawText.replace(/^\s*[-*\u2022\u25CF\u25B8\u25BA]+\s*/, '').replace(/\*\*/g, '').trim();
-        // Strip leading emojis
-        text = text.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}\u{200D}]+\s*/u, '').trim();
+        var text = stripLeadingEmojisAndBullets(rawText);
         if (text.length < 2) return;
         var btn = document.createElement('button');
         btn.className = 'clarification-btn';
@@ -474,11 +497,10 @@
             }
         });
 
-        // Strategy 2: Emoji/bullet lines in paragraphs (🔹 Borstkanker, 🩺 Longkanker, etc.)
+        // Strategy 2: Emoji/bullet lines in paragraphs
         var fullText = bubble.textContent || '';
         if (fullText.indexOf('?') === -1) return;
 
-        // Collect all text nodes to find question + options pattern
         var allP = bubble.querySelectorAll('p');
         var questionSeen = false;
         var optionTexts = [];
@@ -494,17 +516,12 @@
             }
             if (!questionSeen) return;
 
-            // Split on <br> tags
             var lines = el.innerHTML.split(/<br\s*\/?>/);
             var found = [];
             lines.forEach(function (line) {
                 var clean = line.replace(/<[^>]+>/g, '').trim();
-                if (clean.length < 2 || clean.length > 80) return;
-                // Detect option lines: start with emoji, bullet, dash, or are short capitalized words
-                var isOption = /^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u2022\u25CF\u25B8\u25BA\-]/u.test(clean);
-                if (!isOption && /^[A-Z\u00C0-\u024F]/.test(clean) && clean.length < 40) isOption = true;
-                if (isOption) {
-                    var label = clean.replace(/^[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u2022\u25CF\u25B8\u25BA\-\s]+/u, '').replace(/\*\*/g, '').trim();
+                if (isEmojiOrBulletLine(clean)) {
+                    var label = stripLeadingEmojisAndBullets(clean);
                     if (label.length >= 2) found.push(label);
                 }
             });
