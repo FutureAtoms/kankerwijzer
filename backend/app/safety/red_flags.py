@@ -18,6 +18,7 @@ RED_FLAG_PATTERNS: list[tuple[str, str]] = [
     # Treatment decisions
     (r"moet\s*ik\s*(stoppen|starten|nemen|beginnen|veranderen|wisselen|overstappen)", "treatment_decision"),
     (r"wel\s*of\s*niet\s*(behandel|operatie|chemo|bestraling)", "treatment_decision"),
+    (r"als\s*jij\s*mij\s*was", "treatment_decision"),
     # Diagnosis seeking
     (r"heb\s*ik\s*kanker", "diagnosis"),
     (r"diagnose\s*(me|mij|stellen)", "diagnosis"),

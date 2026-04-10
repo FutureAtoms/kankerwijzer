@@ -93,6 +93,7 @@ class AnswerResponse(BaseModel):
     notes: list[str] = Field(default_factory=list)
     refusal_reason: str | None = None
     clarification: ClarificationData | None = Field(None, description="Structured clarification when the agent needs more info")
+    graph_context: dict | None = Field(None, description="Knowledge graph entities and relationships for this answer")
 
 
 class FirecrawlRequest(BaseModel):

@@ -30,6 +30,8 @@ logger = logging.getLogger(__name__)
 # Keywords that suggest the user wants statistics / numbers
 STATS_KEYWORDS = [
     "hoeveel",
+    "hoe vaak",
+    "komt het voor",
     "aantal",
     "incidentie",
     "prevalentie",
@@ -71,6 +73,8 @@ STAT_TYPE_KEYWORDS: dict[str, list[str]] = {
     "incidentie": [
         "incidentie",
         "hoeveel",
+        "hoe vaak",
+        "komt het voor",
         "aantal",
         "how many",
         "new cases",
@@ -130,7 +134,7 @@ CANCER_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
     "borstkanker": ("borstkanker", "breast cancer"),
     "longkanker": ("longkanker", "lung cancer"),
     "darmkanker": ("darmkanker", "colon cancer", "bowel cancer", "colorectal cancer"),
-    "dikkedarmkanker": ("dikkedarmkanker", "colon carcinoma"),
+    "dikkedarmkanker": ("dikkedarmkanker", "colonkanker", "coloncarcinoom", "colon carcinoma"),
     "endeldarmkanker": ("endeldarmkanker", "rectal cancer"),
     "prostaatkanker": ("prostaatkanker", "prostate cancer", "prostate carcinoma"),
     "blaaskanker": ("blaaskanker", "bladder cancer"),
@@ -155,6 +159,14 @@ CANCER_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
 SEX_ALIASES: dict[str, tuple[str, ...]] = {
     "vrouw": ("vrouw", "vrouwen", "female", "women", "woman"),
     "man": ("man", "mannen", "male", "men"),
+}
+
+STAGE_ALIASES: dict[str, tuple[str, ...]] = {
+    "0": ("stadium 0", "stage 0"),
+    "i": ("stadium i", "stadium 1", "stage i", "stage 1"),
+    "ii": ("stadium ii", "stadium 2", "stage ii", "stage 2"),
+    "iii": ("stadium iii", "stadium 3", "stage iii", "stage 3"),
+    "iv": ("stadium iv", "stadium 4", "stage iv", "stage 4"),
 }
 
 
@@ -253,7 +265,21 @@ class HybridMedicalRetriever:
         # ---- 3. Structured-first routing ------------------------------
         structured_hits = self._route_structured(query)
         if structured_hits:
-            notes.append("Structured API routing handled this query.")
+            if self._should_augment_structured_hits(query):
+                notes.append("Structured API routing handled the statistics portion of this query.")
+                try:
+                    vector_hits = self._vector_search(query, limit=max(limit, 5))
+                except Exception:
+                    logger.exception("Vector search failed while augmenting structured evidence")
+                    vector_hits = []
+                    notes.append("Vector search augmentation encountered an error; using structured evidence only.")
+                structured_hits = self._merge_hits(
+                    structured_hits,
+                    self._validate_hits(vector_hits, notes),
+                )
+                notes.append("Added vector evidence for explanatory context.")
+            else:
+                notes.append("Structured API routing handled this query.")
             return RetrievalResponse(
                 query=query,
                 audience=audience,
@@ -294,16 +320,7 @@ class HybridMedicalRetriever:
             )
 
         # ---- 6. Source-whitelist + publisher notes ---------------------
-        validated_hits: list[SearchHit] = []
-        for hit in vector_hits:
-            source_id = hit.document.source_id
-            if not validate_source(source_id):
-                notes.append(f"Source '{source_id}' not in approved whitelist; hit excluded.")
-                continue
-            pub_note = get_publisher_note(source_id)
-            if pub_note and pub_note not in notes:
-                notes.append(pub_note)
-            validated_hits.append(hit)
+        validated_hits = self._validate_hits(vector_hits, notes)
 
         if not validated_hits:
             return RetrievalResponse(
@@ -381,6 +398,53 @@ class HybridMedicalRetriever:
                 if query_words & alias_words:
                     return True
         return False
+
+    @staticmethod
+    def _should_augment_structured_hits(query: str) -> bool:
+        query_lower = query.lower()
+        asks_for_statistics = any(keyword in query_lower for keyword in STATS_KEYWORDS)
+        asks_for_explanation = any(
+            keyword in query_lower
+            for keyword in (
+                "wat is",
+                "what is",
+                "uitleg",
+                "leg uit",
+                "sympt",
+                "behandeling",
+                "risicofactor",
+            )
+        )
+        return asks_for_statistics and asks_for_explanation
+
+    @staticmethod
+    def _merge_hits(primary_hits: list[SearchHit], extra_hits: list[SearchHit]) -> list[SearchHit]:
+        merged = list(primary_hits)
+        seen_keys = {
+            (hit.document.source_id, hit.document.url or hit.document.title)
+            for hit in primary_hits
+        }
+        for hit in extra_hits:
+            key = (hit.document.source_id, hit.document.url or hit.document.title)
+            if key in seen_keys:
+                continue
+            merged.append(hit)
+            seen_keys.add(key)
+        return merged
+
+    @staticmethod
+    def _validate_hits(hits: list[SearchHit], notes: list[str]) -> list[SearchHit]:
+        validated_hits: list[SearchHit] = []
+        for hit in hits:
+            source_id = hit.document.source_id
+            if not validate_source(source_id):
+                notes.append(f"Source '{source_id}' not in approved whitelist; hit excluded.")
+                continue
+            pub_note = get_publisher_note(source_id)
+            if pub_note and pub_note not in notes:
+                notes.append(pub_note)
+            validated_hits.append(hit)
+        return validated_hits
 
     # ------------------------------------------------------------------
     # Structured routing (APIs beat embeddings for exactness)
@@ -526,7 +590,21 @@ class HybridMedicalRetriever:
             "year": self._extract_year(query),
             "sex": self._extract_sex(query),
             "stat_type": self._extract_stat_type(query),
+            "stage": self._extract_stage(query),
         }
+
+    @staticmethod
+    def _extract_stage(query: str) -> str:
+        query_lower = query.lower()
+        ordered_aliases = sorted(
+            STAGE_ALIASES.items(),
+            key=lambda item: max(len(alias) for alias in item[1]),
+            reverse=True,
+        )
+        for stage, aliases in ordered_aliases:
+            if any(alias in query_lower for alias in aliases):
+                return stage
+        return "alle"
 
     @staticmethod
     def _nkr_title_for_request(request: dict[str, Any], data: dict[str, Any]) -> str:
@@ -544,6 +622,7 @@ class HybridMedicalRetriever:
         cancer_type = request["cancer_type"]
         year = request["year"]
         sex = request["sex"]
+        stage = request.get("stage", "alle")
 
         data_rows = data.get("data", []) if isinstance(data, dict) else []
         readable_cancer = cancer_type.replace("kanker", "kanker").replace("-", " ")
@@ -552,6 +631,7 @@ class HybridMedicalRetriever:
             "vrouw": "vrouwen",
             "man": "mannen",
         }.get(sex, sex)
+        readable_stage = f", stadium {stage.upper()}" if stage != "alle" else ""
 
         if stat_type == "stadiumverdeling":
             parts: list[str] = []
@@ -578,13 +658,18 @@ class HybridMedicalRetriever:
             "overleving": "5-jaarsoverleving",
         }.get(stat_type, stat_type)
         if value is None:
-            return f"NKR respons voor {readable_cancer} ({metric_label}) in {year} voor {readable_sex}."
+            return (
+                f"NKR respons voor {readable_cancer}{readable_stage} "
+                f"({metric_label}) in {year} voor {readable_sex}."
+            )
         if stat_type == "overleving":
             return (
-                f"{metric_label.capitalize()} in {year} voor {readable_sex} met {readable_cancer}: {value}%."
+                f"{metric_label.capitalize()} in {year} voor {readable_sex} "
+                f"met {readable_cancer}{readable_stage}: {value}%."
             )
         return (
-            f"{metric_label.capitalize()} in {year} voor {readable_sex} met {readable_cancer}: {int(value)}."
+            f"{metric_label.capitalize()} in {year} voor {readable_sex} "
+            f"met {readable_cancer}{readable_stage}: {int(value)}."
         )
 
     # ------------------------------------------------------------------

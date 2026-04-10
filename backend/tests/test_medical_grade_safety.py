@@ -132,6 +132,7 @@ def test_nkr_request_parser_handles_english_filtered_count_query():
         "year": 2024,
         "sex": "vrouw",
         "stat_type": "incidentie",
+        "stage": "alle",
     }
 
 
@@ -147,6 +148,7 @@ def test_nkr_request_parser_handles_dutch_filtered_count_query():
         "year": 2024,
         "sex": "vrouw",
         "stat_type": "incidentie",
+        "stage": "alle",
     }
 
 
@@ -154,13 +156,14 @@ def test_nkr_fetch_uses_filtered_statistics_query(monkeypatch):
     retriever = HybridMedicalRetriever(get_settings())
     captured: dict[str, object] = {}
 
-    def fake_query_statistics(*, cancer_type, year, sex, stat_type):
+    def fake_query_statistics(*, cancer_type, year, sex, stat_type, stage):
         captured.update(
             {
                 "cancer_type": cancer_type,
                 "year": year,
                 "sex": sex,
                 "stat_type": stat_type,
+                "stage": stage,
             }
         )
         return {
@@ -186,6 +189,80 @@ def test_nkr_fetch_uses_filtered_statistics_query(monkeypatch):
         "year": 2024,
         "sex": "vrouw",
         "stat_type": "incidentie",
+        "stage": "alle",
     }
     assert hits[0].document.source_id == "nkr-cijfers"
     assert "1453" in hits[0].excerpt
+
+
+def test_nkr_request_parser_handles_stage_specific_survival_query():
+    retriever = HybridMedicalRetriever(get_settings())
+
+    parsed = retriever._parse_nkr_request(
+        "Wat zijn de 5-jaars overlevingscijfers voor stadium II colonkanker?"
+    )
+
+    assert parsed == {
+        "cancer_type": "dikkedarmkanker",
+        "year": 2024,
+        "sex": "alle",
+        "stat_type": "overleving",
+        "stage": "ii",
+    }
+
+
+def test_nkr_fetch_passes_stage_filter_for_survival_query(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    captured: dict[str, object] = {}
+
+    def fake_query_statistics(*, cancer_type, year, sex, stat_type, stage):
+        captured.update(
+            {
+                "cancer_type": cancer_type,
+                "year": year,
+                "sex": sex,
+                "stat_type": stat_type,
+                "stage": stage,
+            }
+        )
+        return {
+            "title": {"title": "Overleving per jaar vanaf diagnose, Relatieve overleving"},
+            "data": [{"value": 99.0}],
+        }
+
+    monkeypatch.setattr(retriever.nkr, "query_statistics", fake_query_statistics)
+
+    hits = retriever._fetch_nkr(
+        "wat zijn de 5-jaars overlevingscijfers voor stadium ii colonkanker?"
+    )
+
+    assert captured == {
+        "cancer_type": "dikkedarmkanker",
+        "year": 2024,
+        "sex": "alle",
+        "stat_type": "overleving",
+        "stage": "ii",
+    }
+    assert "99.0%" in hits[0].excerpt
+    assert "stadium II" in hits[0].excerpt
+
+
+def test_mixed_stats_and_explanation_queries_merge_structured_and_vector_sources(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    nkr_hit = _hit(
+        title="NKR incidentie borstkanker",
+        text="Nieuwe diagnoses in 2024 voor borstkanker: 15539.",
+        source_id="nkr-cijfers",
+    )
+    kanker_hit = _hit(
+        title="Wat is borstkanker?",
+        text="Borstkanker is kanker die in de borst ontstaat.",
+        source_id="kanker.nl",
+    )
+
+    monkeypatch.setattr(retriever, "_fetch_nkr", lambda query: [nkr_hit])
+    monkeypatch.setattr(retriever, "_vector_search", lambda query, limit=5: [kanker_hit])
+
+    result = retriever.retrieve("Wat is borstkanker en hoe vaak komt het voor in Nederland?")
+
+    assert [hit.document.source_id for hit in result.hits[:2]] == ["nkr-cijfers", "kanker.nl"]

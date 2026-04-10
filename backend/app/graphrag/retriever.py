@@ -246,13 +246,13 @@ class GraphRetriever:
                 result = session.run(
                     """
                     MATCH (n)
-                    WHERE n.name IS NOT NULL AND n.name CONTAINS $query
+                    WHERE n.name IS NOT NULL AND n.name CONTAINS $search_term
                     RETURN n.name AS name, labels(n) AS types,
                            n.description AS description, n.sources AS sources
-                    LIMIT $limit
+                    LIMIT $max_results
                     """,
-                    query=q_lower,
-                    limit=limit,
+                    search_term=q_lower,
+                    max_results=limit,
                 )
 
                 entities = []

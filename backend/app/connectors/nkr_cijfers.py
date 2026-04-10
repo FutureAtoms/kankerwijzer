@@ -91,12 +91,24 @@ class NKRCijfersClient:
         "vrouw": "geslacht/vrouw",
     }
 
+    STAGE_CODES: dict[str, str] = {
+        "alle": "stadium/totaal/alle",
+        "0": "stadium/0",
+        "i": "stadium/i",
+        "ii": "stadium/ii",
+        "iii": "stadium/iii",
+        "iv": "stadium/iv",
+        "x": "stadium/x",
+        "nvt": "stadium/nvt",
+    }
+
     def query_statistics(
         self,
         cancer_type: str = "alle",
         year: int = 2024,
         sex: str = "alle",
         stat_type: str = "incidentie",
+        stage: str = "alle",
     ) -> Any:
         """Query NKR statistics with specific filters.
 
@@ -105,11 +117,13 @@ class NKRCijfersClient:
             year: Diagnosis year.
             sex: 'alle', 'man', or 'vrouw'.
             stat_type: 'incidentie', 'stadiumverdeling', 'prevalentie', 'sterfte', 'overleving'.
+            stage: Optional stage filter for survival queries.
         """
         cancer_code = self.CANCER_TYPE_CODES.get(
             cancer_type.lower(), self.CANCER_TYPE_CODES["alle"]
         )
         sex_code = self.SEX_CODES.get(sex.lower(), self.SEX_CODES["alle"])
+        stage_code = self.STAGE_CODES.get(stage.lower(), self.STAGE_CODES["alle"])
 
         # Each stat type uses a different navigation + statistic code + groupBy
         st = stat_type.lower()
@@ -117,7 +131,7 @@ class NKRCijfersClient:
         if st == "stadiumverdeling":
             return self._query_stadiumverdeling(cancer_code, year, sex_code)
         elif st == "overleving":
-            return self._query_overleving(cancer_code, year, sex_code)
+            return self._query_overleving(cancer_code, year, sex_code, stage_code)
         elif st == "sterfte":
             return self._query_sterfte(cancer_code, year, sex_code)
         else:
@@ -222,7 +236,7 @@ class NKRCijfersClient:
         })
 
     def _query_overleving(
-        self, cancer_code: str, year: int, sex_code: str
+        self, cancer_code: str, year: int, sex_code: str, stage_code: str
     ) -> Any:
         """Query 5-year relative survival for a specific cancer type.
 
@@ -261,7 +275,7 @@ class NKRCijfersClient:
                 },
                 {
                     "code": "filter/stadium",
-                    "values": [{"code": "stadium/totaal/alle"}],
+                    "values": [{"code": stage_code}],
                 },
             ],
             "statistic": {"code": "statistiek/relatieve-overleving"},

@@ -11,7 +11,7 @@
     const API_ENDPOINT = API_BASE + '/agent/answer';
 
     // ===== i18n Translations =====
-    var currentLang = 'nl';
+    var currentLang = 'en';
 
     var TRANSLATIONS = {
         nl: {
@@ -127,6 +127,30 @@
         });
     }
 
+    // ===== PII Scrubber =====
+    function scrubPII(text) {
+        // Dutch BSN numbers (9 digits, standalone)
+        text = text.replace(/\b\d{9}\b/g, '[REDACTED_PII]');
+        // Dutch phone numbers: 06-12345678, +31612345678, 010 123 4567, etc.
+        text = text.replace(/(\+31|0031|0)[1-9][\s\-]?(\d[\s\-]?){8}/g, '[REDACTED_PII]');
+        // Email addresses
+        text = text.replace(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g, '[REDACTED_PII]');
+        return text;
+    }
+
+    // ===== Toast Notification =====
+    function showToast(message, type) {
+        var toast = document.createElement('div');
+        toast.className = 'toast-notification toast-' + (type || 'info');
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.classList.add('visible'); }, 10);
+        setTimeout(function () {
+            toast.classList.remove('visible');
+            setTimeout(function () { toast.remove(); }, 400);
+        }, 3000);
+    }
+
     // Source badge color mapping
     const SOURCE_COLORS = {
         'kanker.nl': '#2196F3',
@@ -164,6 +188,11 @@
     // ===== State =====
     let isLoading = false;
     let messageCount = 0;
+    // Pre-chat Lastmeter state (distress score + quick concerns)
+    var lastmeterPreChat = {
+        distressScore: 2,
+        concerns: [],
+    };
 
     // ===== Initialize =====
     function init() {
@@ -203,8 +232,55 @@
         // Welcome topic buttons
         initWelcomeTopics();
 
+        // Apply default language to all UI text
+        switchLanguage(currentLang);
+
         // Focus input
         userInput.focus();
+
+        // Pre-chat Lastmeter wiring
+        initPreChatLastmeter();
+    }
+
+    // ===== Pre-Chat Lastmeter =====
+    function initPreChatLastmeter() {
+        var panel = document.getElementById('prechat-lastmeter');
+        var dismissBtn = document.getElementById('prechat-lm-dismiss');
+        var slider = document.getElementById('prechat-distress');
+        var scoreDisplay = document.getElementById('prechat-score-display');
+        var scoreLabel = document.getElementById('prechat-score-label');
+        var concernCbs = document.querySelectorAll('.prechat-concern-cb');
+
+        if (!panel || !slider) return;
+
+        function getScoreLabel(val) {
+            if (val <= 2) return 'Laag';
+            if (val <= 4) return 'Matig';
+            if (val <= 6) return 'Hoog';
+            if (val <= 8) return 'Zeer hoog';
+            return 'Extreem';
+        }
+
+        slider.addEventListener('input', function () {
+            var val = parseInt(this.value, 10);
+            lastmeterPreChat.distressScore = val;
+            scoreDisplay.textContent = val;
+            scoreLabel.textContent = getScoreLabel(val);
+            scoreDisplay.className = 'prechat-score-display prechat-score-' + (val >= 7 ? 'high' : val >= 4 ? 'medium' : 'low');
+        });
+
+        concernCbs.forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                lastmeterPreChat.concerns = [];
+                concernCbs.forEach(function (c) {
+                    if (c.checked) lastmeterPreChat.concerns.push(c.value);
+                });
+            });
+        });
+
+        dismissBtn.addEventListener('click', function () {
+            panel.style.display = 'none';
+        });
     }
 
     // ===== Input Handling =====
@@ -252,15 +328,87 @@
         onSend();
     };
 
+    // ===== Onboarding Welcome Message =====
+    var onboardingShown = false;
+
+    function showOnboardingMessage() {
+        if (onboardingShown) return;
+        onboardingShown = true;
+
+        messageCount++;
+        var div = document.createElement('div');
+        div.className = 'message-ai';
+
+        var header = document.createElement('div');
+        header.className = 'ai-header';
+        header.innerHTML =
+            '<div class="ai-avatar">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="#00A67E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<circle cx="12" cy="12" r="10"/>' +
+            '<path d="M12 8v4M12 16h.01"/>' +
+            '</svg>' +
+            '</div>' +
+            '<span class="ai-name">KankerWijzer</span>';
+
+        var bubble = document.createElement('div');
+        bubble.className = 'bubble onboarding-bubble';
+        bubble.innerHTML =
+            '<p><strong>' + t('onboarding_welcome') + '</strong></p>' +
+            '<p>' + t('onboarding_intro') + '</p>' +
+            '<div class="onboarding-disclaimer">' +
+            '<span class="disclaimer-icon">\u26A0\uFE0F</span>' +
+            '<div>' +
+            '<strong>' + t('onboarding_important') + '</strong>' +
+            '<ul>' +
+            '<li>' + t('onboarding_not_doctor') + '</li>' +
+            '<li>' + t('onboarding_every_patient') + '</li>' +
+            '<li>' + t('onboarding_not_urgent') + '<a href="tel:112" class="onboarding-phone">112</a></li>' +
+            '</ul>' +
+            '</div>' +
+            '</div>' +
+            '<p>' + t('onboarding_help') + '</p>';
+
+        div.appendChild(header);
+        div.appendChild(bubble);
+        messagesEl.appendChild(div);
+        scrollToBottom();
+    }
+
+    // ===== Caregiver Share Button =====
+    function maybeCreateCaregiverButton(markdown) {
+        var caregiverKeywords = ['actiepunten', 'mantelzorg', 'actionable tasks', 'caregiver', 'taken voor'];
+        var lower = markdown.toLowerCase();
+        var shouldShow = caregiverKeywords.some(function (kw) { return lower.indexOf(kw) !== -1; });
+        if (!shouldShow) return null;
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'caregiver-share-wrapper';
+        var shareText = encodeURIComponent('Informatie van KankerWijzer:\n\n' + markdown.substring(0, 500));
+        var btn = document.createElement('a');
+        btn.className = 'caregiver-share-btn';
+        btn.href = 'https://wa.me/?text=' + shareText;
+        btn.target = '_blank';
+        btn.rel = 'noopener noreferrer';
+        btn.innerHTML =
+            '<svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.613.613l4.458-1.495A11.952 11.952 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.39 0-4.592-.836-6.318-2.232l-.44-.362-3.266 1.095 1.095-3.266-.362-.44A9.953 9.953 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>' +
+            'Deel met mantelzorger';
+        wrapper.appendChild(btn);
+        return wrapper;
+    }
+
     // ===== Send Message =====
     function onSend() {
         var query = userInput.value.trim();
         if (!query || isLoading) return;
 
-        // Hide welcome screen — transition to chat
+        // Hide welcome screen and show onboarding
         welcomeScreen.classList.add('hidden');
+        showOnboardingMessage();
 
-        // Add user message
+        // Apply PII scrubber before sending
+        var scrubbedQuery = scrubPII(query);
+
+        // Add user message (show original to user, send scrubbed to API)
         addUserMessage(query);
 
         // Clear input
@@ -281,7 +429,11 @@
         fetch(API_ENDPOINT, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ query: query, audience: audience }),
+            body: JSON.stringify({
+                query: scrubbedQuery,
+                audience: audience,
+                lastmeter: lastmeterPreChat,
+            }),
         })
             .then(function (response) {
                 if (!response.ok) {
@@ -320,7 +472,8 @@
         var confidence = data.confidence;
         var confidenceLabel = data.confidence_label;
         var clarification = data.clarification || null;
-        addAIMessage(answer, citations, confidence, confidenceLabel, clarification);
+        var graphContext = data.graph_context || null;
+        addAIMessage(answer, citations, confidence, confidenceLabel, clarification, graphContext);
     }
 
     // ===== Message Rendering =====
@@ -333,7 +486,7 @@
         scrollToBottom();
     }
 
-    function addAIMessage(markdown, citations, confidence, confidenceLabel, clarification) {
+    function addAIMessage(markdown, citations, confidence, confidenceLabel, clarification, graphContext) {
         messageCount++;
         var msgId = 'msg-' + messageCount;
 
@@ -385,6 +538,18 @@
         if (citations.length > 0) {
             var citationsEl = renderCitations(citations);
             bubble.appendChild(citationsEl);
+        }
+
+        // Caregiver share button (if message contains actionable/caregiver content)
+        var caregiverBtn = maybeCreateCaregiverButton(markdown);
+        if (caregiverBtn) {
+            bubble.appendChild(caregiverBtn);
+        }
+
+        // Knowledge Graph context
+        if (graphContext && graphContext.entities && graphContext.entities.length > 0) {
+            var graphEl = renderGraphContext(graphContext);
+            bubble.appendChild(graphEl);
         }
 
         // Feedback
@@ -769,6 +934,86 @@
             }
             return match;
         });
+    }
+
+    // ===== Knowledge Graph Section =====
+    function renderGraphContext(graphContext) {
+        var section = document.createElement('div');
+        section.className = 'graph-section';
+
+        var titleRow = document.createElement('div');
+        titleRow.className = 'graph-title';
+        titleRow.innerHTML = '<span class="graph-icon">\uD83D\uDD17</span> ' +
+            (currentLang === 'nl' ? 'Kennisgraaf' : 'Knowledge Graph') +
+            ' <span class="graph-center">' + escapeHtml(graphContext.center || '') + '</span>';
+        section.appendChild(titleRow);
+
+        var graphVis = document.createElement('div');
+        graphVis.className = 'graph-visual';
+
+        // Center node
+        var centerNode = document.createElement('div');
+        centerNode.className = 'graph-node graph-node-center';
+        centerNode.textContent = graphContext.center || '?';
+        graphVis.appendChild(centerNode);
+
+        // Group entities by type
+        var byType = {};
+        (graphContext.entities || []).forEach(function (ent) {
+            var type = ent.type || ent.label || 'Other';
+            if (!byType[type]) byType[type] = [];
+            byType[type].push(ent);
+        });
+
+        // Relationship labels
+        var relLabels = {};
+        (graphContext.relationships || []).forEach(function (rel) {
+            var target = (rel.target || rel.end || '').toLowerCase();
+            relLabels[target] = rel.type || rel.label || '';
+        });
+
+        var typeColors = {
+            'CancerType': '#e53935', 'Treatment': '#43A047', 'Symptom': '#FB8C00',
+            'Stage': '#5E35B1', 'Diagnostic': '#1E88E5', 'RiskFactor': '#F4511E',
+            'BodyPart': '#00897B', 'Guideline': '#8E24AA',
+        };
+
+        Object.keys(byType).forEach(function (type) {
+            var group = document.createElement('div');
+            group.className = 'graph-group';
+
+            var groupLabel = document.createElement('div');
+            groupLabel.className = 'graph-group-label';
+            groupLabel.style.color = typeColors[type] || '#666';
+            groupLabel.textContent = type;
+            group.appendChild(groupLabel);
+
+            var nodes = document.createElement('div');
+            nodes.className = 'graph-nodes';
+
+            byType[type].forEach(function (ent) {
+                var name = ent.name || ent.id || '';
+                var node = document.createElement('button');
+                node.className = 'graph-node';
+                node.style.borderColor = typeColors[type] || '#ccc';
+                node.style.color = typeColors[type] || '#333';
+                node.textContent = name;
+                node.title = (relLabels[name.toLowerCase()] || type) + ': ' + name;
+                node.addEventListener('click', function () {
+                    var prefix = currentLang === 'nl' ? 'Informatie over ' : 'Information about ';
+                    userInput.value = prefix + name;
+                    onInputChange();
+                    onSend();
+                });
+                nodes.appendChild(node);
+            });
+
+            group.appendChild(nodes);
+            graphVis.appendChild(group);
+        });
+
+        section.appendChild(graphVis);
+        return section;
     }
 
     // ===== Citations Section =====

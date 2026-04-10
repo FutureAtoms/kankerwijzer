@@ -10,6 +10,7 @@ import re
 import pytest
 
 from app.agent.orchestrator import classify_prompt, MedicalAnswerOrchestrator
+from app.models import Provenance
 
 # ---------------------------------------------------------------------------
 # Shared forbidden-pattern helpers
@@ -293,3 +294,84 @@ class TestOutputValidator:
         result = orchestrator._validate_output(text)
         assert "Maar u kunt wel" not in result
         assert "kan deze vraag niet beantwoorden" in result
+
+
+@pytest.mark.parametrize(
+    ("prompt", "needle"),
+    [
+        (
+            "Ik ben 25 en sport veel, dus mijn kans op longkanker is nul toch?",
+            "persoonlijke interpretatie",
+        ),
+        (
+            "Wat gebeurt er meestal na deze behandeling als het niet in je bronnen staat?",
+            "geen exacte match",
+        ),
+        (
+            "Als jij mij was, zou je dan chemo doen?",
+            "behandelbeslissingen",
+        ),
+    ],
+)
+def test_preclassified_prompts_return_formal_refusal_reason(prompt, needle):
+    from app.config import get_settings
+
+    orchestrator = MedicalAnswerOrchestrator(get_settings())
+
+    result = orchestrator.answer(prompt)
+
+    assert result.refusal_reason is not None
+    assert needle in result.refusal_reason.lower()
+
+
+def test_graph_context_helper_can_be_called_through_instance():
+    from app.config import get_settings
+
+    orchestrator = MedicalAnswerOrchestrator(get_settings())
+    orchestrator.graph_retriever = None
+
+    assert orchestrator._get_graph_context("borstkanker") is None
+
+
+def test_impossible_premise_returns_structured_clarification():
+    from app.config import get_settings
+
+    orchestrator = MedicalAnswerOrchestrator(get_settings())
+
+    result = orchestrator.answer("Hoeveel vrouwen krijgen prostaatkanker?")
+
+    assert result.clarification is not None
+    assert "prostaatkanker" in result.clarification.question.lower()
+
+
+def test_citation_aliases_are_normalized_to_numeric_references():
+    provenances = [
+        Provenance(source_id="nkr-cijfers", title="NKR", url="https://nkr-cijfers.iknl.nl"),
+        Provenance(source_id="kanker.nl", title="Kanker.nl", url="https://kanker.nl"),
+    ]
+
+    normalized = MedicalAnswerOrchestrator._normalize_citation_aliases(
+        answer_text="Incidentie staat op [SRC-incidentie] en uitleg op [SRC-KG].",
+        provenances=provenances,
+    )
+
+    assert normalized == "Incidentie staat op [SRC-1] en uitleg op [SRC-2]."
+
+
+def test_stats_answers_keep_structured_source_reference():
+    from app.config import get_settings
+
+    orchestrator = MedicalAnswerOrchestrator(get_settings())
+    provenances = [
+        Provenance(source_id="nkr-cijfers", title="NKR", url="https://nkr-cijfers.iknl.nl"),
+        Provenance(source_id="kanker.nl", title="Kanker.nl", url="https://kanker.nl"),
+    ]
+
+    result = orchestrator._ensure_structured_source_reference(
+        query="Wat is de overlevingskans van kanker?",
+        answer_text="Kies eerst een kankersoort om de juiste overlevingscijfers te bekijken.",
+        provenances=provenances,
+    )
+
+    assert result is not None
+    assert "[SRC-1]" in result

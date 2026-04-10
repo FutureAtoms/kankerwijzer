@@ -38,8 +38,8 @@
             </nav>
             <div class="sidebar-footer">
                 <div class="language-toggle">
-                    <button class="lang-btn active" id="lang-nl" title="Nederlands">NL</button>
-                    <button class="lang-btn" id="lang-en" title="English">EN</button>
+                    <button class="lang-btn" id="lang-nl" title="Nederlands">NL</button>
+                    <button class="lang-btn active" id="lang-en" title="English">EN</button>
                 </div>
                 <div class="audience-selector">
                     <label for="audience" data-i18n="audience_label">Doelgroep:</label>
@@ -111,6 +111,36 @@
 
                 <!-- Messages Container -->
                 <div class="messages" id="messages" aria-live="polite"></div>
+            </div>
+
+            <!-- Pre-Chat Lastmeter Assessment -->
+            <div class="prechat-lastmeter" id="prechat-lastmeter">
+                <div class="prechat-lm-header">
+                    <span class="prechat-lm-title">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                        Hoe voelt u zich vandaag? <span class="prechat-lm-optional">(optioneel)</span>
+                    </span>
+                    <button class="prechat-lm-dismiss" id="prechat-lm-dismiss" title="Verbergen">&times;</button>
+                </div>
+                <div class="prechat-lm-body">
+                    <div class="prechat-lm-slider-group">
+                        <label for="prechat-distress">Distress score:</label>
+                        <input type="range" id="prechat-distress" min="0" max="10" step="1" value="2" class="prechat-slider" />
+                        <span class="prechat-score-display" id="prechat-score-display">2</span>
+                        <span class="prechat-score-label" id="prechat-score-label">Laag</span>
+                    </div>
+                    <div class="prechat-lm-concerns">
+                        <label class="prechat-concern-label">
+                            <input type="checkbox" value="childcare" class="prechat-concern-cb" /> &#x1F476; Kinderopvang
+                        </label>
+                        <label class="prechat-concern-label">
+                            <input type="checkbox" value="work" class="prechat-concern-cb" /> &#x1F4BC; Werk/Financi&euml;n
+                        </label>
+                        <label class="prechat-concern-label">
+                            <input type="checkbox" value="fatigue" class="prechat-concern-cb" /> &#x1F634; Ernstige vermoeidheid
+                        </label>
+                    </div>
+                </div>
             </div>
 
             <!-- Input Area -->

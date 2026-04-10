@@ -12,3 +12,9 @@ def test_red_flag_detects_blood_coughing_word_order_variants():
     flag_type, _ = check_red_flags("Ik hoest bloed op sinds vanochtend.")
 
     assert flag_type == "emergency"
+
+
+def test_red_flag_detects_if_you_were_me_treatment_decision():
+    flag_type, _ = check_red_flags("Als jij mij was, zou je dan chemo doen?")
+
+    assert flag_type == "treatment_decision"

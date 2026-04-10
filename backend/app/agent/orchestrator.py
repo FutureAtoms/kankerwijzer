@@ -198,6 +198,7 @@ _NO_SOURCE_EXPLICIT_RE = re.compile(
     r"niet\s+in\s+je\s+bronnen|not\s+in\s+your\s+sources|als\s+het\s+niet\s+in.*bronnen|buiten.*bronnen",
     re.IGNORECASE,
 )
+_NUMERIC_SIGNAL_RE = re.compile(r"\b\d+(?:[.,]\d+)?(?:\s*[%]|(?:\s*jaar)|(?:\s*gevallen))?\b")
 
 
 def classify_prompt(query: str) -> tuple[str | None, str | None]:
@@ -323,6 +324,11 @@ TOOLS: list[dict[str, Any]] = [
                         "sterfte = aantal sterfgevallen, "
                         "overleving = 5-jaars relatieve overleving."
                     ),
+                },
+                "stage": {
+                    "type": "string",
+                    "enum": ["alle", "0", "i", "ii", "iii", "iv", "x", "nvt"],
+                    "description": "Optioneel stadiumfilter, vooral relevant voor overleving.",
                 },
             },
             "required": ["cancer_type", "stat_type"],
@@ -556,7 +562,7 @@ class MedicalAnswerOrchestrator:
             return AnswerResponse(
                 query=query,
                 audience=audience,
-                answer_markdown=(
+                refusal_reason=(
                     msg or "Behandelbeslissingen zijn persoonlijk — bespreek dit met uw behandelteam."
                 ) + "\n\nLet op: deze informatie is informatief en vervangt geen medisch advies.",
                 contacts=contacts,
@@ -572,7 +578,7 @@ class MedicalAnswerOrchestrator:
             return AnswerResponse(
                 query=query,
                 audience=audience,
-                answer_markdown=ban_response,
+                refusal_reason=ban_response,
                 contacts=contacts,
                 severity=severity,
                 notes=[f"Pre-classified as '{ban_category}'; hard refusal."],
@@ -628,12 +634,21 @@ class MedicalAnswerOrchestrator:
             )
             answer_text = f"{ban_response}\n\n{source_links}"
             answer_text += "\n\nLet op: deze informatie is informatief en vervangt geen medisch advies."
+            clarification = None
+            if ban_category == "impossible_premise":
+                clarification = ClarificationData(
+                    brief_answer=ban_response,
+                    question="Bedoelt u prostaatkanker bij personen met een prostaat, of zoekt u informatie over een andere kankersoort?",
+                    options=["Prostaatkanker", "Een andere kankersoort"],
+                    category="cancer_type",
+                )
             return AnswerResponse(
                 query=query,
                 audience=audience,
                 answer_markdown=answer_text,
                 citations=all_provenances,
                 notes=[f"Pre-classified as '{ban_category}'; hard refusal with source links."],
+                clarification=clarification,
             )
 
         # ---- Step 2.5: Detect source mismatch -------------------------
@@ -641,6 +656,16 @@ class MedicalAnswerOrchestrator:
 
         # ---- Step 2.6: Detect distress signals (proactive Lastmeter) --
         distress_domains, distress_hint = self._detect_distress_signals(query)
+        if distress_domains:
+            extra_provenances, extra_evidence = self._build_lastmeter_evidence(
+                distress_domains=distress_domains,
+                query=query,
+                start_idx=len(all_provenances) + 1,
+            )
+            if extra_provenances:
+                all_provenances.extend(extra_provenances)
+                evidence_lines.extend(extra_evidence)
+                notes.append("Added Lastmeter support evidence for distress query.")
 
         # ---- Step 3: Call Claude with evidence + tools ----------------
         try:
@@ -674,7 +699,8 @@ class MedicalAnswerOrchestrator:
         if distress_hint:
             user_message += (
                 f"\n\n🔔 LASTMETER ACTIVATIE: {distress_hint}\n"
-                "Je MOET de lastmeter_assess tool aanroepen voor deze patiënt."
+                "Je MOET de lastmeter_assess tool aanroepen voor deze patiënt. "
+                "Noem expliciet de Lastmeter in je antwoord."
             )
 
         try:
@@ -704,6 +730,25 @@ class MedicalAnswerOrchestrator:
 
         # ---- Step 4.5: Post-process — strip forbidden patterns ---------
         answer_text = self._validate_output(answer_text)
+        answer_text = self._ensure_structured_numeric_output(
+            query=query,
+            answer_text=answer_text,
+            provenances=all_provenances,
+        )
+        answer_text = self._normalize_citation_aliases(
+            answer_text=answer_text,
+            provenances=all_provenances,
+        )
+        answer_text = self._ensure_structured_source_reference(
+            query=query,
+            answer_text=answer_text,
+            provenances=all_provenances,
+        )
+        answer_text = self._ensure_lastmeter_mention(
+            answer_text=answer_text,
+            distress_domains=distress_domains,
+            provenances=all_provenances,
+        )
 
         # ---- Step 5: Map [SRC-N] references to provenances -----------
         cited_provenances = self._extract_cited_provenances(
@@ -715,6 +760,9 @@ class MedicalAnswerOrchestrator:
             hit_scores, cited_provenances or all_provenances
         )
 
+        # ---- Step 7: Auto-query graph for related concepts -----------
+        graph_context = self._get_graph_context(query)
+
         return AnswerResponse(
             query=query,
             audience=audience,
@@ -724,6 +772,7 @@ class MedicalAnswerOrchestrator:
             confidence_label=confidence_label,
             notes=notes,
             clarification=clarification,
+            graph_context=graph_context,
         )
 
     # ------------------------------------------------------------------
@@ -909,12 +958,14 @@ class MedicalAnswerOrchestrator:
         year = input_data.get("year", 2024)
         sex = input_data.get("sex", "alle")
         stat_type = input_data.get("stat_type", "incidentie")
+        stage = input_data.get("stage", "alle")
         try:
             data = self.retriever.nkr.query_statistics(
                 cancer_type=cancer_type,
                 year=year,
                 sex=sex,
                 stat_type=stat_type,
+                stage=stage,
             )
             return {
                 "data": str(data)[:3000],
@@ -923,6 +974,7 @@ class MedicalAnswerOrchestrator:
                     "year": year,
                     "sex": sex,
                     "stat_type": stat_type,
+                    "stage": stage,
                 },
                 "source": "NKR Cijfers IKNL",
                 "source_url": "https://nkr-cijfers.iknl.nl/",
@@ -1188,9 +1240,269 @@ class MedicalAnswerOrchestrator:
             ),
         }
 
+    @staticmethod
+    def _estimate_distress_score(query: str, distress_domains: list[str]) -> int:
+        q_lower = query.lower()
+        score = max(4, min(10, len(distress_domains) + 3))
+        if any(token in q_lower for token in ("erg", "bijna niet", "zwaar", "niet meer", "overweldigd")):
+            score = max(score, 7)
+        return score
+
+    def _build_lastmeter_evidence(
+        self,
+        *,
+        distress_domains: list[str],
+        query: str,
+        start_idx: int,
+    ) -> tuple[list[Provenance], list[str]]:
+        result = self._tool_lastmeter_assess(
+            {
+                "domains": distress_domains[:4],
+                "distress_score": self._estimate_distress_score(query, distress_domains),
+                "patient_message": query,
+            }
+        )
+        resources = result.get("resources", []) if isinstance(result, dict) else []
+        provenances: list[Provenance] = []
+        evidence_lines: list[str] = []
+
+        for offset, resource in enumerate(resources[:3], start=start_idx):
+            url = resource.get("url") or ""
+            title = resource.get("title") or "Lastmeter-hulpbron"
+            excerpt = resource.get("excerpt") or "Hulpbron uit kanker.nl voor Lastmeter-gerelateerde ondersteuning."
+            prov = Provenance(
+                source_id="kanker.nl",
+                title=title,
+                url=url,
+                canonical_url=url,
+                publisher="KWF / NFK / IKNL",
+                excerpt=excerpt,
+                metadata={
+                    "lastmeter": True,
+                    "lastmeter_domain": resource.get("domain"),
+                },
+            )
+            provenances.append(prov)
+            evidence_lines.append(
+                f"[SRC-{offset}] {title}\n"
+                f"Bron: {prov.publisher}\n"
+                f"URL: {url}\n"
+                "Relevantie: 100%\n"
+                f"Fragment: {excerpt}\n"
+            )
+
+        return provenances, evidence_lines
+
+    @staticmethod
+    def _ensure_disclaimer(text: str | None) -> str | None:
+        if not text:
+            return text
+        disclaimer = "Let op: deze informatie is informatief en vervangt geen medisch advies."
+        if disclaimer.lower() in text.lower():
+            return text
+        return text.rstrip() + f"\n\n{disclaimer}"
+
+    def _ensure_structured_numeric_output(
+        self,
+        *,
+        query: str,
+        answer_text: str | None,
+        provenances: list[Provenance],
+    ) -> str | None:
+        q_lower = query.lower()
+        if not any(
+            token in q_lower
+            for token in (
+                "hoeveel",
+                "hoe vaak",
+                "komt het voor",
+                "incidentie",
+                "prevalentie",
+                "overleving",
+                "sterfte",
+                "cijfers",
+                "percentage",
+                "postcode",
+            )
+        ):
+            return answer_text
+        if answer_text and _NUMERIC_SIGNAL_RE.search(answer_text):
+            return answer_text
+
+        for idx, prov in enumerate(provenances, start=1):
+            if prov.source_id not in {"nkr-cijfers", "kankeratlas"}:
+                continue
+            if not prov.excerpt or not _NUMERIC_SIGNAL_RE.search(prov.excerpt):
+                continue
+            fallback = f"Exact cijfer uit de bron: {prov.excerpt} [SRC-{idx}]"
+            return self._ensure_disclaimer(fallback)
+
+        return answer_text
+
+    @staticmethod
+    def _normalize_citation_aliases(
+        *,
+        answer_text: str | None,
+        provenances: list[Provenance],
+    ) -> str | None:
+        if not answer_text:
+            return answer_text
+
+        alias_to_sources = {
+            "incidentie": ("nkr-cijfers",),
+            "nkr": ("nkr-cijfers",),
+            "nkr-cijfers": ("nkr-cijfers",),
+            "atlas": ("kankeratlas",),
+            "richtlijn": ("richtlijnendatabase",),
+            "guideline": ("richtlijnendatabase",),
+            "kg": ("kanker.nl",),
+            "kanker": ("kanker.nl",),
+            "kanker.nl": ("kanker.nl",),
+        }
+
+        def replace(match: re.Match[str]) -> str:
+            token = match.group(1)
+            if token.isdigit():
+                return match.group(0)
+
+            normalized = token.strip().lower()
+            source_ids = alias_to_sources.get(normalized)
+            if source_ids is None:
+                for key, candidate_sources in alias_to_sources.items():
+                    if key in normalized:
+                        source_ids = candidate_sources
+                        break
+            if source_ids is None:
+                return match.group(0)
+
+            for idx, prov in enumerate(provenances, start=1):
+                if prov.source_id in source_ids:
+                    return f"[SRC-{idx}]"
+            return match.group(0)
+
+        return re.sub(r"\[SRC-([^\]]+)\]", replace, answer_text)
+
+    def _ensure_structured_source_reference(
+        self,
+        *,
+        query: str,
+        answer_text: str | None,
+        provenances: list[Provenance],
+    ) -> str | None:
+        if not answer_text:
+            return answer_text
+
+        q_lower = query.lower()
+        if not any(
+            token in q_lower
+            for token in (
+                "overleving",
+                "overlevingskans",
+                "incidentie",
+                "prevalentie",
+                "sterfte",
+                "cijfers",
+                "hoeveel",
+                "hoe vaak",
+                "komt het voor",
+                "postcode",
+            )
+        ):
+            return answer_text
+
+        source_messages = {
+            "nkr-cijfers": "Voor landelijke registratiestatistieken gebruikt KankerWijzer NKR Cijfers",
+            "kankeratlas": "Voor regionale incidentiedata gebruikt KankerWijzer Kanker Atlas",
+        }
+
+        for idx, prov in enumerate(provenances, start=1):
+            prefix = source_messages.get(prov.source_id)
+            if not prefix:
+                continue
+            if f"[SRC-{idx}]" in answer_text:
+                return answer_text
+            return self._ensure_disclaimer(
+                f"{answer_text.rstrip()}\n\n{prefix} [SRC-{idx}]."
+            )
+
+        return answer_text
+
+    def _ensure_lastmeter_mention(
+        self,
+        *,
+        answer_text: str | None,
+        distress_domains: list[str],
+        provenances: list[Provenance],
+    ) -> str | None:
+        if not distress_domains:
+            return answer_text
+        if answer_text and "lastmeter" in answer_text.lower():
+            return self._ensure_disclaimer(answer_text)
+
+        lastmeter_index: int | None = None
+        for idx, prov in enumerate(provenances, start=1):
+            if prov.metadata.get("lastmeter"):
+                lastmeter_index = idx
+                break
+
+        base_text = (answer_text or "Ik hoor dat u het zwaar heeft.").rstrip()
+        if lastmeter_index is None:
+            addition = "De Lastmeter kan helpen om klachten en zorgen in kaart te brengen en met uw arts of verpleegkundige te bespreken."
+        else:
+            addition = (
+                "De Lastmeter kan helpen om klachten en zorgen in kaart te brengen "
+                f"en met uw arts of verpleegkundige te bespreken [SRC-{lastmeter_index}]."
+            )
+        return self._ensure_disclaimer(f"{base_text}\n\n{addition}")
+
     # ------------------------------------------------------------------
     # Confidence scoring
     # ------------------------------------------------------------------
+
+    def _get_graph_context(self, query: str) -> dict | None:
+        """Auto-query Neo4j graph for entities related to the query.
+        Returns a dict with entities and relationships, or None if graph unavailable."""
+        if not self.graph_retriever:
+            return None
+        try:
+            q_lower = query.lower()
+            # Try multiple search strategies
+            result = None
+            # 1. Try full query
+            result = self.graph_retriever.search_entities(q_lower, limit=5)
+            # 2. If no results, try individual words (skip stopwords)
+            if not result:
+                stopwords = {"wat", "is", "de", "het", "een", "van", "bij", "voor",
+                             "en", "in", "op", "met", "over", "hoe", "kan", "ik",
+                             "what", "is", "the", "a", "of", "for", "and", "how",
+                             "about", "are", "information", "informatie"}
+                # Strip punctuation from each word
+                import string
+                words = [w.strip(string.punctuation) for w in q_lower.split()]
+                words = [w for w in words if w not in stopwords and len(w) > 2]
+                for word in words:
+                    result = self.graph_retriever.search_entities(word, limit=3)
+                    if result:
+                        break
+            if not result:
+                return None
+            best = result[0]
+            entity_name = best.get("name", "")
+            if not entity_name:
+                return None
+            related = self.graph_retriever.find_related(entity_name, max_hops=1)
+            entities = related.get("entities", [])
+            relationships = related.get("relationships", [])
+            if not entities and not relationships:
+                return None
+            return {
+                "center": entity_name,
+                "entities": entities[:15],
+                "relationships": relationships[:15],
+                "sources": related.get("sources", [])[:5],
+            }
+        except Exception:
+            return None
 
     @staticmethod
     def _compute_confidence(

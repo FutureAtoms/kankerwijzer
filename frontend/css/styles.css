@@ -1443,6 +1443,84 @@ body {
     background: #d32f2f;
 }
 
+/* ===== KNOWLEDGE GRAPH ===== */
+.graph-section {
+    margin-top: 16px;
+    padding: 14px;
+    background: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+}
+.graph-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.graph-icon {
+    font-size: 1rem;
+}
+.graph-center {
+    background: #00A67E;
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    text-transform: capitalize;
+}
+.graph-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.graph-node-center {
+    display: inline-block;
+    padding: 6px 16px;
+    background: #00A67E;
+    color: white;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: capitalize;
+    margin-bottom: 4px;
+    cursor: default;
+}
+.graph-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.graph-group-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.graph-nodes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.graph-node {
+    padding: 4px 12px;
+    border: 2px solid #ccc;
+    border-radius: 16px;
+    background: white;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-transform: capitalize;
+}
+.graph-node:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    background: #f0faf6;
+}
+
 /* ===== LANGUAGE TOGGLE ===== */
 .language-toggle {
     display: flex;
@@ -1691,3 +1769,166 @@ body {
     border-radius: 3px;
     transition: width 0.3s ease;
 }
+
+/* ===== PRE-CHAT LASTMETER ===== */
+.prechat-lastmeter {
+    background: linear-gradient(135deg, #f0faf6 0%, #e8f5f1 100%);
+    border-top: 1px solid #b2dfdb;
+    border-bottom: 1px solid #b2dfdb;
+    padding: 10px 20px;
+    flex-shrink: 0;
+}
+.prechat-lm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+.prechat-lm-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #004D40;
+}
+.prechat-lm-optional {
+    font-weight: 400;
+    color: #80cbc4;
+    font-size: 0.75rem;
+}
+.prechat-lm-dismiss {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    color: #80cbc4;
+    cursor: pointer;
+    padding: 0 4px;
+    line-height: 1;
+}
+.prechat-lm-dismiss:hover { color: #004D40; }
+.prechat-lm-body {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.prechat-lm-slider-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: #555;
+}
+.prechat-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 120px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, #4caf50 0%, #ffeb3b 50%, #f44336 100%);
+    outline: none;
+    cursor: pointer;
+}
+.prechat-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #00A67E;
+    border: 2px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    cursor: pointer;
+}
+.prechat-score-display {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #00A67E;
+    min-width: 18px;
+    text-align: center;
+}
+.prechat-score-display.prechat-score-medium { color: #f57c00; }
+.prechat-score-display.prechat-score-high { color: #d32f2f; }
+.prechat-score-label {
+    font-size: 0.75rem;
+    color: #888;
+}
+.prechat-lm-concerns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.prechat-concern-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: #444;
+    cursor: pointer;
+    padding: 4px 10px;
+    border: 1px solid #b2dfdb;
+    border-radius: 16px;
+    background: white;
+    transition: all 0.15s;
+}
+.prechat-concern-label:hover {
+    background: #e0f2ef;
+    border-color: #00A67E;
+}
+.prechat-concern-label input[type="checkbox"] {
+    accent-color: #00A67E;
+}
+
+/* ===== CAREGIVER SHARE BUTTON ===== */
+.caregiver-share-wrapper {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid #e0f2ef;
+}
+.caregiver-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #25D366;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 24px;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(37,211,102,0.35);
+    transition: all 0.2s ease;
+}
+.caregiver-share-btn:hover {
+    background: #1ebe5b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37,211,102,0.45);
+    color: white;
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+.toast-notification {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: white;
+    background: #333;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    max-width: 320px;
+}
+.toast-notification.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+.toast-success { background: #2e7d32; }
+.toast-info { background: #01579b; }
+.toast-warning { background: #e65100; }
