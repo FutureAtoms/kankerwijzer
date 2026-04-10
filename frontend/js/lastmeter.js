@@ -1,5 +1,5 @@
 /**
- * KankerWijzer Lastmeter Component
+ * OncologieWijzer Lastmeter Component
  * Self-contained distress thermometer with domain checklists and resource lookup.
  * All data stays client-side (localStorage, cleared on close).
  */

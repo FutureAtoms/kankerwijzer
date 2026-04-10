@@ -1,5 +1,5 @@
 /**
- * KankerWijzer Chat Application
+ * OncologieWijzer Chat Application
  * Frontend for the IKNL Medical-Grade Cancer Information System
  */
 
@@ -17,12 +17,12 @@
         nl: {
             subtitle: 'Betrouwbare kankerinformatie van IKNL',
             header_trust: 'Alleen goedgekeurde bronnen',
-            welcome_title: 'Welkom bij KankerWijzer',
+            welcome_title: 'Welkom bij OncologieWijzer',
             welcome_desc: 'Stel uw vraag over kanker en ontvang informatie die wordt onderbouwd met goedgekeurde bronnen, duidelijke verwijzingen en veilige doorverwijzing bij spoed of persoonlijke zorgvragen.',
             trust_sources_title: 'Bronnen met herkomst',
             trust_sources_desc: 'Antwoorden verwijzen naar kanker.nl, NKR Cijfers, Kanker Atlas, richtlijnen en IKNL-publicaties.',
             trust_advice_title: 'Geen persoonlijk behandeladvies',
-            trust_advice_desc: 'Bij diagnose-, spoed- of behandelbeslissingen verwijst KankerWijzer direct door naar passende hulp.',
+            trust_advice_desc: 'Bij diagnose-, spoed- of behandelbeslissingen verwijst OncologieWijzer direct door naar passende hulp.',
             trust_lastmeter_title: 'Ondersteuning bij klachten',
             trust_lastmeter_desc: 'Gebruik de Lastmeter om last en klachten te verkennen en relevante informatie mee te nemen naar uw zorgverlener.',
             audience_label: 'Doelgroep:',
@@ -33,7 +33,7 @@
             ex_colon: 'Behandeling darmkanker',
             ex_fatigue: 'Vermoeidheid bij chemo',
             ex_survival: 'Overlevingscijfers longkanker',
-            onboarding_welcome: '<strong>Welkom bij KankerWijzer!</strong>',
+            onboarding_welcome: '<strong>Welkom bij OncologieWijzer!</strong>',
             onboarding_intro: 'Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.',
             onboarding_important: 'Belangrijk om te weten:',
             onboarding_not_doctor: 'Ik ben <strong>geen arts</strong> \u2014 ik geef informatief advies, geen diagnose of behandelplan',
@@ -56,12 +56,12 @@
         en: {
             subtitle: 'Reliable cancer information from IKNL',
             header_trust: 'Approved sources only',
-            welcome_title: 'Welcome to KankerWijzer',
+            welcome_title: 'Welcome to OncologieWijzer',
             welcome_desc: 'Ask your question about cancer and receive information backed by approved sources, clear references, and safe referrals for urgent or personal care questions.',
             trust_sources_title: 'Sources with provenance',
             trust_sources_desc: 'Answers reference kanker.nl, NKR Cijfers, Cancer Atlas, guidelines, and IKNL publications.',
             trust_advice_title: 'No personal treatment advice',
-            trust_advice_desc: 'For diagnosis, emergency, or treatment decisions, KankerWijzer refers you directly to appropriate care.',
+            trust_advice_desc: 'For diagnosis, emergency, or treatment decisions, OncologieWijzer refers you directly to appropriate care.',
             trust_lastmeter_title: 'Support for complaints',
             trust_lastmeter_desc: 'Use the Lastmeter to explore distress and complaints, and take relevant information to your healthcare provider.',
             audience_label: 'Audience:',
@@ -72,7 +72,7 @@
             ex_colon: 'Colorectal cancer treatment',
             ex_fatigue: 'Fatigue during chemo',
             ex_survival: 'Lung cancer survival rates',
-            onboarding_welcome: '<strong>Welcome to KankerWijzer!</strong>',
+            onboarding_welcome: '<strong>Welcome to OncologieWijzer!</strong>',
             onboarding_intro: 'Thank you for reaching out. I am an AI assistant from IKNL helping you find reliable cancer information from trusted sources.',
             onboarding_important: 'Important to know:',
             onboarding_not_doctor: 'I am <strong>not a doctor</strong> \u2014 I provide informational guidance, not diagnosis or treatment plans',
@@ -348,7 +348,7 @@
             '<path d="M12 8v4M12 16h.01"/>' +
             '</svg>' +
             '</div>' +
-            '<span class="ai-name">KankerWijzer</span>';
+            '<span class="ai-name">OncologieWijzer</span>';
 
         var bubble = document.createElement('div');
         bubble.className = 'bubble onboarding-bubble';
@@ -383,7 +383,7 @@
 
         var wrapper = document.createElement('div');
         wrapper.className = 'caregiver-share-wrapper';
-        var shareText = encodeURIComponent('Informatie van KankerWijzer:\n\n' + markdown.substring(0, 500));
+        var shareText = encodeURIComponent('Informatie van OncologieWijzer:\n\n' + markdown.substring(0, 500));
         var btn = document.createElement('a');
         btn.className = 'caregiver-share-btn';
         btn.href = 'https://wa.me/?text=' + shareText;
@@ -504,7 +504,7 @@
             '<path d="M12 8v4M12 16h.01"/>' +
             '</svg>' +
             '</div>' +
-            '<span class="ai-name">KankerWijzer</span>';
+            '<span class="ai-name">OncologieWijzer</span>';
 
         // Confidence badge next to name
         if (confidence !== null && confidence !== undefined) {
@@ -749,7 +749,7 @@
             '<path d="M12 8v4M12 16h.01"/>' +
             '</svg>' +
             '</div>' +
-            '<span class="ai-name">KankerWijzer</span>';
+            '<span class="ai-name">OncologieWijzer</span>';
 
         // Refusal box with severity-based styling
         var box = document.createElement('div');
@@ -860,7 +860,7 @@
             '<path d="M12 8v4M12 16h.01"/>' +
             '</svg>' +
             '</div>' +
-            '<span class="ai-name">KankerWijzer</span>' +
+            '<span class="ai-name">OncologieWijzer</span>' +
             '</div>' +
             '<div class="loading-indicator">' +
             '<div class="loading-dots"><span></span><span></span><span></span></div>' +

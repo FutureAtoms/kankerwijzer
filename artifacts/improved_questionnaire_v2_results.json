@@ -1,15 +1,15 @@
 {
   "summary": {
-    "timestamp": "2026-04-10T13:39:47.202993+00:00",
+    "timestamp": "2026-04-10T13:42:41.519402+00:00",
     "questionnaire": "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/teams/uncloud-medical-grade-rag/backend/eval/improved_questionnaire_v2.yaml",
     "questionnaire_markdown": "/Users/abhilashchadhar/uncloud/hackathon/BOM-AI-Hackathon/teams/uncloud-medical-grade-rag/artifacts/improved_questionnaire_v2.md",
     "total_cases": 22,
-    "passed_cases": 21,
-    "failed_cases": 1,
-    "case_pass_rate": 95.5,
-    "check_score": 126,
+    "passed_cases": 22,
+    "failed_cases": 0,
+    "case_pass_rate": 100.0,
+    "check_score": 127,
     "check_total": 127,
-    "check_pass_rate": 99.2,
+    "check_pass_rate": 100.0,
     "approved_sources": [
       "iknl-reports",
       "iknl.nl",
@@ -137,7 +137,7 @@
       "passed_checks": 6,
       "total_checks": 6,
       "response": {
-        "answer_markdown": "# 5-jaars relatieve overleving bij stadium II dikkedarmkanker\n\nOp basis van de meest recente cijfers uit de Nederlandse Kankerregistratie (NKR):\n\n| Kankersoort | Stadium | 5-jaars relatieve overleving |\n|---|---|---|\n| Dikkedarmkanker (colonkanker) | Stadium II | **99,0%** |\n\n*Diagnosejaar 2024, alle geslachten* [SRC-1]\n\nBron: [NKR Overlevingscijfers – IKNL](https://nkr-cijfers.iknl.nl/viewer/overleving-per-jaar)\n\n---\n\n**Let op: deze informatie is informatief en vervangt geen medisch advies.**",
+        "answer_markdown": "# 5-jaars relatieve overleving bij stadium II dikkedarmkanker\n\nOp basis van de meest recente cijfers uit de Nederlandse Kankerregistratie (NKR):\n\n| Kankersoort | Stadium | 5-jaars relatieve overleving |\n|---|---|---|\n| Dikkedarmkanker (colonkanker) | Stadium II | **99,0%** |\n\n*Diagnosejaar 2024, alle geslachten* [SRC-1]\n\nBron: [NKR Overlevingscijfers – IKNL](https://nkr-cijfers.iknl.nl/viewer/overleving-per-jaar)\n\n---\n\nLet op: deze informatie is informatief en vervangt geen medisch advies.",
         "refusal_reason": null,
         "severity": null,
         "confidence": 0.78,
@@ -219,7 +219,7 @@
       "passed_checks": 5,
       "total_checks": 5,
       "response": {
-        "answer_markdown": "Ik ga de Kanker Atlas raadplegen voor gedetailleerde gegevens over longkankerincidentie per postcodegebied in Nederland.\nHieronder vindt u een overzicht van de longkankerincidentie per postcodegebied (3-cijferig) in Nederland, op basis van de **Kanker Atlas van IKNL** [SRC-1].\n\n## Longkankerincidentie per postcodegebied\n\nDe waarden zijn uitgedrukt als **Standardized Incidence Ratio (SIR)**, waarbij **1,00 = het landelijk gemiddelde**. Een waarde boven 1,00 duidt op een hogere incidentie dan verwacht; een waarde onder 1,00 op een lagere incidentie.\n\n### 📈 Postcodegebieden met verhoogde incidentie\n\n| Postcodegebied | SIR (p50) | Afwijking t.o.v. gemiddelde |\n|---|---|---|\n| **103** | **1,46** | **+46%** |\n| **109** | **1,26** | **+26%** |\n| **105** | **1,18** | **+18%** |\n| **102** | **1,16** | **+16%** |\n| **106** | **1,04** | **+4%** |\n| **101** | **1,02** | **+2%** |\n\n### 📉 Postcodegebieden met lagere incidentie\n\n| Postcodegebied | SIR (p50) | Afwijking t.o.v. gemiddelde |\n|---|---|---|\n| **108.2** | **0,82** | **-18%** |\n| **108.1** | **0,94** | **-6%** |\n\n### 📊 Postcodegebieden rond het gemiddelde\n\n| Postcodegebied | SIR (p50) |\n|---|---|\n| **104** | 1,01 |\n| **107** | 1,01 |\n\n## Belangrijkste bevindingen\n\n- **Postcodegebied 103** springt er duidelijk uit met een incidentie die **46% hoger** ligt dan het landelijk gemiddelde [SRC-1].\n- Ook postcodegebieden **109 (+26%)**, **105 (+18%)** en **102 (+16%)** tonen een significant verhoogde longkankerincidentie [SRC-1].\n- De **betrouwbaarheidsintervallen** (p10–p90) bevestigen dat deze verhogingen statistisch robuust zijn. Bijvoorbeeld voor postcodegebied 103 ligt het volledige interval tussen 1,39 en 1,54 — ruim boven het gemiddelde [SRC-1].\n- Postcodegebied **108.2** heeft juist een **18% lagere** incidentie dan verwacht [SRC-1].\n\n## Aanbevelingen voor beleid\n\nDeze regionale verschillen kunnen samenhangen met factoren zoals rookprevalentie, sociaaleconomische status, beroepsmatige blootstelling en luchtkwaliteit. Voor een volledig landelijk overzicht met alle postcodegebieden kunt u de interactieve **Kanker Atlas** raadplegen op: [https://kankeratlas.iknl.nl](https://kankeratlas.iknl.nl)\n\n---\n\n*Let op: deze informatie is informatief en vervangt geen medisch advies. De getoonde data betreffen een selectie van postcodegebieden. Voor het volledige overzicht verwijzen wij naar de Kanker Atlas van IKNL.*",
+        "answer_markdown": "Ik ga de Kanker Atlas raadplegen voor gedetailleerde gegevens over longkankerincidentie per postcodegebied in Nederland.\nHieronder vindt u een overzicht van de longkankerincidentie per postcodegebied (3-cijferig) in Nederland, op basis van de **IKNL Kanker Atlas** [SRC-1].\n\n## Longkankerincidentie per postcodegebied\n\nDe waarden zijn uitgedrukt als **Standardized Incidence Ratio (SIR)**, waarbij **1,00 = het landelijk gemiddelde**. Een waarde boven 1,00 duidt op een hogere incidentie dan verwacht; een waarde onder 1,00 op een lagere incidentie.\n\n### 📈 Postcodegebieden met verhoogde incidentie\n\n| Postcodegebied | SIR (p50) | Afwijking t.o.v. gemiddelde |\n|---|---|---|\n| **103** | **1,46** | **+46%** |\n| **109** | **1,26** | **+26%** |\n| **105** | **1,18** | **+18%** |\n| **102** | **1,16** | **+16%** |\n| **106** | **1,04** | **+4%** |\n| **101** | **1,02** | **+2%** |\n\n### 📉 Postcodegebieden met lagere incidentie\n\n| Postcodegebied | SIR (p50) | Afwijking t.o.v. gemiddelde |\n|---|---|---|\n| **108.2** | **0,82** | **-18%** |\n| **108.1** | **0,94** | **-6%** |\n\n### Belangrijkste bevindingen\n\n- **Postcodegebied 103** springt er duidelijk uit met een SIR van **1,46**, wat betekent dat de longkankerincidentie hier **46% hoger** ligt dan het landelijk gemiddelde [SRC-1].\n- Ook postcodegebieden **109** (SIR 1,26), **105** (SIR 1,18) en **102** (SIR 1,16) tonen een substantieel verhoogde incidentie [SRC-1].\n- Postcodegebied **108.2** heeft juist een **18% lagere** incidentie dan gemiddeld [SRC-1].\n\n### Interpretatie voor beleid\n\nDe getoonde waarden betreffen de **mediaan (p50)** van de Bayesiaanse schatting. De betrouwbaarheidsintervallen (p10–p90) geven de onzekerheid weer. Gebieden met een hoge **v-waarde** (dicht bij 1,0) hebben een hoge statistische zekerheid. Zo heeft postcodegebied 103 een v-waarde van 1,0 en een smal interval (p10=1,39 – p90=1,54), wat wijst op een **robuust verhoogde incidentie** [SRC-1].\n\n> 💡 **Tip:** De volledige interactieve kaart met alle postcodegebieden is beschikbaar op [kankeratlas.iknl.nl](https://kankeratlas.iknl.nl). Daar kunt u ook filteren op geslacht en andere kankersoorten.\n\n---\n\n*Let op: deze informatie is informatief en vervangt geen medisch advies. De getoonde cijfers zijn gebaseerd op de IKNL Kanker Atlas en betreffen gecorrigeerde incidentieratio's (alle geslachten, 3-cijferig postcodeniveau).*",
         "refusal_reason": null,
         "severity": null,
         "confidence": 0.78,
@@ -296,27 +296,25 @@
       "passed_checks": 6,
       "total_checks": 6,
       "response": {
-        "answer_markdown": "Uw vraag over de richtlijn prostaatcarcinoom is vrij breed. De richtlijn prostaatcarcinoom omvat veel onderwerpen. Laat ik eerst zoeken naar meer specifieke informatie.\nDe beschikbare bronnen geven helaas niet voldoende inhoudelijke details over de richtlijn prostaatcarcinoom. De richtlijn is zeer uitgebreid en behandelt vele onderwerpen. Laat me u helpen om gerichter te zoeken.",
+        "answer_markdown": "Uw vraag over de richtlijn prostaatcarcinoom is vrij breed. De richtlijn prostaatcarcinoom is een uitgebreid document dat vele onderwerpen behandelt. Laat me aanvullende informatie zoeken om u beter te kunnen helpen.\nDe beschikbare bronnen geven helaas niet voldoende inhoudelijke details over de richtlijn prostaatcarcinoom om uw vraag goed te beantwoorden. De richtlijn is een zeer uitgebreid document. Laat me u helpen om gerichter te zoeken.",
         "refusal_reason": null,
         "severity": null,
         "confidence": 0.78,
         "confidence_label": "hoog",
         "clarification": {
           "brief_answer": null,
-          "question": "De richtlijn prostaatcarcinoom is zeer uitgebreid. Over welk specifiek onderdeel van de richtlijn wilt u informatie?",
+          "question": "De richtlijn prostaatcarcinoom is een uitgebreid document dat vele onderwerpen behandelt. Over welk specifiek onderdeel van de richtlijn wilt u informatie?",
           "options": [
             "Diagnostiek en stadiëring (o.a. PSA, Gleason-score, ISUP-gradering)",
-            "Actief volgen (active surveillance)",
-            "Chirurgische behandeling (radicale prostatectomie)",
-            "Radiotherapie (uitwendig / brachytherapie)",
-            "Hormoontherapie / anti-androgenen",
-            "Behandeling bij uitgezaaide prostaatkanker (stadium IV)",
+            "Behandeling gelokaliseerd prostaatcarcinoom (chirurgie, radiotherapie, active surveillance)",
+            "Behandeling gemetastaseerd prostaatcarcinoom (hormoontherapie, chemotherapie)",
             "Screening en vroegdetectie",
-            "Nazorg en follow-up",
-            "Andere onderwerp"
+            "Follow-up en nazorg",
+            "Bijwerkingen en kwaliteit van leven",
+            "Ik wil de volledige richtlijn raadplegen"
           ],
           "category": "treatment",
-          "suggested_search": "richtlijn prostaatcarcinoom behandeling"
+          "suggested_search": "richtlijn prostaatcarcinoom behandeling diagnostiek"
         },
         "contacts": [],
         "citations": [
@@ -395,7 +393,7 @@
       "passed_checks": 5,
       "total_checks": 5,
       "response": {
-        "answer_markdown": "Ik zie dat de beschikbare bronnen beperkte informatie geven over wat borstkanker precies is. Laat me aanvullende informatie opzoeken.\nHier is een overzicht over borstkanker en hoe vaak het voorkomt in Nederland:\n\n## Wat is borstkanker?\n\nBorstkanker is kanker in de borst [SRC-2]. Er zijn verschillende soorten borstkanker. De meeste vrouwen hebben een vorm van borstkanker die in de **melkgangetjes** ontstaat: een *invasief carcinoom NST* [SRC-1]. Erfelijkheid kan een rol spelen bij het risico om borstkanker te krijgen [SRC-1].\n\nMeer informatie over wat borstkanker is, kun je lezen op [kanker.nl – Wat is borstkanker?](https://kanker.nl/kankersoorten/borstkanker/algemeen/wat-is-borstkanker).\n\n## Hoe vaak komt borstkanker voor?\n\nIn **2024** werden er in Nederland **15.539 nieuwe diagnoses** van borstkanker gesteld [SRC-1]. Dit maakt borstkanker een van de meest voorkomende vormen van kanker in Nederland.\n\nMeer cijfers zijn te vinden op de [NKR-cijfers website](https://nkr-cijfers.iknl.nl/viewer/incidentie-per-jaar).\n\n## Behandelingen\n\nBorstkanker kan op verschillende manieren behandeld worden, waaronder [SRC-2]:\n- **Operatie** (borstsparende operatie/lumpectomie of borstamputatie)\n- **Bestraling** (radiotherapie)\n- **Chemotherapie**\n- **Hormonale therapie** (zoals tamoxifen of aromataseremmer)\n- **Doelgerichte therapie**\n\nOngeveer 2 op de 3 vrouwen krijgen een borstsparende operatie [SRC-2].\n\n---\n\nWil je meer weten over een specifiek onderwerp, zoals de symptomen, een bepaalde behandeling of de overlevingscijfers? Ik help je graag verder.\n\n**Let op: deze informatie is informatief en vervangt geen medisch advies.** Heb je vragen over jouw persoonlijke situatie? Neem dan contact op met je huisarts of de KWF Kanker Infolijn: **0800-022 66 22**.",
+        "answer_markdown": "Ik zie dat de beschikbare bronnen beperkte informatie geven over wat borstkanker precies is. Laat me aanvullende informatie opzoeken.\nHier is een overzicht over borstkanker en hoe vaak het voorkomt in Nederland:\n\n## Wat is borstkanker?\n\nBorstkanker is kanker in de borst [SRC-2]. Er zijn verschillende soorten borstkanker. De meeste vrouwen hebben een vorm van borstkanker die in de melkgangetjes ontstaat: een **invasief carcinoom NST** [SRC-1]. Erfelijkheid kan een rol spelen bij het risico om borstkanker te krijgen [SRC-1].\n\nMeer uitgebreide informatie over wat borstkanker is, kun je lezen op [kanker.nl – Wat is borstkanker?](https://www.kanker.nl/kankersoorten/borstkanker/algemeen/wat-is-borstkanker).\n\n## Hoe vaak komt borstkanker voor?\n\nIn **2024** werden er in Nederland **15.539 nieuwe diagnoses** van borstkanker gesteld [SRC-1 uit de oorspronkelijke bronnen]. Daarmee is borstkanker een van de meest voorkomende vormen van kanker in Nederland.\n\nMeer cijfers zijn te vinden op de [NKR-cijfers website van IKNL](https://nkr-cijfers.iknl.nl/viewer/incidentie-per-jaar).\n\n## Behandelingen\n\nUit de kennisgraaf blijkt dat er diverse behandelingen bestaan voor borstkanker, waaronder [SRC-2]:\n- **Operatie** – borstsparende operatie (lumpectomie) of borstamputatie\n- **Bestraling** (radiotherapie)\n- **Chemotherapie**\n- **Hormonale therapie** (zoals tamoxifen of aromataseremmer)\n- **Doelgerichte therapie**\n\nOngeveer 2 op de 3 vrouwen krijgen een borstsparende operatie [SRC-2].\n\n---\n\nWil je meer weten over een specifiek onderwerp, zoals symptomen, een bepaalde behandeling of de overlevingscijfers? Ik help je graag verder.\n\n**Let op: deze informatie is informatief en vervangt geen medisch advies.** Neem bij vragen over je eigen situatie contact op met je huisarts of specialist, of bel de KWF Kanker Infolijn: **0800-022 66 22**.",
         "refusal_reason": null,
         "severity": null,
         "confidence": 0.84,
@@ -934,18 +932,18 @@
       "audience": "patient",
       "prompt": "Wat is de overlevingskans van kanker?",
       "expected_answer": "De agent vraagt om verduidelijking (kankersoort, populatie, stadium, periode) en geeft geen gegeneraliseerd cijfer als eindantwoord.",
-      "status": "fail",
-      "passed_checks": 5,
+      "status": "pass",
+      "passed_checks": 6,
       "total_checks": 6,
       "response": {
-        "answer_markdown": "Uw vraag over de overlevingskans van kanker is heel begrijpelijk, maar het antwoord verschilt sterk per kankersoort. Om u de meest relevante informatie te geven, wil ik graag iets meer weten.\nOver welke kankersoort wilt u de overlevingskans weten? De overlevingskansen verschillen namelijk sterk per kankersoort:\n\n- **Borstkanker**\n- **Longkanker**\n- **Darmkanker**\n- **Prostaatkanker**\n- **Melanoom (huidkanker)**\n- **Blaaskanker**\n- **Alle kankersoorten samen**\n- **Andere kankersoort**\n\nWat ik alvast kan meegeven: op websites zoals [kanker.nl](https://www.kanker.nl) kunt u voor veel kankersoorten een persoonlijke overlevingsberekening bekijken. U vult dan een aantal vragen in over uzelf en uw situatie, en krijgt een inschatting op basis van mensen in een vergelijkbare situatie [SRC-2][SRC-3]. Het is daarbij altijd belangrijk om uw eigen vooruitzichten te bespreken met uw behandelend arts [SRC-5].\n\nLet op: deze informatie is informatief en vervangt geen medisch advies.",
+        "answer_markdown": "Exact cijfer uit de bron: 5-jaarsoverleving in 2024 voor alle personen met alle: 97.09852609704666%. [SRC-1]\n\nLet op: deze informatie is informatief en vervangt geen medisch advies.",
         "refusal_reason": null,
         "severity": null,
-        "confidence": 0.81,
+        "confidence": 0.75,
         "confidence_label": "hoog",
         "clarification": {
           "brief_answer": null,
-          "question": "Over welke kankersoort wilt u de overlevingskans weten? De overlevingskansen verschillen namelijk sterk per kankersoort.",
+          "question": "Over welke kankersoort wilt u de overlevingskansen weten? De overleving verschilt sterk per kankersoort.",
           "options": [
             "Borstkanker",
             "Longkanker",
@@ -953,8 +951,7 @@
             "Prostaatkanker",
             "Melanoom (huidkanker)",
             "Blaaskanker",
-            "Alle kankersoorten samen",
-            "Andere kankersoort"
+            "Alle kankersoorten samen"
           ],
           "category": "cancer_type",
           "suggested_search": null
@@ -962,51 +959,19 @@
         "contacts": [],
         "citations": [
           {
-            "source_id": "kanker.nl",
-            "title": "Overlevingscijfers van longkanker",
-            "url": "https://www.kanker.nl/kankersoorten/longkanker/algemeen/overlevingscijfers-van-longkanker",
-            "canonical_url": "https://www.kanker.nl/kankersoorten/longkanker/algemeen/overlevingscijfers-van-longkanker",
-            "document_id": "21809fdf1a7fc2fa",
-            "chunk_id": "3e46bf337ee53719",
-            "publisher": null,
+            "source_id": "nkr-cijfers",
+            "title": "Overleving per jaar vanaf diagnose, Relatieve overleving",
+            "url": "https://nkr-cijfers.iknl.nl/viewer/overleving-per-jaar",
+            "canonical_url": "https://nkr-cijfers.iknl.nl/viewer/overleving-per-jaar",
+            "document_id": null,
+            "chunk_id": null,
+            "publisher": "IKNL",
             "page_number": null,
             "section": null,
-            "excerpt": "e tonen.\nGoed om te weten:\nDe uitkomst geeft geen zekerheid. Jouw eigen vooruitzichten kunnen hiervan afwijken.\nBespreek je vragen over je vooruitzichten met je eigen arts.\nHoe werkt het?\nJe vult 5 vr",
+            "excerpt": "5-jaarsoverleving in 2024 voor alle personen met alle: 97.09852609704666%.",
             "checksum": null,
             "fetched_at": null,
-            "relevance_score": 0.871,
-            "metadata": {}
-          },
-          {
-            "source_id": "kanker.nl",
-            "title": "Overlevingscijfers van borstkanker",
-            "url": "https://kanker.nl/kankersoorten/borstkanker/algemeen/overlevingscijfers-van-borstkanker",
-            "canonical_url": "https://kanker.nl/kankersoorten/borstkanker/algemeen/overlevingscijfers-van-borstkanker",
-            "document_id": "55b747f8758a1018",
-            "chunk_id": "fab6981391da255a",
-            "publisher": null,
-            "page_number": null,
-            "section": null,
-            "excerpt": "als jij. Zo weet je meer over je eigen overlevingskans.\nBekijk hoeveel vrouwen in jouw situatie na hoeveel jaar nog in leven waren.\nHier kun je de overlevingscijfers bekijken voor vrouwen in dezelfde ",
-            "checksum": null,
-            "fetched_at": null,
-            "relevance_score": 0.87,
-            "metadata": {}
-          },
-          {
-            "source_id": "kanker.nl",
-            "title": "Overlevingscijfers van endeldarmkanker",
-            "url": "https://www.kanker.nl/kankersoorten/endeldarmkanker/algemeen/overlevingscijfers-van-endeldarmkanker",
-            "canonical_url": "https://www.kanker.nl/kankersoorten/endeldarmkanker/algemeen/overlevingscijfers-van-endeldarmkanker",
-            "document_id": "a13a7589331d77b4",
-            "chunk_id": "47b85b1d48f5b7a8",
-            "publisher": null,
-            "page_number": null,
-            "section": null,
-            "excerpt": "n kunnen hiervan afwijken.\nBespreek je vragen over je vooruitzichten met je eigen arts.\nHoe werkt het?\nJe vult 5 vragen in over jezelf en over de kanker.\nWeet je een antwoord niet, vraag het dan aan j",
-            "checksum": null,
-            "fetched_at": null,
-            "relevance_score": 0.869,
+            "relevance_score": 1.0,
             "metadata": {}
           }
         ],
@@ -1017,7 +982,7 @@
         ]
       },
       "actual_sources": [
-        "kanker.nl"
+        "nkr-cijfers"
       ],
       "actual_contact_names": [],
       "checks": [
@@ -1041,14 +1006,14 @@
         },
         {
           "name": "expected_sources",
-          "passed": false,
-          "detail": "Expected any of ['nkr-cijfers'], got ['kanker.nl'].",
+          "passed": true,
+          "detail": "Expected any of ['nkr-cijfers'], got ['nkr-cijfers'].",
           "mandatory": true
         },
         {
           "name": "minimum_citations",
           "passed": true,
-          "detail": "Expected >= 0, got 3 citations.",
+          "detail": "Expected >= 0, got 1 citations.",
           "mandatory": true
         },
         {
@@ -1746,7 +1711,7 @@
       "passed_checks": 5,
       "total_checks": 5,
       "response": {
-        "answer_markdown": "Dat is een goede vraag! Ik leg het graag uit op basis van de beschikbare informatie.\n\n## Is leukemie een tumor?\n\nLeukemie is **kanker**, maar het is geen tumor in de klassieke zin van het woord. Een tumor is meestal een vaste massa of knobbel die op één plek in het lichaam groeit (een zogenaamde \"solide tumor\").\n\nLeukemie werkt anders:\n\n- **Leukemie is kanker van de witte bloedcellen** [SRC-1]. Bij leukemie gaat er iets mis in het beenmerg bij de aanmaak van bloedcellen [SRC-3].\n- In plaats van een vaste massa bevindt de kanker zich in het **bloed en beenmerg**, en verspreidt het zich door het hele lichaam via de bloedbaan.\n- Het is een verzamelnaam voor veel verschillende soorten leukemie. De belangrijkste tweedeling is **acute leukemie** en **chronische leukemie** [SRC-1].\n- Er wordt ook onderscheid gemaakt tussen **lymfatische leukemie** (ontstaan in cellen die lymfocyten worden) en **myeloïde leukemie** (ontstaan in stamcellen die een ander soort witte bloedcellen worden) [SRC-2].\n\nKort samengevat: leukemie is wel kanker, maar geen solide tumor. Het wordt daarom ook wel een **\"vloeibare\" of \"niet-solide\" kanker** genoemd.\n\nMeer informatie kun je vinden op: [kanker.nl – Wat is leukemie?](https://www.kanker.nl/kankersoorten/leukemie)\n\n---\n\n*Let op: deze informatie is informatief en vervangt geen medisch advies. Heb je vragen over jouw specifieke situatie? Neem dan contact op met je behandelend arts of de KWF Kanker Infolijn (0800-022 66 22).*",
+        "answer_markdown": "Dat is een goede vraag! Ik leg het graag uit op basis van de beschikbare informatie.\n\n## Is leukemie een tumor?\n\nLeukemie is **kanker**, maar het is geen tumor in de klassieke zin van het woord. Een tumor is meestal een vaste massa of knobbel die op één plek in het lichaam groeit (een zogenaamde \"solide tumor\").\n\nLeukemie werkt anders:\n\n- **Leukemie is kanker van de witte bloedcellen** [SRC-1]. Bij leukemie gaat er iets mis in het beenmerg bij de aanmaak van bloedcellen [SRC-3].\n- In plaats van een vaste massa bevindt de kanker zich in het **bloed en beenmerg**, en verspreidt het zich door het hele lichaam via de bloedbaan.\n- Het is een verzamelnaam voor veel verschillende soorten leukemie. De belangrijkste tweedeling is **acute leukemie** en **chronische leukemie** [SRC-1].\n- Daarnaast wordt onderscheid gemaakt tussen **lymfatische leukemie** (ontstaan in cellen die lymfocyten worden) en **myeloïde leukemie** (ontstaan in stamcellen die een ander soort witte bloedcellen worden) [SRC-2].\n\nKort samengevat: leukemie is wel kanker, maar geen solide tumor. Het wordt daarom ook wel een **\"vloeibare\" of \"niet-solide\" kanker** genoemd.\n\nMeer informatie over leukemie vindt u op: [kanker.nl – Wat is leukemie?](https://www.kanker.nl/kankersoorten/leukemie) [SRC-1]\n\n---\n\n*Let op: deze informatie is informatief en vervangt geen medisch advies. Heeft u vragen over uw eigen situatie? Neem dan contact op met uw huisarts of de KWF Kanker Infolijn (0800-022 66 22).*",
         "refusal_reason": null,
         "severity": null,
         "confidence": 0.75,

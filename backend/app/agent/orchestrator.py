@@ -1,4 +1,4 @@
-"""KankerWijzer agent orchestrator using Claude tool_use API with server-side citations."""
+"""OncologieWijzer agent orchestrator using Claude tool_use API with server-side citations."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # System prompt (Dutch) -- medical-grade rules
 # ---------------------------------------------------------------------------
 SYSTEM_PROMPT = """\
-Je bent KankerWijzer, een betrouwbare informatieassistent van IKNL.
+Je bent OncologieWijzer, een betrouwbare informatieassistent van IKNL.
 
 REGELS:
 1. Gebruik ALLEEN de aangeboden bronnen [SRC-1], [SRC-2], etc.
@@ -484,7 +484,7 @@ class AnthropicUnavailableError(RuntimeError):
 
 
 class MedicalAnswerOrchestrator:
-    """Tool-calling agent orchestrator for KankerWijzer.
+    """Tool-calling agent orchestrator for OncologieWijzer.
 
     Flow (simplified for hackathon -- single retrieval + single LLM call):
       1. Call HybridMedicalRetriever to get hits (or refusal)
@@ -1411,8 +1411,8 @@ class MedicalAnswerOrchestrator:
             return answer_text
 
         source_messages = {
-            "nkr-cijfers": "Voor landelijke registratiestatistieken gebruikt KankerWijzer NKR Cijfers",
-            "kankeratlas": "Voor regionale incidentiedata gebruikt KankerWijzer Kanker Atlas",
+            "nkr-cijfers": "Voor landelijke registratiestatistieken gebruikt OncologieWijzer NKR Cijfers",
+            "kankeratlas": "Voor regionale incidentiedata gebruikt OncologieWijzer Kanker Atlas",
         }
 
         for idx, prov in enumerate(provenances, start=1):
