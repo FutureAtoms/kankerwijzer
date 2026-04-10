@@ -32,7 +32,7 @@
 ### Richtlijnendatabase Policy Decision
 The hackathon repo lists richtlijnendatabase.nl as a source, but it is **not maintained by IKNL** (noted in `sources/richtlijnendatabase.nl.md`). Policy: **include it as a source** because IKNL's own source list includes it, but tag all richtlijnendatabase citations with `publisher: "Federatie Medisch Specialisten"` (not IKNL) and add a note: "Deze richtlijn is opgesteld door de Federatie Medisch Specialisten, niet door IKNL."
 
-### Design Decisions Responding to Review
+### Design Decisions Responding to All Reviews
 
 | Issue | Resolution |
 |-------|-----------|
@@ -42,6 +42,13 @@ The hackathon repo lists richtlijnendatabase.nl as a source, but it is **not mai
 | **#4 PyMuPDF downgrade** | **Docling is primary** PDF parser (OCR, layout, tables, images). PyMuPDF is fallback only when `docling` extra is not installed. |
 | **#5 Route contract** | Keep all existing routes (`/health`, `/sources/...`, `/agent/...`). New endpoints added alongside, not replacing. Frontend calls existing `/agent/answer` and `/agent/retrieve`. |
 | **#6 Graph coverage trap** | Graph is **augmentation-only**. Vector search from Qdrant is always the primary retrieval path. Graph adds relationship context but the agent system prompt explicitly states: "Never answer from graph data alone; always cross-reference with vector-retrieved evidence." |
+| **#8 PDF provenance manifest** | Create `backend/app/ingestion/pdf_manifest.py` with an explicit mapping from each local PDF filename to its exact public URL, DOI, or landing page. Reports and scientific publications are registered as **two separate source families** in source_registry. Chunks that cannot be mapped to a specific public URL get `canonical_url` set to the specific IKNL publications index page + filename, not a generic page. |
+| **#9 Crawl fallback safety** | Generic HTML-to-text fallback is **disabled for ingestion**. Crawl-based ingestion requires Firecrawl or fails explicitly. A content validator strips script/analytics/nav boilerplate before chunking. If Firecrawl is absent, Step 10 is skipped entirely (not degraded). |
+| **#10 Evaluation hard-fail gates** | Eval now has **hard-fail thresholds**: faithfulness >= 0.85 (FAIL if below), citation correctness >= 0.80 (FAIL), refusal accuracy >= 0.90 (FAIL). Pipeline returns exit code 1 on failure. These are not aspirational — the build breaks. |
+| **#11 pgvector infrastructure** | Docker compose uses `ankane/pgvector:latest` image (not vanilla postgres). Schema init script includes `CREATE EXTENSION IF NOT EXISTS vector;`. Verified in Step 1. |
+| **#12 Feedback schema enrichment** | `user_feedback` table gets: `feedback_type TEXT NOT NULL` (helpful/missing_info/incorrect/unclear), `conversation_id TEXT`, `message_index INTEGER`, keeping existing columns. Schema migration in Step 11. |
+| **#13 Source family split** | Source registry splits iknl-publications into **two families**: `iknl-reports` (access_mode=pdf, 3 bundled reports) and `scientific-publications` (access_mode=pdf, 5 bundled papers). Verification checks each independently. |
+| **#14 Abstention threshold calibration** | The 0.45 threshold is an initial value. Step 12 (evaluation) includes a **calibration run**: test 20 known-answer and 10 known-unanswerable queries at thresholds [0.3, 0.35, 0.4, 0.45, 0.5, 0.55], pick the threshold that maximizes (recall on answerable) + (precision on unanswerable). The chosen threshold is written to config, not hardcoded. |
 | **#7 Lastmeter sensitive data** | Session-scoped, **ephemeral** distress data. No persistent storage. Consent banner before assessment. Auto-clear on session end. Server returns resource links only; raw scores stay client-side. |
 
 ---
@@ -103,17 +110,21 @@ Each step has a **verification gate** and a **Ralph loop prompt** with a `<promi
 **Goal**: Get Qdrant + Neo4j + Postgres running, install all Python deps.
 
 **What to do**:
-1. Update `docker-compose.yml` — add Qdrant (port 6333) and Postgres+pgvector (port 5432)
-2. Update `pyproject.toml` — add `qdrant-client>=1.12.0`, `sentence-transformers>=3.0.0`, `psycopg[binary]>=3.2.0` to deps
-3. Update `postgres_schema.sql` — change `VECTOR(1536)` to `VECTOR(1024)` for multilingual-e5-large
-4. Run `docker compose up -d neo4j qdrant postgres`
-5. Run `cd backend && uv sync --all-extras`
-6. Apply Postgres schema
+1. Update `docker-compose.yml` — add Qdrant (port 6333) and Postgres with pgvector (port 5432, using `ankane/pgvector:latest` image)
+2. Create `backend/app/storage/init.sql` — `CREATE EXTENSION IF NOT EXISTS vector;` + apply `postgres_schema.sql`
+3. Mount init.sql as Docker entrypoint in compose: `volumes: - ./app/storage/init.sql:/docker-entrypoint-initdb.d/01-init.sql`
+4. Update `pyproject.toml` — add `qdrant-client>=1.12.0`, `sentence-transformers>=3.0.0`, `psycopg[binary]>=3.2.0` to deps
+5. Update `postgres_schema.sql` — change `VECTOR(1536)` to `VECTOR(1024)` for multilingual-e5-large
+6. Update `source_registry.py` — split `iknl-publications` into `iknl-reports` (3 bundled PDFs) and `scientific-publications` (5 bundled papers)
+7. Run `docker compose up -d neo4j qdrant postgres`
+8. Run `cd backend && uv sync --all-extras`
 
-**Files to modify**:
-- `teams/uncloud-medical-grade-rag/docker-compose.yml`
+**Files to modify/create**:
+- `teams/uncloud-medical-grade-rag/docker-compose.yml` (add qdrant + pgvector postgres)
 - `teams/uncloud-medical-grade-rag/backend/pyproject.toml`
 - `teams/uncloud-medical-grade-rag/backend/app/storage/postgres_schema.sql` (VECTOR dim: 1536 → 1024)
+- Create `teams/uncloud-medical-grade-rag/backend/app/storage/init.sql` (CREATE EXTENSION vector)
+- `teams/uncloud-medical-grade-rag/backend/app/source_registry.py` (split source families)
 
 **Verification gate**:
 ```bash
@@ -154,20 +165,55 @@ Set up infrastructure for KankerWijzer. Add Qdrant (port 6333) and Postgres+pgve
 4. Create `backend/app/ingestion/postgres_writer.py` — writes to Postgres tables: source_catalog, documents, chunks
 5. Every chunk record: chunk_id, document_id, chunk_index, chunk_text, page_number, section, citation_url, start_offset, end_offset
 
+5. Create `backend/app/ingestion/pdf_manifest.py` — explicit mapping from each local PDF to its exact public URL:
+   ```python
+   PDF_MANIFEST = {
+       # Reports
+       "rapport_UItgezaaide-kanker_2025_cijfers-inzichten-en-uitdagingen.pdf": {
+           "canonical_url": "https://iknl.nl/uitgezaaide-kanker-2025",
+           "source_id": "iknl-reports",
+           "title": "Uitgezaaide kanker 2025: Cijfers, inzichten en uitdagingen",
+           "publisher": "IKNL",
+       },
+       "rapport_manvrouwverschillenbij-kanker_definitief2.pdf": {
+           "canonical_url": "https://iknl.nl/onderzoek/publicaties",  # No dedicated page identified
+           "source_id": "iknl-reports",
+           "title": "Man-vrouwverschillen bij kanker",
+           "publisher": "IKNL",
+       },
+       "trendrapport_darmkanker_def.pdf": {
+           "canonical_url": "https://iknl.nl/onderzoek/publicaties",
+           "source_id": "iknl-reports",
+           "title": "Trendrapport Darmkanker",
+           "publisher": "IKNL",
+       },
+       # Scientific publications
+       "comorbidities_medication_use_and_overall_survival_in_eight_cancers.pdf": {
+           "canonical_url": "https://iknl.nl/onderzoek/publicaties",
+           "source_id": "scientific-publications",
+           "title": "Comorbidities, medication use, and overall survival in eight cancers",
+           "publisher": "IKNL / peer-reviewed journal",
+       },
+       # ... (all 5 publications mapped individually)
+   }
+   ```
+   If a PDF cannot be mapped to a specific public landing page, `canonical_url` is set to `https://iknl.nl/onderzoek/publicaties#{filename_stem}` (specific enough to identify, honest that it points to the index).
+
 **CRITICAL: Provenance fields per source**:
-| Source | document_id | canonical_url | page_number | section | checksum |
-|--------|-------------|---------------|-------------|---------|----------|
-| kanker.nl JSON | SHA256(url) | page URL | null | first heading | SHA256(text) |
-| PDF reports | SHA256(filepath) | iknl.nl publication URL | PDF page num | PDF heading | SHA256(text) |
-| PDF pubs | SHA256(filepath) | iknl.nl/onderzoek/publicaties | PDF page num | PDF heading | SHA256(text) |
-| NKR metadata | "nkr-nav-{code}" | nkr-cijfers.iknl.nl/viewer/... | null | nav label | null |
-| Atlas metadata | "atlas-filters" | kankeratlas.iknl.nl | null | null | null |
+| Source | source_id | document_id | canonical_url | page_number | section | checksum |
+|--------|-----------|-------------|---------------|-------------|---------|----------|
+| kanker.nl JSON | kanker.nl | SHA256(url) | page URL | null | first heading | SHA256(text) |
+| PDF reports | **iknl-reports** | SHA256(filepath) | **from pdf_manifest.py** | PDF page num | PDF heading | SHA256(text) |
+| PDF pubs | **scientific-publications** | SHA256(filepath) | **from pdf_manifest.py** | PDF page num | PDF heading | SHA256(text) |
+| NKR metadata | nkr-cijfers | "nkr-nav-{code}" | nkr-cijfers.iknl.nl/viewer/... | null | nav label | null |
+| Atlas metadata | kankeratlas | "atlas-filters" | kankeratlas.iknl.nl | null | null | null |
 
 **Files to create**:
 - `teams/uncloud-medical-grade-rag/backend/app/ingestion/__init__.py`
 - `teams/uncloud-medical-grade-rag/backend/app/ingestion/chunker.py`
 - `teams/uncloud-medical-grade-rag/backend/app/ingestion/pipeline.py`
 - `teams/uncloud-medical-grade-rag/backend/app/ingestion/postgres_writer.py`
+- `teams/uncloud-medical-grade-rag/backend/app/ingestion/pdf_manifest.py`
 
 **Existing code to reuse**:
 - `backend/app/models.py:Provenance` — the provenance contract (DO NOT simplify)
@@ -734,20 +780,26 @@ Wire Neo4j graph retriever into agent's explore_graph tool. The graph provides r
 
 ---
 
-### STEP 10: Crawl Remaining Sources (Firecrawl)
+### STEP 10: Crawl Remaining Sources (Firecrawl-only, no fallback)
 **Goal**: Crawl iknl.nl and richtlijnendatabase.nl, ingest into Postgres, project to Qdrant.
 
 **What to do**:
 1. Create `backend/app/ingestion/crawl_sources.py`:
-   - Crawl iknl.nl/kankersoorten (~30 pages)
-   - Crawl 5-10 richtlijnendatabase.nl guidelines
-   - Use existing `firecrawl_client.py`
-   - For each crawled page: create `SourceDocument` with full `Provenance`
+   - Crawl iknl.nl/kankersoorten (~30 pages) via Firecrawl
+   - Crawl 5-10 richtlijnendatabase.nl guidelines via Firecrawl
+   - **CRITICAL: No generic HTML-to-text fallback**. If `FIRECRAWL_API_KEY` is absent, this step is skipped entirely with a clear log message. Generic scraping poisons the index with boilerplate.
+   - Use Firecrawl's markdown output format (clean, content-focused)
+   - Create `backend/app/ingestion/content_validator.py` — validate crawled content before ingestion:
+     - Strip script/analytics/cookie-consent/nav boilerplate
+     - Reject pages with < 100 chars of meaningful content
+     - Reject pages where > 50% of content is boilerplate (detected by common Dutch nav phrases)
+   - For each valid crawled page: create `SourceDocument` with full `Provenance`
    - Write to Postgres, then project to Qdrant
-2. Requires `FIRECRAWL_API_KEY`
+2. **Requires**: `FIRECRAWL_API_KEY` — without it, this step produces zero documents (not degraded output)
 
 **Files to create**:
 - `teams/uncloud-medical-grade-rag/backend/app/ingestion/crawl_sources.py`
+- `teams/uncloud-medical-grade-rag/backend/app/ingestion/content_validator.py`
 
 **Verification gate**:
 ```bash
@@ -774,16 +826,25 @@ Crawl iknl.nl/kankersoorten and richtlijnendatabase.nl guidelines using Firecraw
 
 ---
 
-### STEP 11: Feedback Collection
-**Goal**: Structured user feedback stored in Postgres user_feedback table.
+### STEP 11: Feedback Collection (enriched schema)
+**Goal**: Structured user feedback with types, conversation context, stored in Postgres.
 
 **What to do**:
-1. Create `backend/app/feedback.py`:
-   - `POST /feedback` — stores feedback in Postgres `user_feedback` table (already in schema)
-   - `GET /feedback/stats` — returns aggregate stats
-2. Wire frontend feedback buttons to `/feedback`
+1. Create migration `backend/app/storage/feedback_migration.sql`:
+   ```sql
+   ALTER TABLE user_feedback ADD COLUMN IF NOT EXISTS feedback_type TEXT NOT NULL DEFAULT 'general';
+   ALTER TABLE user_feedback ADD COLUMN IF NOT EXISTS conversation_id TEXT;
+   ALTER TABLE user_feedback ADD COLUMN IF NOT EXISTS message_index INTEGER;
+   -- Existing columns: query_text, answer_excerpt, citation_urls, is_helpful, notes, created_at
+   ```
+2. Create `backend/app/feedback.py`:
+   - `POST /feedback` — accepts `{query_text, answer_excerpt, feedback_type, conversation_id, message_index, is_helpful, notes, citation_urls}`
+   - `feedback_type` must be one of: `helpful`, `missing_info`, `incorrect`, `unclear`, `general`
+   - `GET /feedback/stats` — returns: total count, breakdown by feedback_type, % helpful, most common missing-info topics
+3. Wire frontend feedback buttons to `/feedback` with appropriate `feedback_type`
 
 **Files to create/modify**:
+- Create `teams/uncloud-medical-grade-rag/backend/app/storage/feedback_migration.sql`
 - Create `teams/uncloud-medical-grade-rag/backend/app/feedback.py`
 - Modify `teams/uncloud-medical-grade-rag/backend/app/main.py`
 - Modify `teams/uncloud-medical-grade-rag/frontend/js/app.js`
@@ -792,51 +853,63 @@ Crawl iknl.nl/kankersoorten and richtlijnendatabase.nl guidelines using Firecraw
 ```bash
 cd backend && uv run uvicorn app.main:app --port 8000 &
 sleep 3
+
+# Test 1: Submit typed feedback
 curl -s http://localhost:8000/feedback -X POST -H 'Content-Type: application/json' \
-  -d '{"query_text":"test","answer_excerpt":"test","is_helpful":true,"notes":"goed antwoord"}' | python3 -c "
+  -d '{"query_text":"test","answer_excerpt":"test","feedback_type":"missing_info","conversation_id":"conv-123","message_index":0,"is_helpful":false,"notes":"mist info over bijwerkingen"}' | python3 -c "
 import json,sys; d=json.load(sys.stdin)
 assert d.get('status') or d.get('feedback_id')
-print('FEEDBACK PASSED')
+print('TYPED FEEDBACK PASSED')
 "
+
+# Test 2: Stats endpoint works
+curl -s http://localhost:8000/feedback/stats | python3 -c "
+import json,sys; d=json.load(sys.stdin)
+assert 'total' in d or 'count' in d
+print('STATS ENDPOINT PASSED')
+"
+
 kill %1
 ```
 
 **Ralph loop prompt**:
 ```
-Add feedback at backend/app/feedback.py. POST /feedback stores to Postgres user_feedback table (already in schema). GET /feedback/stats returns aggregates. Wire frontend buttons. Output <promise>FEEDBACK COMPLETE</promise> when POST /feedback returns success and data is in Postgres.
+Add enriched feedback at backend/app/feedback.py. Migrate user_feedback table to add feedback_type (helpful/missing_info/incorrect/unclear/general), conversation_id, message_index columns. POST /feedback stores typed feedback. GET /feedback/stats returns breakdown by type. Wire frontend buttons with correct feedback_type. Output <promise>FEEDBACK COMPLETE</promise> when POST with feedback_type="missing_info" succeeds AND /feedback/stats returns type breakdown.
 ```
 
 ---
 
-### STEP 12: Evaluation Pipeline (45 Questions)
-**Goal**: Comprehensive medical QA evaluation with LLM-as-judge.
+### STEP 12: Evaluation Pipeline (45 Questions, Hard-Fail Gates, Threshold Calibration)
+**Goal**: Medical-grade QA evaluation with hard-fail thresholds that break the build on safety failures.
 
 **What to do**:
-1. Expand `backend/eval/golden_questions.yaml` to 45 questions
-2. Update `backend/scripts/run_eval.py`:
-   - For each question: call `/agent/answer`, check:
-     - Deterministic: source whitelist compliance, citation count, refusal on unsafe
-     - LLM-judge: faithfulness (claims supported by citations?), completeness
-   - Write results to Postgres `evaluation_runs` + JSON report
-
-**Question categories**:
-- 10 patient info, 8 statistics, 6 geographic, 6 guideline, 5 cross-source, 5 ethical decline, 5 out-of-scope
+1. Expand `backend/eval/golden_questions.yaml` to 45 questions:
+   - 10 patient info (Dutch + English), 8 statistics (validate against API), 6 geographic, 6 guideline, 5 cross-source, 5 ethical decline, 5 conflict/out-of-scope
+2. Update `backend/scripts/run_eval.py` with **hard-fail thresholds** (exit code 1 on failure):
+   - Faithfulness >= 0.85 | Citation correctness >= 0.80 | Refusal accuracy >= 0.90 | Source whitelist == 1.0 | Hallucination rate <= 0.10
+3. Create `backend/scripts/calibrate_threshold.py` — test 20 answerable + 10 unanswerable queries at thresholds [0.30-0.55], pick optimal, write to config
+4. Write results to Postgres `evaluation_runs` + JSON reports
 
 **Verification gate**:
 ```bash
-cd backend && uv run python scripts/run_eval.py
+cd backend
+ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY uv run python scripts/calibrate_threshold.py
+ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY uv run python scripts/run_eval.py
+# Exit code 0 = all gates passed, exit code 1 = at least one gate failed
 python3 -c "
 import json
 report = json.load(open('eval/results/eval_report.json'))
-print(f'Total: {report[\"total\"]}, Passed: {report.get(\"passed\",0)}')
 assert report['total'] >= 40
-print('EVALUATION PASSED')
+assert report['faithfulness'] >= 0.85, f'FAIL: {report[\"faithfulness\"]}'
+assert report['refusal_accuracy'] >= 0.90, f'FAIL: {report[\"refusal_accuracy\"]}'
+assert report['source_whitelist_compliance'] >= 1.0
+print('ALL EVALUATION GATES PASSED')
 "
 ```
 
 **Ralph loop prompt**:
 ```
-Expand eval to 45 questions in backend/eval/golden_questions.yaml. Categories: patient info (10), statistics (8), geographic (6), guidelines (6), cross-source (5), ethical decline (5), out-of-scope (5). Update run_eval.py with source whitelist checks and LLM-as-judge faithfulness. Output <promise>EVAL COMPLETE</promise> when eval runs >=40 questions and generates eval_report.json.
+Build medical-grade eval at backend/scripts/run_eval.py + calibrate_threshold.py. 45 questions in golden_questions.yaml. HARD-FAIL gates: faithfulness >= 0.85, citation correctness >= 0.80, refusal accuracy >= 0.90, source whitelist == 1.0, hallucination <= 0.10. Exit code 1 on any failure. Calibration: test 20+10 queries at 6 thresholds, pick optimal. Output <promise>EVAL COMPLETE</promise> when run_eval.py exits 0 with all gates passing.
 ```
 
 ---
