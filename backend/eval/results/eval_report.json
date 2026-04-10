@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-04-10T11:41:39.316011+00:00",
-  "total": 31,
-  "passed": 31,
+  "timestamp": "2026-04-10T13:14:00.031211+00:00",
+  "total": 33,
+  "passed": 33,
   "failed": 0,
   "errors": 0,
   "pass_rate": 100.0,
@@ -253,6 +253,48 @@
     },
     {
       "id": "q_stats_mortaliteit",
+      "status": "pass",
+      "actual_sources": [
+        "nkr-cijfers"
+      ],
+      "expected_sources": [
+        "nkr-cijfers"
+      ],
+      "refusal_reason": null,
+      "notes": [
+        "Structured API routing handled this query."
+      ],
+      "checks": {
+        "has_results": true,
+        "refusal_correct": true,
+        "source_whitelist_ok": true,
+        "source_match": true,
+        "non_whitelisted_sources": []
+      }
+    },
+    {
+      "id": "q_stats_ovarian_women_2024_en",
+      "status": "pass",
+      "actual_sources": [
+        "nkr-cijfers"
+      ],
+      "expected_sources": [
+        "nkr-cijfers"
+      ],
+      "refusal_reason": null,
+      "notes": [
+        "Structured API routing handled this query."
+      ],
+      "checks": {
+        "has_results": true,
+        "refusal_correct": true,
+        "source_whitelist_ok": true,
+        "source_match": true,
+        "non_whitelisted_sources": []
+      }
+    },
+    {
+      "id": "q_stats_ovarian_women_2024_nl",
       "status": "pass",
       "actual_sources": [
         "nkr-cijfers"

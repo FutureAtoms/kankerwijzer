@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from app.agent.orchestrator import MedicalAnswerOrchestrator
 from app.config import get_settings
 from app.feedback import router as feedback_router
+from app.graphrag.retriever import GraphRetriever
 from app.lastmeter import router as lastmeter_router
 from app.connectors.firecrawl_client import FirecrawlClient, FirecrawlUnavailableError
 from app.connectors.iknl import IKNLWebConnector
@@ -34,6 +35,12 @@ simple_retriever = SimpleMedicalRetriever(settings)
 hybrid_retriever = HybridMedicalRetriever(settings)
 answerer = MedicalAnswerOrchestrator(settings)
 verifier = SourceVerifier(settings)
+
+# GraphRAG retriever — optional, degrades gracefully
+try:
+    graph_retriever = GraphRetriever(settings)
+except Exception:
+    graph_retriever = None  # type: ignore[assignment]
 
 
 def _raise_optional_dependency(exc: Exception) -> None:
@@ -215,6 +222,17 @@ def agent_answer(request: QuestionRequest):
         audience=request.audience,
         limit=request.limit,
     )
+
+
+@app.get("/graph/status")
+def graph_status():
+    """Return knowledge graph node count, edge count, and cancer types found."""
+    if graph_retriever is None:
+        return {"available": False, "error": "GraphRetriever not initialized", "node_count": 0, "edge_count": 0, "cancer_types": 0}
+    try:
+        return graph_retriever.graph_status()
+    except Exception as exc:
+        return {"available": False, "error": str(exc), "node_count": 0, "edge_count": 0, "cancer_types": 0}
 
 
 # --- Include routers ---

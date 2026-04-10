@@ -112,7 +112,7 @@
             if (el.tagName === 'OPTION') {
                 el.textContent = translated;
             } else {
-                el.textContent = translated;
+                el.innerHTML = translated;
             }
         });
 

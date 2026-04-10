@@ -118,8 +118,10 @@ class NKRCijfersClient:
             return self._query_stadiumverdeling(cancer_code, year, sex_code)
         elif st == "overleving":
             return self._query_overleving(cancer_code, year, sex_code)
+        elif st == "sterfte":
+            return self._query_sterfte(cancer_code, year, sex_code)
         else:
-            # incidentie, prevalentie, sterfte all use the same pattern
+            # incidentie and prevalentie use the same pattern
             return self._query_incidentie_type(st, cancer_code, year, sex_code)
 
     def _query_incidentie_type(
@@ -166,6 +168,12 @@ class NKRCijfersClient:
             ],
             "statistic": {"code": "statistiek/aantal"},
         })
+
+    @staticmethod
+    def _to_cbs_cancer_code(cancer_code: str) -> str:
+        if cancer_code.startswith("kankersoort/"):
+            return cancer_code.replace("kankersoort/", "kankersoortCBS/", 1)
+        return cancer_code
 
     def _query_stadiumverdeling(
         self, cancer_code: str, year: int, sex_code: str
@@ -216,14 +224,22 @@ class NKRCijfersClient:
     def _query_overleving(
         self, cancer_code: str, year: int, sex_code: str
     ) -> Any:
-        """Query 5-year relative survival for a specific cancer type."""
+        """Query 5-year relative survival for a specific cancer type.
+
+        NKR survival data uses diagnosis-period buckets plus years-after-diagnosis
+        instead of a single diagnosis year.
+        """
+        period_code = "periode/10-jaar/2015-2024"
+        if year < 2015:
+            period_code = "periode/10-jaar/2005-2014"
+
         return self.data({
             "language": "nl-NL",
             "navigation": {"code": "overleving/periode"},
             "groupBy": [
                 {
-                    "code": "filter/periode-van-diagnose",
-                    "values": [{"code": f"periode/1-jaar/{year}"}],
+                    "code": "filter/jaren-na-diagnose",
+                    "values": [{"code": "jaren-na-diagnose/5"}],
                 }
             ],
             "aggregateBy": [
@@ -236,15 +252,49 @@ class NKRCijfersClient:
                     "values": [{"code": sex_code}],
                 },
                 {
+                    "code": "filter/periode-van-diagnose",
+                    "values": [{"code": period_code}],
+                },
+                {
                     "code": "filter/leeftijdsgroep",
                     "values": [{"code": "leeftijdsgroep/totaal/alle"}],
                 },
                 {
-                    "code": "filter/regio",
-                    "values": [{"code": "regio/totaal/alle"}],
+                    "code": "filter/stadium",
+                    "values": [{"code": "stadium/totaal/alle"}],
                 },
             ],
-            "statistic": {"code": "statistiek/5-jaars"},
+            "statistic": {"code": "statistiek/relatieve-overleving"},
+        })
+
+    def _query_sterfte(
+        self, cancer_code: str, year: int, sex_code: str
+    ) -> Any:
+        """Query mortality counts using the CBS-backed sterfte schema."""
+        return self.data({
+            "language": "nl-NL",
+            "navigation": {"code": "sterfte/periode"},
+            "groupBy": [
+                {
+                    "code": "filter/jaar-van-overlijden",
+                    "values": [{"code": f"periode/1-jaar/{year}"}],
+                }
+            ],
+            "aggregateBy": [
+                {
+                    "code": "filter/kankersoortCBS",
+                    "values": [{"code": self._to_cbs_cancer_code(cancer_code)}],
+                },
+                {
+                    "code": "filter/geslacht",
+                    "values": [{"code": sex_code}],
+                },
+                {
+                    "code": "filter/leeftijdsgroep",
+                    "values": [{"code": "leeftijdsgroep/totaal/alle"}],
+                },
+            ],
+            "statistic": {"code": "statistiek/aantal"},
         })
 
     def example_stage_distribution(self, year: int = 2024) -> Any:

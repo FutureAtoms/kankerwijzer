@@ -120,3 +120,72 @@ def test_years_are_not_mistaken_for_postcodes_in_stats_queries(monkeypatch):
         "Show the incidence distribution per stadium for all cancers for 2024."
     )
     assert hits[0].document.source_id == "nkr-cijfers"
+
+
+def test_nkr_request_parser_handles_english_filtered_count_query():
+    retriever = HybridMedicalRetriever(get_settings())
+
+    parsed = retriever._parse_nkr_request("how many women in 2024 had ovarian cancer")
+
+    assert parsed == {
+        "cancer_type": "eierstokkanker",
+        "year": 2024,
+        "sex": "vrouw",
+        "stat_type": "incidentie",
+    }
+
+
+def test_nkr_request_parser_handles_dutch_filtered_count_query():
+    retriever = HybridMedicalRetriever(get_settings())
+
+    parsed = retriever._parse_nkr_request(
+        "hoeveel vrouwen kregen in 2024 eierstokkanker"
+    )
+
+    assert parsed == {
+        "cancer_type": "eierstokkanker",
+        "year": 2024,
+        "sex": "vrouw",
+        "stat_type": "incidentie",
+    }
+
+
+def test_nkr_fetch_uses_filtered_statistics_query(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    captured: dict[str, object] = {}
+
+    def fake_query_statistics(*, cancer_type, year, sex, stat_type):
+        captured.update(
+            {
+                "cancer_type": cancer_type,
+                "year": year,
+                "sex": sex,
+                "stat_type": stat_type,
+            }
+        )
+        return {
+            "title": {
+                "title": "Incidentie per jaar, Aantal",
+            },
+            "data": [
+                {
+                    "value": 1453.0,
+                    "filterValues": [
+                        {"filterCode": "filter/periode-van-diagnose", "code": "periode/1-jaar/2024"}
+                    ],
+                }
+            ],
+        }
+
+    monkeypatch.setattr(retriever.nkr, "query_statistics", fake_query_statistics)
+
+    hits = retriever._fetch_nkr("how many women in 2024 had ovarian cancer")
+
+    assert captured == {
+        "cancer_type": "eierstokkanker",
+        "year": 2024,
+        "sex": "vrouw",
+        "stat_type": "incidentie",
+    }
+    assert hits[0].document.source_id == "nkr-cijfers"
+    assert "1453" in hits[0].excerpt

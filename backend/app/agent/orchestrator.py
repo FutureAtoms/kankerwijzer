@@ -13,6 +13,12 @@ from app.models import AnswerResponse, ClarificationData, ContactInfo, Provenanc
 from app.retrieval.hybrid import HybridMedicalRetriever
 from app.safety.red_flags import check_red_flags, get_routing_info
 
+# GraphRAG — optional, degrades gracefully if Neo4j is unavailable
+try:
+    from app.graphrag.retriever import GraphRetriever as _GraphRetriever
+except ImportError:
+    _GraphRetriever = None  # type: ignore[assignment,misc]
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -132,8 +138,128 @@ C) WANNEER DE VRAAG PERSOONLIJK KLINKT MAAR INFORMATIEF IS:
 Vragen als "Hoe kan ik omgaan met..." zijn informatief (niet persoonlijk advies).
 Beantwoord deze met praktische tips UIT DE BRONNEN, maar vraag welke kankersoort als de bronnen te generiek zijn.
 
-GEBRUIK ask_clarification NIET als de vraag specifiek is EN de bronnen goed matchen.\
+GEBRUIK ask_clarification NIET als de vraag specifiek is EN de bronnen goed matchen.
+
+AANVULLENDE STRIKTE REGELS:
+
+VERBODEN GEDRAG:
+- Vat NOOIT broninhoud samen of parafraseer het in eigen woorden.
+- Geef NOOIT persoonlijke risico-inschattingen of statistische interpretaties.
+- Ga NOOIT door na een weigering. Na een weigering: STOP. Geen "maar u kunt wel...", geen tips, geen suggesties.
+- Leg NOOIT medische termen uit in eigen woorden. Verwijs naar de bron die het uitlegt.
+
+ANTWOORDFORMAAT:
+- Verwijs ALTIJD naar de exacte bronpagina met [SRC-N] en URL.
+- Gebruik het fragment uit de bron. Schrijf het NIET in eigen woorden om.
+- Bij professionele statistiekvragen: toon ALLEEN de exacte cijfers uit de bron, geen duiding.
+
+BIJ VAGE VRAGEN:
+- Gebruik ALLEEN ask_clarification. Geef GEEN "kort antwoord" of algemene informatie eerst.\
 """
+
+# ---------------------------------------------------------------------------
+# Prompt pre-classification — detect banned prompt categories
+# ---------------------------------------------------------------------------
+
+_SUMMARIZATION_RE = re.compile(
+    r"samenvatten|samenvatting|samenvat|belangrijkste\s+inzichten|geef\s+een\s+overzicht",
+    re.IGNORECASE,
+)
+_SYNTHESIS_RE = re.compile(
+    r"combiner|combineer|beste\s+behandeling|combine.*information|informatie\s+combineren",
+    re.IGNORECASE,
+)
+_PERSONAL_INTERPRETATION_RE = re.compile(
+    r"voor\s+mij\b|mijn\s+kans|mijn\s+risico|wat\s+betekent.*voor\s+mij|mijn\s+overlevingskans|mijn\s+prognose",
+    re.IGNORECASE,
+)
+_PERSONAL_ADVICE_RE = re.compile(
+    r"als\s+jij\s+mij\s+was|zou\s+je.*dan|wat\s+raad\s+je.*aan|would\s+you\s+recommend|what\s+would\s+you",
+    re.IGNORECASE,
+)
+_IMPOSSIBLE_PREMISE_PATTERNS: list[tuple[re.Pattern, str, str]] = [
+    (
+        re.compile(r"vrouwen.*prostaatkanker", re.IGNORECASE),
+        "prostaatkanker",
+        "Prostaatkanker komt uitsluitend voor bij personen met een prostaat.",
+    ),
+    (
+        re.compile(r"mannen.*baarmoeder(hals)?kanker", re.IGNORECASE),
+        "baarmoederkanker",
+        "Baarmoeder(hals)kanker komt uitsluitend voor bij personen met een baarmoeder.",
+    ),
+    (
+        re.compile(r"mannen.*eierstokkanker", re.IGNORECASE),
+        "eierstokkanker",
+        "Eierstokkanker komt uitsluitend voor bij personen met eierstokken.",
+    ),
+]
+_NO_SOURCE_EXPLICIT_RE = re.compile(
+    r"niet\s+in\s+je\s+bronnen|not\s+in\s+your\s+sources|als\s+het\s+niet\s+in.*bronnen|buiten.*bronnen",
+    re.IGNORECASE,
+)
+
+
+def classify_prompt(query: str) -> tuple[str | None, str | None]:
+    """Detect banned prompt categories and return a hard-coded response.
+
+    Returns (category, hard_response) or (None, None) when no ban applies.
+    """
+    q = query.strip()
+
+    # 1. Impossible biological premise
+    for pattern, cancer_type, correction in _IMPOSSIBLE_PREMISE_PATTERNS:
+        if pattern.search(q):
+            return (
+                "impossible_premise",
+                f"Uw vraag bevat een onjuiste medische aanname. {correction}",
+            )
+
+    # 2. Personal advice requests
+    if _PERSONAL_ADVICE_RE.search(q):
+        return (
+            "personal_advice",
+            "Ik kan geen persoonlijk advies geven. Behandelbeslissingen zijn persoonlijk "
+            "— bespreek dit met uw behandelteam of huisarts.\n\n"
+            "Let op: deze informatie is informatief en vervangt geen medisch advies.",
+        )
+
+    # 3. Personal interpretation of statistics/risk
+    if _PERSONAL_INTERPRETATION_RE.search(q):
+        return (
+            "personal_interpretation",
+            "Ik kan geen persoonlijke interpretatie geven van medische gegevens. "
+            "Bespreek dit met uw arts of verpleegkundige.\n\n"
+            "Let op: deze informatie is informatief en vervangt geen medisch advies.",
+        )
+
+    # 4. Summarization requests
+    if _SUMMARIZATION_RE.search(q):
+        return (
+            "summarization",
+            "Ik mag geen samenvattingen maken van bronmateriaal. "
+            "Hieronder vindt u de directe bronnen over dit onderwerp:",
+        )
+
+    # 5. Synthesis / best-treatment requests
+    if _SYNTHESIS_RE.search(q):
+        return (
+            "synthesis",
+            "Ik mag geen bronnen combineren of behandeladvies geven. "
+            "Bespreek behandelopties met uw behandelteam.\n\n"
+            "Let op: deze informatie is informatief en vervangt geen medisch advies.",
+        )
+
+    # 6. Explicit "not in your sources" framing
+    if _NO_SOURCE_EXPLICIT_RE.search(q):
+        return (
+            "no_source_explicit",
+            "Geen exacte match gevonden in de goedgekeurde bronnen.\n\n"
+            "Let op: deze informatie is informatief en vervangt geen medisch advies.",
+        )
+
+    return (None, None)
+
 
 # ---------------------------------------------------------------------------
 # Tool definitions for Claude tool_use API
@@ -230,23 +356,15 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "ask_clarification",
         "description": (
-            "Stel de gebruiker een verduidelijkende vraag. Gebruik in TWEE situaties: "
+            "Stel ALLEEN een verduidelijkende vraag. Geef GEEN antwoord, samenvatting of uitleg vooraf. "
+            "Gebruik in TWEE situaties: "
             "(1) De vraag is te breed of vaag (bijv. 'kanker', 'behandeling'). "
-            "(2) De gevonden bronnen beantwoorden de vraag NIET goed — bijv. bronnen over "
-            "vermoeidheid bij vaginakanker terwijl de vraag gaat over vermoeidheid bij chemotherapie. "
-            "In geval 2: leg kort uit dat de beschikbare info beperkt is, en vraag om specificatie "
-            "(kankersoort, behandeltype, etc.) zodat je gerichter kunt zoeken."
+            "(2) De gevonden bronnen beantwoorden de vraag NIET goed. "
+            "Vraag om specificatie (kankersoort, behandeltype, etc.) zodat je gerichter kunt zoeken."
         ),
         "input_schema": {
             "type": "object",
             "properties": {
-                "brief_answer": {
-                    "type": "string",
-                    "description": (
-                        "Een kort algemeen antwoord (2-3 zinnen) op de brede vraag, "
-                        "voordat je de vervolgvraag stelt."
-                    ),
-                },
                 "clarification_question": {
                     "type": "string",
                     "description": (
@@ -316,6 +434,39 @@ TOOLS: list[dict[str, Any]] = [
             "required": ["domains"],
         },
     },
+    {
+        "name": "explore_knowledge_graph",
+        "description": (
+            "Doorzoek de medische kennisgraaf voor relaties tussen kankersoorten, behandelingen, "
+            "symptomen en stadia. Gebruik dit als AANVULLING op search_cancer_info om structurele "
+            "verbanden te vinden — bijv. welke behandelingen een kankersoort heeft, welke symptomen "
+            "voorkomen, of hoe entiteiten met elkaar verbonden zijn. "
+            "Het resultaat bevat entiteiten, relaties en bron-URLs."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "entity_name": {
+                    "type": "string",
+                    "description": (
+                        "Naam van de entiteit om te verkennen (kankersoort, behandeling, symptoom). "
+                        "Bijv. 'borstkanker', 'chemotherapie', 'vermoeidheid'."
+                    ),
+                },
+                "search_type": {
+                    "type": "string",
+                    "enum": ["related", "cancer_info", "search"],
+                    "description": (
+                        "Type zoekopdracht: "
+                        "'related' = vind gerelateerde entiteiten, "
+                        "'cancer_info' = haal alle info over een kankersoort op, "
+                        "'search' = fuzzy zoeken op entiteitnaam."
+                    ),
+                },
+            },
+            "required": ["entity_name"],
+        },
+    },
 ]
 
 # Regex to find [SRC-N] references in answer text
@@ -340,6 +491,20 @@ class MedicalAnswerOrchestrator:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.retriever = HybridMedicalRetriever(settings)
+
+        # GraphRAG retriever — optional
+        self.graph_retriever = None
+        if _GraphRetriever is not None:
+            try:
+                self.graph_retriever = _GraphRetriever(settings)
+                if not self.graph_retriever.available:
+                    self.graph_retriever = None
+                    logger.info("GraphRetriever initialized but Neo4j not available — graph features disabled.")
+                else:
+                    logger.info("GraphRetriever initialized successfully.")
+            except Exception as exc:
+                logger.warning("Failed to initialize GraphRetriever: %s", exc)
+                self.graph_retriever = None
 
     # ------------------------------------------------------------------
     # Anthropic client (lazy)
@@ -384,6 +549,35 @@ class MedicalAnswerOrchestrator:
                         icon=c.get("icon"),
                     ))
 
+        # ---- Step 0.5: Early return for treatment_decision red flags ----
+        if flag_type == "treatment_decision":
+            routing = get_routing_info(flag_type)
+            msg = routing.get("message", "") if routing else ""
+            return AnswerResponse(
+                query=query,
+                audience=audience,
+                answer_markdown=(
+                    msg or "Behandelbeslissingen zijn persoonlijk — bespreek dit met uw behandelteam."
+                ) + "\n\nLet op: deze informatie is informatief en vervangt geen medisch advies.",
+                contacts=contacts,
+                severity=severity,
+                notes=["Treatment decision detected; hard refusal without LLM."],
+            )
+
+        # ---- Step 0.6: Pre-classify prompt for banned categories ------
+        ban_category, ban_response = classify_prompt(query)
+
+        if ban_category and ban_category not in ("summarization", "impossible_premise"):
+            # Pure refusal — no retrieval or LLM needed
+            return AnswerResponse(
+                query=query,
+                audience=audience,
+                answer_markdown=ban_response,
+                contacts=contacts,
+                severity=severity,
+                notes=[f"Pre-classified as '{ban_category}'; hard refusal."],
+            )
+
         # ---- Step 1: Retrieve evidence --------------------------------
         retrieval = self.retriever.retrieve(query=query, audience=audience, limit=limit)
 
@@ -423,6 +617,23 @@ class MedicalAnswerOrchestrator:
                 audience=audience,
                 refusal_reason="Geen relevante bronnen gevonden.",
                 notes=notes,
+            )
+
+        # ---- Step 2.1: Handle banned categories that need source links -
+        if ban_category in ("summarization", "impossible_premise"):
+            # Return hard response with source links attached (no LLM)
+            source_links = "\n".join(
+                f"- [SRC-{idx}] {hit.document.title}: {hit.document.provenance.url}"
+                for idx, hit in enumerate(retrieval.hits, start=1)
+            )
+            answer_text = f"{ban_response}\n\n{source_links}"
+            answer_text += "\n\nLet op: deze informatie is informatief en vervangt geen medisch advies."
+            return AnswerResponse(
+                query=query,
+                audience=audience,
+                answer_markdown=answer_text,
+                citations=all_provenances,
+                notes=[f"Pre-classified as '{ban_category}'; hard refusal with source links."],
             )
 
         # ---- Step 2.5: Detect source mismatch -------------------------
@@ -491,6 +702,9 @@ class MedicalAnswerOrchestrator:
             client, response, query, audience, evidence_lines, notes
         )
 
+        # ---- Step 4.5: Post-process — strip forbidden patterns ---------
+        answer_text = self._validate_output(answer_text)
+
         # ---- Step 5: Map [SRC-N] references to provenances -----------
         cited_provenances = self._extract_cited_provenances(
             answer_text, all_provenances
@@ -541,7 +755,7 @@ class MedicalAnswerOrchestrator:
                 # Capture clarification data before executing
                 if block.name == "ask_clarification":
                     clarification = ClarificationData(
-                        brief_answer=block.input.get("brief_answer"),
+                        brief_answer=None,
                         question=block.input.get("clarification_question", ""),
                         options=block.input.get("options", []),
                         category=block.input.get("category", "other"),
@@ -602,6 +816,51 @@ class MedicalAnswerOrchestrator:
         return answer_text, clarification
 
     # ------------------------------------------------------------------
+    # Post-processing output validator
+    # ------------------------------------------------------------------
+
+    _FORBIDDEN_OUTPUT_RE = re.compile(
+        r"|".join([
+            r"Dit\s+betekent\s+dat",
+            r"Met\s+andere\s+woorden",
+            r"Kort\s+gezegd",
+            r"Samenvattend",
+            r"In\s+het\s+kort",
+            r"Dit\s+wil\s+zeggen",
+            r"Dat\s+houdt\s+in\s+dat",
+            r"Maar\s+u\s+kunt\s+wel",
+            r"Wat\s+u\s+wel\s+kunt\s+doen",
+            r"Het\s+is\s+belangrijk\s+om",
+            r"Overweeg\s+om",
+            r"U\s+kunt\s+overwegen",
+            r"Voor\s+u\s+persoonlijk",
+            r"In\s+uw\s+geval",
+            r"Op\s+basis\s+van\s+uw",
+        ]),
+        re.IGNORECASE,
+    )
+
+    def _validate_output(self, text: str | None) -> str | None:
+        """Strip forbidden explanatory/advisory patterns from LLM output."""
+        if not text:
+            return text
+        match = self._FORBIDDEN_OUTPUT_RE.search(text)
+        if match:
+            # Truncate at the first forbidden pattern
+            truncated = text[: match.start()].rstrip()
+            if truncated:
+                # Keep what came before (likely the source references)
+                return truncated + (
+                    "\n\nLet op: deze informatie is informatief en vervangt geen medisch advies."
+                )
+            # Nothing useful before the forbidden pattern
+            return (
+                "Neem voor verdere informatie contact op met uw behandelteam of huisarts.\n\n"
+                "Let op: deze informatie is informatief en vervangt geen medisch advies."
+            )
+        return text
+
+    # ------------------------------------------------------------------
     # Tool execution
     # ------------------------------------------------------------------
 
@@ -620,6 +879,8 @@ class MedicalAnswerOrchestrator:
                 return self._tool_lastmeter_assess(tool_input)
             elif tool_name == "ask_clarification":
                 return self._tool_ask_clarification(tool_input)
+            elif tool_name == "explore_knowledge_graph":
+                return self._tool_explore_graph(tool_input)
             else:
                 return {"error": f"Unknown tool: {tool_name}"}
         except Exception as exc:
@@ -664,6 +925,8 @@ class MedicalAnswerOrchestrator:
                     "stat_type": stat_type,
                 },
                 "source": "NKR Cijfers IKNL",
+                "source_url": "https://nkr-cijfers.iknl.nl/",
+                "instruction": "Presenteer ALLEEN de exacte cijfers met bronvermelding. Geen uitleg.",
             }
         except Exception as exc:
             return {"error": f"NKR API unavailable: {exc}"}
@@ -845,6 +1108,35 @@ class MedicalAnswerOrchestrator:
             "options": input_data.get("options", []),
             "category": input_data.get("category", "other"),
         }
+
+    def _tool_explore_graph(self, input_data: dict[str, Any]) -> dict[str, Any]:
+        """Execute explore_knowledge_graph tool via GraphRetriever."""
+        if not self.graph_retriever:
+            return {"error": "Knowledge graph not available", "entities": [], "relationships": []}
+
+        entity_name = input_data.get("entity_name", "")
+        search_type = input_data.get("search_type", "related")
+
+        try:
+            if search_type == "cancer_info":
+                result = self.graph_retriever.get_cancer_type_info(entity_name)
+            elif search_type == "search":
+                entities = self.graph_retriever.search_entities(entity_name, limit=10)
+                result = {"entities": entities, "relationships": [], "sources": []}
+                # Collect sources from entities
+                for ent in entities:
+                    result["sources"].extend(ent.get("sources", []))
+                result["sources"] = list(set(result["sources"]))[:20]
+            else:  # "related" (default)
+                result = self.graph_retriever.find_related(entity_name, max_hops=2)
+
+            return {
+                "source": "Neo4j Knowledge Graph",
+                **result,
+            }
+        except Exception as exc:
+            logger.warning("explore_knowledge_graph failed: %s", exc)
+            return {"error": str(exc), "entities": [], "relationships": []}
 
     def _tool_lastmeter_assess(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """Execute lastmeter_assess tool — find resources for patient distress domains."""

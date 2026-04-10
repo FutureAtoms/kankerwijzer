@@ -43,6 +43,43 @@ STATS_KEYWORDS = [
     "sterfte",
 ]
 
+STAT_TYPE_KEYWORDS: dict[str, list[str]] = {
+    "stadiumverdeling": [
+        "stage distribution",
+        "stadiumverdeling",
+        "verdeling per stadium",
+        "distribution per stadium",
+    ],
+    "overleving": [
+        "overleving",
+        "survival",
+        "5-year survival",
+        "5 jaarsoverleving",
+        "5-jaars",
+    ],
+    "sterfte": [
+        "sterfte",
+        "mortaliteit",
+        "mortality",
+        "deaths",
+        "death rate",
+    ],
+    "prevalentie": [
+        "prevalentie",
+        "prevalence",
+    ],
+    "incidentie": [
+        "incidentie",
+        "hoeveel",
+        "aantal",
+        "how many",
+        "new cases",
+        "new diagnoses",
+        "diagnoses",
+        "gevallen",
+    ],
+}
+
 # Keywords that suggest a geographic / regional query
 GEO_KEYWORDS = [
     "regio",
@@ -56,43 +93,22 @@ GEO_KEYWORDS = [
 ]
 
 IN_SCOPE_KEYWORDS = [
-    "kanker",
-    "tumor",
-    "oncolog",
-    "chemotherapie",
-    "chemo",
-    "immunotherapie",
-    "bestraling",
-    "radiotherapie",
-    "operatie",
-    "behandeling",
-    "bijwerking",
-    "symptoom",
-    "diagnose",
-    "uitzaai",
-    "stadium",
-    "screening",
-    "onderzoek",
-    "coloscopie",
-    "mammo",
-    "borst",
-    "darm",
-    "long",
-    "prostaat",
-    "melanoom",
-    "huidkanker",
-    "lastmeter",
-    "vermoeid",
-    "misselijk",
-    "pijn",
-    "nkr",
-    "incidentie",
-    "overleving",
-    "sterfte",
-    "richtlijn",
-    "guideline",
-    "atlas",
-    "postcode",
+    # Dutch
+    "kanker", "tumor", "oncolog", "chemotherapie", "chemo",
+    "immunotherapie", "bestraling", "radiotherapie", "operatie",
+    "behandeling", "bijwerking", "symptoom", "diagnose", "uitzaai",
+    "stadium", "screening", "onderzoek", "coloscopie", "mammo",
+    "borst", "darm", "long", "prostaat", "melanoom", "huidkanker",
+    "lastmeter", "vermoeid", "misselijk", "pijn", "nkr",
+    "incidentie", "overleving", "sterfte", "richtlijn", "atlas", "postcode",
+    # English
+    "cancer", "oncology", "tumor", "tumour", "chemotherapy",
+    "immunotherapy", "radiation", "surgery", "treatment", "side effect",
+    "symptom", "diagnosis", "metasta", "staging", "screening",
+    "breast", "lung", "colon", "colorectal", "prostate", "melanoma",
+    "skin cancer", "lymphoma", "leukemia", "leukaemia",
+    "survival", "incidence", "mortality", "prevalence", "guideline",
+    "carcinoma", "sarcoma", "myeloma", "blastoma",
 ]
 
 # Pattern to detect 3-4 digit postcode-like numbers
@@ -100,6 +116,46 @@ _POSTCODE_RE = re.compile(r"\b\d{3,4}\b")
 
 # Pattern to detect year-like 4-digit numbers (1900-2099)
 _YEAR_RE = re.compile(r"\b(19|20)\d{2}\b")
+
+NKR_VIEWER_URLS: dict[str, str] = {
+    "incidentie": "https://nkr-cijfers.iknl.nl/viewer/incidentie-per-jaar",
+    "prevalentie": "https://nkr-cijfers.iknl.nl/viewer/prevalentie-per-jaar",
+    "sterfte": "https://nkr-cijfers.iknl.nl/viewer/sterfte-per-jaar",
+    "overleving": "https://nkr-cijfers.iknl.nl/viewer/overleving-per-jaar",
+    "stadiumverdeling": "https://nkr-cijfers.iknl.nl/viewer/incidentie-verdeling-per-stadium",
+}
+
+CANCER_TYPE_ALIASES: dict[str, tuple[str, ...]] = {
+    "alle": ("alle kankersoorten", "all cancers", "all cancer types"),
+    "borstkanker": ("borstkanker", "breast cancer"),
+    "longkanker": ("longkanker", "lung cancer"),
+    "darmkanker": ("darmkanker", "colon cancer", "bowel cancer", "colorectal cancer"),
+    "dikkedarmkanker": ("dikkedarmkanker", "colon carcinoma"),
+    "endeldarmkanker": ("endeldarmkanker", "rectal cancer"),
+    "prostaatkanker": ("prostaatkanker", "prostate cancer", "prostate carcinoma"),
+    "blaaskanker": ("blaaskanker", "bladder cancer"),
+    "nierkanker": ("nierkanker", "kidney cancer", "renal cancer"),
+    "melanoom": ("melanoom", "melanoma"),
+    "huidkanker": ("huidkanker", "skin cancer"),
+    "maagkanker": ("maagkanker", "stomach cancer", "gastric cancer"),
+    "slokdarmkanker": ("slokdarmkanker", "esophageal cancer", "oesophageal cancer"),
+    "alvleesklierkanker": ("alvleesklierkanker", "pancreatic cancer"),
+    "leverkanker": ("leverkanker", "liver cancer"),
+    "eierstokkanker": ("eierstokkanker", "ovarian cancer"),
+    "baarmoederhalskanker": ("baarmoederhalskanker", "cervical cancer"),
+    "baarmoederkanker": ("baarmoederkanker", "endometrial cancer", "uterine cancer"),
+    "schildklierkanker": ("schildklierkanker", "thyroid cancer"),
+    "leukemie": ("leukemie", "leukemia"),
+    "hodgkinlymfoom": ("hodgkinlymfoom", "hodgkin lymphoma"),
+    "non-hodgkinlymfoom": ("non-hodgkinlymfoom", "non-hodgkin lymphoma"),
+    "hersenkanker": ("hersenkanker", "brain cancer"),
+    "keelkanker": ("keelkanker", "throat cancer"),
+}
+
+SEX_ALIASES: dict[str, tuple[str, ...]] = {
+    "vrouw": ("vrouw", "vrouwen", "female", "women", "woman"),
+    "man": ("man", "mannen", "male", "men"),
+}
 
 
 class HybridMedicalRetriever:
@@ -176,6 +232,14 @@ class HybridMedicalRetriever:
             # Skip legacy patterns — the agent's Lastmeter tool will handle this
             pass
         else:
+            if not self._is_in_scope_query(query):
+                return RetrievalResponse(
+                    query=query,
+                    audience=audience,
+                    refusal_reason="Deze vraag valt buiten het onderwerp kanker en oncologische informatie.",
+                    notes=["Out-of-scope query detected before retrieval."],
+                )
+
             # ---- 2. Legacy unsafe-pattern detection -----------------------
             legacy_refusal = self._check_legacy_patterns(query)
             if legacy_refusal:
@@ -185,9 +249,6 @@ class HybridMedicalRetriever:
                     refusal_reason=legacy_refusal,
                     notes=["Unsafe prompt detected by legacy pattern matcher."],
                 )
-            # Note: removed the IN_SCOPE_KEYWORDS gate — it was too aggressive
-            # and blocked valid English cancer terms. The abstention threshold
-            # (step 5 below) handles truly off-topic queries instead.
 
         # ---- 3. Structured-first routing ------------------------------
         structured_hits = self._route_structured(query)
@@ -306,7 +367,20 @@ class HybridMedicalRetriever:
     @staticmethod
     def _is_in_scope_query(query: str) -> bool:
         query_lower = query.lower()
-        return any(keyword in query_lower for keyword in IN_SCOPE_KEYWORDS)
+        # Check scope keywords
+        if any(keyword in query_lower for keyword in IN_SCOPE_KEYWORDS):
+            return True
+        # Check cancer type aliases (bidirectional: alias in query OR query words in alias)
+        query_words = set(query_lower.split())
+        for aliases in CANCER_TYPE_ALIASES.values():
+            for alias in aliases:
+                if alias in query_lower:
+                    return True
+                # Also check if any query word appears in the alias
+                alias_words = set(alias.split())
+                if query_words & alias_words:
+                    return True
+        return False
 
     # ------------------------------------------------------------------
     # Structured routing (APIs beat embeddings for exactness)
@@ -346,14 +420,21 @@ class HybridMedicalRetriever:
     def _fetch_richtlijn(self, query_lower: str) -> list[SearchHit]:
         """Fetch a guideline overview page from Richtlijnendatabase."""
         guideline = self.richtlijn.scrape_guideline()
-        markdown = guideline.get("markdown", "")
-        title = guideline.get("metadata", {}).get("title") or "Richtlijnendatabase"
+        if isinstance(guideline, dict):
+            markdown = guideline.get("markdown", "")
+            title = guideline.get("metadata", {}).get("title") or "Richtlijnendatabase"
+            url = guideline.get("url") or self.richtlijn.EXAMPLE_GUIDELINE
+        else:
+            markdown = getattr(guideline, "markdown", "") or ""
+            metadata = getattr(guideline, "metadata", None)
+            title = getattr(metadata, "title", None) or "Richtlijnendatabase"
+            url = getattr(metadata, "url", None) or self.richtlijn.EXAMPLE_GUIDELINE
         excerpt = markdown[:400].replace("\n", " ").strip() or title
         return [
             self._build_structured_hit(
                 source_id="richtlijnendatabase",
                 title=title,
-                url=guideline.get("url") or self.richtlijn.EXAMPLE_GUIDELINE,
+                url=url,
                 text=markdown or title,
                 excerpt=excerpt,
             )
@@ -378,18 +459,16 @@ class HybridMedicalRetriever:
                 )
             ]
 
-        stage_data = self.nkr.example_stage_distribution()
-        text = str(stage_data)[:4000]
-        excerpt = (
-            "Structured NKR response fetched for incidence distribution per stadium "
-            "for all cancers in 2024."
-        )
+        stats_request = self._parse_nkr_request(query_lower)
+        data = self.nkr.query_statistics(**stats_request)
+        title = self._nkr_title_for_request(stats_request, data)
+        excerpt = self._nkr_excerpt_for_request(stats_request, data)
         return [
             self._build_structured_hit(
                 source_id="nkr-cijfers",
-                title="NKR Cijfers incidence distribution per stadium",
-                url="https://nkr-cijfers.iknl.nl/viewer/incidentie-verdeling-per-stadium",
-                text=text,
+                title=title,
+                url=NKR_VIEWER_URLS.get(stats_request["stat_type"], "https://nkr-cijfers.iknl.nl"),
+                text=str(data)[:4000],
                 excerpt=excerpt,
             )
         ]
@@ -412,6 +491,101 @@ class HybridMedicalRetriever:
                 excerpt=excerpt,
             )
         ]
+
+    @staticmethod
+    def _extract_year(query: str) -> int:
+        years = re.findall(r"\b(?:19|20)\d{2}\b", query)
+        if years:
+            return int(years[-1])
+        return 2024
+
+    @staticmethod
+    def _extract_sex(query: str) -> str:
+        for sex, aliases in SEX_ALIASES.items():
+            if any(alias in query for alias in aliases):
+                return sex
+        return "alle"
+
+    @staticmethod
+    def _extract_cancer_type(query: str) -> str:
+        for cancer_type, aliases in CANCER_TYPE_ALIASES.items():
+            if any(alias in query for alias in aliases):
+                return cancer_type
+        return "alle"
+
+    @staticmethod
+    def _extract_stat_type(query: str) -> str:
+        for stat_type, keywords in STAT_TYPE_KEYWORDS.items():
+            if any(keyword in query for keyword in keywords):
+                return stat_type
+        return "incidentie"
+
+    def _parse_nkr_request(self, query: str) -> dict[str, Any]:
+        return {
+            "cancer_type": self._extract_cancer_type(query),
+            "year": self._extract_year(query),
+            "sex": self._extract_sex(query),
+            "stat_type": self._extract_stat_type(query),
+        }
+
+    @staticmethod
+    def _nkr_title_for_request(request: dict[str, Any], data: dict[str, Any]) -> str:
+        title = data.get("title", {}) if isinstance(data, dict) else {}
+        if isinstance(title, dict) and title.get("title"):
+            return str(title["title"])
+        stat_type = request["stat_type"]
+        cancer_type = request["cancer_type"]
+        year = request["year"]
+        return f"NKR Cijfers {stat_type} voor {cancer_type} in {year}"
+
+    @staticmethod
+    def _nkr_excerpt_for_request(request: dict[str, Any], data: dict[str, Any]) -> str:
+        stat_type = request["stat_type"]
+        cancer_type = request["cancer_type"]
+        year = request["year"]
+        sex = request["sex"]
+
+        data_rows = data.get("data", []) if isinstance(data, dict) else []
+        readable_cancer = cancer_type.replace("kanker", "kanker").replace("-", " ")
+        readable_sex = {
+            "alle": "alle personen",
+            "vrouw": "vrouwen",
+            "man": "mannen",
+        }.get(sex, sex)
+
+        if stat_type == "stadiumverdeling":
+            parts: list[str] = []
+            for row in data_rows[:7]:
+                filter_values = row.get("filterValues", [])
+                stage_code = ""
+                if filter_values and isinstance(filter_values[0], dict):
+                    stage_code = filter_values[0].get("code", "")
+                stage = stage_code.split("/")[-1].upper() if stage_code else "onbekend"
+                value = row.get("value")
+                if value is not None:
+                    parts.append(f"{stage}: {value}%")
+            summary = ", ".join(parts) if parts else "geen data"
+            return (
+                f"Stadiumverdeling in {year} voor {readable_sex} met {readable_cancer}: {summary}."
+            )
+
+        first = data_rows[0] if data_rows else {}
+        value = first.get("value")
+        metric_label = {
+            "incidentie": "nieuwe diagnoses",
+            "prevalentie": "prevalente gevallen",
+            "sterfte": "sterfgevallen",
+            "overleving": "5-jaarsoverleving",
+        }.get(stat_type, stat_type)
+        if value is None:
+            return f"NKR respons voor {readable_cancer} ({metric_label}) in {year} voor {readable_sex}."
+        if stat_type == "overleving":
+            return (
+                f"{metric_label.capitalize()} in {year} voor {readable_sex} met {readable_cancer}: {value}%."
+            )
+        return (
+            f"{metric_label.capitalize()} in {year} voor {readable_sex} met {readable_cancer}: {int(value)}."
+        )
 
     # ------------------------------------------------------------------
     # Vector search

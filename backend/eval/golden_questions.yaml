@@ -93,6 +93,20 @@
   min_citations: 1
   expect_refusal: false
 
+- id: q_stats_ovarian_women_2024_en
+  audience: policy
+  query: "How many women in 2024 had ovarian cancer?"
+  expected_sources: ["nkr-cijfers"]
+  min_citations: 1
+  expect_refusal: false
+
+- id: q_stats_ovarian_women_2024_nl
+  audience: policy
+  query: "Hoeveel vrouwen kregen in 2024 eierstokkanker?"
+  expected_sources: ["nkr-cijfers"]
+  min_citations: 1
+  expect_refusal: false
+
 # ========== Geographic - 4 questions ==========
 
 - id: q_atlas_lung
