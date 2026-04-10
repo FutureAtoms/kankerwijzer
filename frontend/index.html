@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OncologieWijzer - Betrouwbare kankerinformatie van IKNL</title>
+    <title>OncologieWijzer - Reliable cancer information from IKNL</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -42,10 +42,10 @@
                     <button class="lang-btn active" id="lang-en" title="English">EN</button>
                 </div>
                 <div class="audience-selector">
-                    <label for="audience" data-i18n="audience_label">Doelgroep:</label>
+                    <label for="audience" data-i18n="audience_label">Audience:</label>
                     <select id="audience">
                         <option value="patient" selected data-i18n="audience_patient">Patient</option>
-                        <option value="professional" data-i18n="audience_professional">Zorgprofessional</option>
+                        <option value="professional" data-i18n="audience_professional">Healthcare professional</option>
                     </select>
                 </div>
             </div>
@@ -64,9 +64,9 @@
                 </button>
                 <div class="header-info">
                     <h1>OncologieWijzer</h1>
-                    <p class="subtitle" data-i18n="subtitle">Betrouwbare kankerinformatie van IKNL</p>
+                    <p class="subtitle" data-i18n="subtitle">Reliable cancer information from IKNL</p>
                 </div>
-                <div class="header-trust" data-i18n="header_trust">Alleen goedgekeurde bronnen</div>
+                <div class="header-trust" data-i18n="header_trust">Approved sources only</div>
                 <div class="header-actions">
                     <button class="btn-icon" id="btn-new-chat" title="Nieuw gesprek">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -82,29 +82,29 @@
                 <!-- Welcome Message -->
                 <div class="welcome-screen" id="welcome-screen">
                     <div class="welcome-onboarding">
-                        <h2 data-i18n="welcome_title">Welkom bij OncologieWijzer</h2>
-                        <p data-i18n="onboarding_intro">Bedankt dat u contact opneemt. Ik ben een AI-assistent van IKNL en help u betrouwbare informatie over kanker te vinden uit vertrouwde bronnen.</p>
+                        <h2 data-i18n="welcome_title">Welcome to OncologieWijzer</h2>
+                        <p data-i18n="onboarding_intro">Thank you for reaching out. I am an AI assistant from IKNL helping you find reliable cancer information from trusted sources.</p>
 
                         <div class="onboarding-disclaimer">
                             <span class="disclaimer-icon">&#x26A0;&#xFE0F;</span>
                             <div>
-                                <strong data-i18n="onboarding_important">Belangrijk om te weten:</strong>
+                                <strong data-i18n="onboarding_important">Important to know:</strong>
                                 <ul>
-                                    <li data-i18n="onboarding_not_doctor">Ik ben <strong>geen arts</strong> &#x2014; ik geef informatief advies, geen diagnose of behandelplan</li>
-                                    <li data-i18n="onboarding_every_patient">Elke pati&euml;nt is anders &#x2014; bespreek alles met uw <strong>huisarts of specialist</strong></li>
-                                    <li><span data-i18n="onboarding_not_urgent">Deze chatbot is <strong>niet voor spoed</strong> &#x2014; bel bij nood </span><a href="tel:112" class="onboarding-phone">112</a></li>
+                                    <li data-i18n="onboarding_not_doctor">I am <strong>not a doctor</strong> &#x2014; I provide informational guidance, not diagnosis or treatment plans</li>
+                                    <li data-i18n="onboarding_every_patient">Every patient is different &#x2014; always discuss everything with your <strong>GP or specialist</strong></li>
+                                    <li><span data-i18n="onboarding_not_urgent">This chatbot is <strong>not for emergencies</strong> &#x2014; call </span><a href="tel:112" class="onboarding-phone">112</a></li>
                                 </ul>
                             </div>
                         </div>
 
-                        <p data-i18n="onboarding_help">Waar kan ik u mee helpen? U kunt mij vragen stellen over:</p>
+                        <p data-i18n="onboarding_help">How can I help you? You can ask me about:</p>
 
                         <div class="welcome-topics" id="welcome-topics">
-                            <button class="clarification-btn welcome-topic-btn" data-topic="cancer_type" data-question-nl="Informatie over een kankersoort" data-question-en="Information about a cancer type" data-i18n="topic_cancer_type">Informatie over een kankersoort</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="treatment" data-question-nl="Behandelingen en bijwerkingen" data-question-en="Treatments and side effects" data-i18n="topic_treatment">Behandelingen en bijwerkingen</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="stats" data-question-nl="Cijfers en statistieken" data-question-en="Statistics and figures" data-i18n="topic_stats">Cijfers en statistieken</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="lastmeter" data-question-nl="Omgaan met klachten (Lastmeter)" data-question-en="Coping with complaints (Lastmeter)" data-i18n="topic_lastmeter">Omgaan met klachten (Lastmeter)</button>
-                            <button class="clarification-btn welcome-topic-btn" data-topic="guidelines" data-question-nl="Richtlijnen voor zorgprofessionals" data-question-en="Guidelines for professionals" data-i18n="topic_guidelines">Richtlijnen voor zorgprofessionals</button>
+                            <button class="clarification-btn welcome-topic-btn" data-topic="cancer_type" data-question-nl="Informatie over een kankersoort" data-question-en="Information about a cancer type" data-i18n="topic_cancer_type">Information about a cancer type</button>
+                            <button class="clarification-btn welcome-topic-btn" data-topic="treatment" data-question-nl="Behandelingen en bijwerkingen" data-question-en="Treatments and side effects" data-i18n="topic_treatment">Treatments and side effects</button>
+                            <button class="clarification-btn welcome-topic-btn" data-topic="stats" data-question-nl="Cijfers en statistieken" data-question-en="Statistics and figures" data-i18n="topic_stats">Statistics and figures</button>
+                            <button class="clarification-btn welcome-topic-btn" data-topic="lastmeter" data-question-nl="Omgaan met klachten (Lastmeter)" data-question-en="Coping with complaints (Lastmeter)" data-i18n="topic_lastmeter">Coping with complaints (Lastmeter)</button>
+                            <button class="clarification-btn welcome-topic-btn" data-topic="guidelines" data-question-nl="Richtlijnen voor zorgprofessionals" data-question-en="Guidelines for professionals" data-i18n="topic_guidelines">Guidelines for professionals</button>
                         </div>
                     </div>
                 </div>
@@ -118,9 +118,9 @@
                 <div class="prechat-lm-header">
                     <span class="prechat-lm-title">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                        Hoe voelt u zich vandaag? <span class="prechat-lm-optional">(optioneel)</span>
+                        How are you feeling today? <span class="prechat-lm-optional">(optional)</span>
                     </span>
-                    <button class="prechat-lm-dismiss" id="prechat-lm-dismiss" title="Verbergen">&times;</button>
+                    <button class="prechat-lm-dismiss" id="prechat-lm-dismiss" title="Hide">&times;</button>
                 </div>
                 <div class="prechat-lm-body">
                     <div class="prechat-lm-slider-group">
@@ -131,13 +131,13 @@
                     </div>
                     <div class="prechat-lm-concerns">
                         <label class="prechat-concern-label">
-                            <input type="checkbox" value="childcare" class="prechat-concern-cb" /> &#x1F476; Kinderopvang
+                            <input type="checkbox" value="childcare" class="prechat-concern-cb" /> &#x1F476; Childcare
                         </label>
                         <label class="prechat-concern-label">
-                            <input type="checkbox" value="work" class="prechat-concern-cb" /> &#x1F4BC; Werk/Financi&euml;n
+                            <input type="checkbox" value="work" class="prechat-concern-cb" /> &#x1F4BC; Work/Finances
                         </label>
                         <label class="prechat-concern-label">
-                            <input type="checkbox" value="fatigue" class="prechat-concern-cb" /> &#x1F634; Ernstige vermoeidheid
+                            <input type="checkbox" value="fatigue" class="prechat-concern-cb" /> &#x1F634; Severe fatigue
                         </label>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                 <div class="input-container">
                     <textarea
                         id="user-input"
-                        placeholder="Stel uw vraag over kanker..."
+                        placeholder="Ask your question about cancer..."
                         data-placeholder-nl="Stel uw vraag over kanker..."
                         data-placeholder-en="Ask your question about cancer..."
                         rows="1"
@@ -162,7 +162,7 @@
                     </button>
                 </div>
                 <div class="disclaimer" data-i18n="disclaimer">
-                    Deze informatie is informatief en vervangt geen medisch advies. Raadpleeg altijd uw arts.
+                    This information is for informational purposes and does not replace medical advice. Always consult your doctor.
                 </div>
             </div>
         </main>
