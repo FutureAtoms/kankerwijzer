@@ -254,7 +254,8 @@
         var citations = data.citations || [];
         var confidence = data.confidence;
         var confidenceLabel = data.confidence_label;
-        addAIMessage(answer, citations, confidence, confidenceLabel);
+        var clarification = data.clarification || null;
+        addAIMessage(answer, citations, confidence, confidenceLabel, clarification);
     }
 
     // ===== Message Rendering =====
@@ -267,7 +268,7 @@
         scrollToBottom();
     }
 
-    function addAIMessage(markdown, citations, confidence, confidenceLabel) {
+    function addAIMessage(markdown, citations, confidence, confidenceLabel, clarification) {
         messageCount++;
         var msgId = 'msg-' + messageCount;
 
@@ -310,6 +311,11 @@
         // Convert option-like list items into clickable suggestion buttons
         addClickableOptions(bubble);
 
+        // Render structured clarification options if present
+        if (clarification && clarification.options && clarification.options.length > 0) {
+            renderClarificationButtons(bubble, clarification);
+        }
+
         // Citations section with per-source relevance
         if (citations.length > 0) {
             var citationsEl = renderCitations(citations);
@@ -325,6 +331,33 @@
 
         messagesEl.appendChild(div);
         scrollToBottom();
+    }
+
+    /**
+     * Render structured clarification options as clickable buttons.
+     * Each button sends the option text as a new query to the orchestrator.
+     */
+    function renderClarificationButtons(bubble, clarification) {
+        // Remove any heuristic-detected options to avoid duplicates
+        var existing = bubble.querySelectorAll('.clarification-options');
+        existing.forEach(function (el) { el.remove(); });
+
+        var container = document.createElement('div');
+        container.className = 'clarification-options';
+
+        clarification.options.forEach(function (option) {
+            var btn = document.createElement('button');
+            btn.className = 'clarification-btn';
+            btn.textContent = option;
+            btn.addEventListener('click', function () {
+                userInput.value = option;
+                onInputChange();
+                onSend();
+            });
+            container.appendChild(btn);
+        });
+
+        bubble.appendChild(container);
     }
 
     function getConfidenceClass(label) {

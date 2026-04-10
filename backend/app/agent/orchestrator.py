@@ -9,7 +9,7 @@ from typing import Any
 
 from app.config import Settings
 from app.lastmeter import DOMAIN_RESOURCES, LASTMETER_DOMAINS, _get_dataset
-from app.models import AnswerResponse, ContactInfo, Provenance
+from app.models import AnswerResponse, ClarificationData, ContactInfo, Provenance
 from app.retrieval.hybrid import HybridMedicalRetriever
 from app.safety.red_flags import check_red_flags, get_routing_info
 
@@ -427,7 +427,7 @@ class MedicalAnswerOrchestrator:
             )
 
         # ---- Step 4: Handle tool_use blocks (if Claude wants to call tools)
-        answer_text = self._process_response(
+        answer_text, clarification = self._process_response(
             client, response, query, audience, evidence_lines, notes
         )
 
@@ -449,6 +449,7 @@ class MedicalAnswerOrchestrator:
             confidence=confidence,
             confidence_label=confidence_label,
             notes=notes,
+            clarification=clarification,
         )
 
     # ------------------------------------------------------------------
@@ -463,16 +464,29 @@ class MedicalAnswerOrchestrator:
         audience: str,
         evidence_lines: list[str],
         notes: list[str],
-    ) -> str | None:
-        """Extract answer text, handling tool_use if Claude requests it."""
+    ) -> tuple[str | None, ClarificationData | None]:
+        """Extract answer text, handling tool_use if Claude requests it.
+
+        Returns (answer_text, clarification_data).
+        """
 
         text_parts: list[str] = []
         tool_results: list[dict[str, Any]] = []
+        clarification: ClarificationData | None = None
 
         for block in response.content:
             if getattr(block, "type", None) == "text":
                 text_parts.append(block.text)
             elif getattr(block, "type", None) == "tool_use":
+                # Capture clarification data before executing
+                if block.name == "ask_clarification":
+                    clarification = ClarificationData(
+                        brief_answer=block.input.get("brief_answer"),
+                        question=block.input.get("clarification_question", ""),
+                        options=block.input.get("options", []),
+                        category=block.input.get("category", "other"),
+                        suggested_search=block.input.get("suggested_search"),
+                    )
                 # Execute the tool call server-side
                 tool_result = self._execute_tool(block.name, block.input, notes)
                 tool_results.append(
@@ -509,13 +523,23 @@ class MedicalAnswerOrchestrator:
                 for block in follow_up.content:
                     if getattr(block, "type", None) == "text":
                         text_parts.append(block.text)
+                    elif getattr(block, "type", None) == "tool_use":
+                        if block.name == "ask_clarification":
+                            clarification = ClarificationData(
+                                brief_answer=block.input.get("brief_answer"),
+                                question=block.input.get("clarification_question", ""),
+                                options=block.input.get("options", []),
+                                category=block.input.get("category", "other"),
+                                suggested_search=block.input.get("suggested_search"),
+                            )
 
                 notes.append("Tool-use round completed.")
             except Exception as exc:
                 logger.exception("Follow-up Claude call failed")
                 notes.append(f"Tool follow-up error: {exc}")
 
-        return "\n".join(text_parts).strip() if text_parts else None
+        answer_text = "\n".join(text_parts).strip() if text_parts else None
+        return answer_text, clarification
 
     # ------------------------------------------------------------------
     # Tool execution
