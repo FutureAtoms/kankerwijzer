@@ -410,12 +410,32 @@
         var container = document.createElement('div');
         container.className = 'clarification-options';
 
+        // Build context prefix from the clarification category
+        var contextPrefix = '';
+        switch (clarification.category) {
+            case 'cancer_type':
+                contextPrefix = currentLang === 'nl' ? 'Informatie over ' : 'Information about ';
+                break;
+            case 'treatment':
+                contextPrefix = currentLang === 'nl' ? 'Behandeling bij ' : 'Treatment for ';
+                break;
+            case 'side_effects':
+                contextPrefix = currentLang === 'nl' ? 'Bijwerkingen van ' : 'Side effects of ';
+                break;
+            case 'source_mismatch':
+                contextPrefix = currentLang === 'nl' ? 'Informatie over ' : 'Information about ';
+                break;
+            default:
+                contextPrefix = '';
+        }
+
         clarification.options.forEach(function (option) {
             var btn = document.createElement('button');
             btn.className = 'clarification-btn';
             btn.textContent = option;
             btn.addEventListener('click', function () {
-                userInput.value = option;
+                // Send option with context so the query is specific enough
+                userInput.value = contextPrefix + option;
                 onInputChange();
                 onSend();
             });

@@ -176,14 +176,6 @@ class HybridMedicalRetriever:
             # Skip legacy patterns — the agent's Lastmeter tool will handle this
             pass
         else:
-            if not self._is_in_scope_query(query):
-                return RetrievalResponse(
-                    query=query,
-                    audience=audience,
-                    refusal_reason="Deze vraag valt buiten het onderwerp kanker en oncologische informatie.",
-                    notes=["Out-of-scope query detected before retrieval."],
-                )
-
             # ---- 2. Legacy unsafe-pattern detection -----------------------
             legacy_refusal = self._check_legacy_patterns(query)
             if legacy_refusal:
@@ -193,6 +185,9 @@ class HybridMedicalRetriever:
                     refusal_reason=legacy_refusal,
                     notes=["Unsafe prompt detected by legacy pattern matcher."],
                 )
+            # Note: removed the IN_SCOPE_KEYWORDS gate — it was too aggressive
+            # and blocked valid English cancer terms. The abstention threshold
+            # (step 5 below) handles truly off-topic queries instead.
 
         # ---- 3. Structured-first routing ------------------------------
         structured_hits = self._route_structured(query)
