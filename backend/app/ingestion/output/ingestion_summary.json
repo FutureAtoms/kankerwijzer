@@ -1,0 +1,32 @@
+{
+  "started_at": "2026-04-10T10:36:44.025335+00:00",
+  "phases": {
+    "kanker.nl": {
+      "documents": 2816,
+      "chunks": 7469
+    },
+    "iknl-reports": {
+      "documents": 3,
+      "chunks": 368
+    },
+    "scientific-publications": {
+      "documents": 5,
+      "chunks": 232
+    },
+    "nkr-cijfers": {
+      "documents": 10,
+      "chunks": 10
+    },
+    "kankeratlas": {
+      "documents": 26,
+      "chunks": 26
+    }
+  },
+  "elapsed_seconds": 4.04,
+  "finished_at": "2026-04-10T10:36:48.068521+00:00",
+  "totals": {
+    "sources": 5,
+    "documents": 2861,
+    "chunks": 8106
+  }
+}
