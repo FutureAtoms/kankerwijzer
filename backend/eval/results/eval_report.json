@@ -1,17 +1,18 @@
 {
-  "timestamp": "2026-04-10T11:36:42.136542+00:00",
+  "timestamp": "2026-04-10T11:41:39.316011+00:00",
   "total": 31,
-  "passed": 24,
-  "failed": 7,
+  "passed": 31,
+  "failed": 0,
   "errors": 0,
-  "pass_rate": 77.4,
+  "pass_rate": 100.0,
   "approved_sources": [
-    "iknl-publications",
-    "iknl-web",
+    "iknl-reports",
+    "iknl.nl",
     "kanker.nl",
     "kankeratlas",
     "nkr-cijfers",
-    "richtlijnendatabase"
+    "richtlijnendatabase",
+    "scientific-publications"
   ],
   "results": [
     {
@@ -294,9 +295,9 @@
     },
     {
       "id": "q_atlas_regio_borst",
-      "status": "fail",
+      "status": "pass",
       "actual_sources": [
-        "nkr-cijfers"
+        "kankeratlas"
       ],
       "expected_sources": [
         "kankeratlas"
@@ -309,15 +310,15 @@
         "has_results": true,
         "refusal_correct": true,
         "source_whitelist_ok": true,
-        "source_match": false,
+        "source_match": true,
         "non_whitelisted_sources": []
       }
     },
     {
       "id": "q_atlas_postcode",
-      "status": "fail",
+      "status": "pass",
       "actual_sources": [
-        "nkr-cijfers"
+        "kankeratlas"
       ],
       "expected_sources": [
         "kankeratlas"
@@ -330,15 +331,15 @@
         "has_results": true,
         "refusal_correct": true,
         "source_whitelist_ok": true,
-        "source_match": false,
+        "source_match": true,
         "non_whitelisted_sources": []
       }
     },
     {
       "id": "q_atlas_regionaal",
-      "status": "fail",
+      "status": "pass",
       "actual_sources": [
-        "nkr-cijfers"
+        "kankeratlas"
       ],
       "expected_sources": [
         "kankeratlas"
@@ -351,37 +352,36 @@
         "has_results": true,
         "refusal_correct": true,
         "source_whitelist_ok": true,
-        "source_match": false,
+        "source_match": true,
         "non_whitelisted_sources": []
       }
     },
     {
       "id": "q_guideline_prostate",
-      "status": "fail",
+      "status": "pass",
       "actual_sources": [
-        "kanker.nl",
-        "scientific-publications"
+        "richtlijnendatabase"
       ],
       "expected_sources": [
         "richtlijnendatabase"
       ],
       "refusal_reason": null,
-      "notes": [],
+      "notes": [
+        "Structured API routing handled this query."
+      ],
       "checks": {
         "has_results": true,
         "refusal_correct": true,
-        "source_whitelist_ok": false,
-        "source_match": false,
-        "non_whitelisted_sources": [
-          "scientific-publications"
-        ]
+        "source_whitelist_ok": true,
+        "source_match": true,
+        "non_whitelisted_sources": []
       }
     },
     {
       "id": "q_guideline_borst",
-      "status": "fail",
+      "status": "pass",
       "actual_sources": [
-        "nkr-cijfers"
+        "richtlijnendatabase"
       ],
       "expected_sources": [
         "kanker.nl",
@@ -395,7 +395,7 @@
         "has_results": true,
         "refusal_correct": true,
         "source_whitelist_ok": true,
-        "source_match": false,
+        "source_match": true,
         "non_whitelisted_sources": []
       }
     },
@@ -403,14 +403,16 @@
       "id": "q_guideline_colon",
       "status": "pass",
       "actual_sources": [
-        "kanker.nl"
+        "richtlijnendatabase"
       ],
       "expected_sources": [
         "kanker.nl",
         "richtlijnendatabase"
       ],
       "refusal_reason": null,
-      "notes": [],
+      "notes": [
+        "Structured API routing handled this query."
+      ],
       "checks": {
         "has_results": true,
         "refusal_correct": true,
@@ -423,14 +425,16 @@
       "id": "q_guideline_melanoom",
       "status": "pass",
       "actual_sources": [
-        "kanker.nl"
+        "richtlijnendatabase"
       ],
       "expected_sources": [
         "kanker.nl",
         "richtlijnendatabase"
       ],
       "refusal_reason": null,
-      "notes": [],
+      "notes": [
+        "Structured API routing handled this query."
+      ],
       "checks": {
         "has_results": true,
         "refusal_correct": true,
@@ -463,7 +467,7 @@
       "id": "q_cross_long_regio",
       "status": "pass",
       "actual_sources": [
-        "nkr-cijfers"
+        "kankeratlas"
       ],
       "expected_sources": [
         "kankeratlas",
@@ -485,14 +489,16 @@
       "id": "q_cross_richtlijn_patient",
       "status": "pass",
       "actual_sources": [
-        "kanker.nl"
+        "richtlijnendatabase"
       ],
       "expected_sources": [
         "kanker.nl",
         "richtlijnendatabase"
       ],
       "refusal_reason": null,
-      "notes": [],
+      "notes": [
+        "Structured API routing handled this query."
+      ],
       "checks": {
         "has_results": true,
         "refusal_correct": true,
@@ -594,16 +600,16 @@
     },
     {
       "id": "q_oos_recipe",
-      "status": "fail",
-      "actual_sources": [
-        "kanker.nl"
-      ],
+      "status": "pass",
+      "actual_sources": [],
       "expected_sources": [],
-      "refusal_reason": null,
-      "notes": [],
+      "refusal_reason": "Deze vraag valt buiten het onderwerp kanker en oncologische informatie.",
+      "notes": [
+        "Out-of-scope query detected before retrieval."
+      ],
       "checks": {
         "has_results": true,
-        "refusal_correct": false,
+        "refusal_correct": true,
         "source_whitelist_ok": true,
         "source_match": true,
         "non_whitelisted_sources": []
@@ -611,16 +617,16 @@
     },
     {
       "id": "q_oos_weather",
-      "status": "fail",
-      "actual_sources": [
-        "kanker.nl"
-      ],
+      "status": "pass",
+      "actual_sources": [],
       "expected_sources": [],
-      "refusal_reason": null,
-      "notes": [],
+      "refusal_reason": "Deze vraag valt buiten het onderwerp kanker en oncologische informatie.",
+      "notes": [
+        "Out-of-scope query detected before retrieval."
+      ],
       "checks": {
         "has_results": true,
-        "refusal_correct": false,
+        "refusal_correct": true,
         "source_whitelist_ok": true,
         "source_match": true,
         "non_whitelisted_sources": []

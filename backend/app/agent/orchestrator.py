@@ -47,20 +47,39 @@ De Lastmeter werkt als volgt:
 
 Gebruik de Lastmeter proactief wanneer een patiënt duidelijk last ervaart, maar dwing het niet af bij informationele vragen.
 
-VERDUIDELIJKING BIJ BREDE VRAGEN:
-Wanneer een vraag te breed of vaag is om een goed antwoord te geven, gebruik dan de
-ask_clarification tool om de gebruiker een vervolgvraag te stellen. Voorbeelden van brede vragen:
-- "kanker" (welke kankersoort?)
-- "behandeling" (voor welke kankersoort? welk stadium?)
-- "statistieken" (welke kankersoort? welk jaar? incidentie of overleving?)
-- "bijwerkingen" (van welke behandeling?)
+VERDUIDELIJKING — GEBRUIK ask_clarification IN DEZE GEVALLEN:
 
-Bij een brede vraag:
-1. Geef een KORT algemeen antwoord (2-3 zinnen max)
-2. Gebruik ask_clarification om specifieke opties aan te bieden
-3. De opties moeten relevant zijn voor de vraag (kankersoorten, behandeltypes, etc.)
+A) BREDE OF VAGE VRAGEN:
+Wanneer een vraag te breed is, zoals "kanker", "behandeling", "statistieken", "bijwerkingen"
+zonder specificatie. Bied dan opties aan (kankersoorten, behandeltypes, etc.).
 
-Gebruik ask_clarification NIET als de vraag al specifiek genoeg is (bijv. "Wat is borstkanker?" is specifiek).\
+B) BRONNEN BEANTWOORDEN DE VRAAG NIET GOED (KRITIEK):
+Controleer ALTIJD of de gevonden bronnen de vraag echt beantwoorden. Voorbeelden van slechte matches:
+- Vraag over "vermoeidheid tijdens chemotherapie" → bronnen over vermoeidheid bij vaginakanker/schaamlipkanker
+  (FOUT: de bronnen gaan over een specifieke kankersoort, niet over chemotherapie-vermoeidheid in het algemeen)
+- Vraag over "bijwerkingen immunotherapie" → bronnen over bijwerkingen chemotherapie
+  (FOUT: verkeerde behandeling)
+- Vraag over "overleving bij longkanker" → bronnen over borstkanker overleving
+  (FOUT: verkeerde kankersoort)
+
+Als de bronnen NIET direct matchen met de vraag:
+1. GEBRUIK de bronnen NIET alsof ze het antwoord zijn — citeer ze NIET
+2. Probeer NIET herhaaldelijk te zoeken met dezelfde of vergelijkbare termen — dat geeft dezelfde resultaten
+3. Gebruik DIRECT ask_clarification met:
+   - brief_answer: "Ik heb geen specifieke informatie gevonden over [onderwerp]. De beschikbare informatie is per kankersoort georganiseerd."
+   - clarification_question: een gerichte vervolgvraag
+   - options: relevante keuzes die helpen om betere informatie te vinden
+   Voorbeeld voor "vermoeidheid tijdens chemotherapie":
+   - brief_answer: "Vermoeidheid is een veelvoorkomende bijwerking van chemotherapie. Onze informatie over vermoeidheid is per kankersoort beschikbaar."
+   - question: "Voor welke kankersoort zoekt u informatie over vermoeidheid?"
+   - options: ["Borstkanker", "Longkanker", "Darmkanker", "Prostaatkanker", "Leukemie", "Andere kankersoort"]
+4. Doe MAXIMAAL 1 herzoekpoging. Als die ook niet matcht → ask_clarification
+
+C) WANNEER DE VRAAG PERSOONLIJK KLINKT MAAR INFORMATIEF IS:
+Vragen als "Hoe kan ik omgaan met..." zijn informatief (niet persoonlijk advies).
+Beantwoord deze met praktische tips UIT DE BRONNEN, maar vraag welke kankersoort als de bronnen te generiek zijn.
+
+GEBRUIK ask_clarification NIET als de vraag specifiek is EN de bronnen goed matchen.\
 """
 
 # ---------------------------------------------------------------------------
@@ -133,10 +152,12 @@ TOOLS: list[dict[str, Any]] = [
     {
         "name": "ask_clarification",
         "description": (
-            "Stel de gebruiker een verduidelijkende vraag wanneer hun vraag te breed of vaag is. "
-            "Gebruik dit bij brede vragen zoals 'kanker', 'behandeling', 'statistieken', 'bijwerkingen' "
-            "zonder specificatie van kankersoort, behandeltype of tijdsperiode. "
-            "Bied specifieke opties aan zodat de gebruiker kan verfijnen."
+            "Stel de gebruiker een verduidelijkende vraag. Gebruik in TWEE situaties: "
+            "(1) De vraag is te breed of vaag (bijv. 'kanker', 'behandeling'). "
+            "(2) De gevonden bronnen beantwoorden de vraag NIET goed — bijv. bronnen over "
+            "vermoeidheid bij vaginakanker terwijl de vraag gaat over vermoeidheid bij chemotherapie. "
+            "In geval 2: leg kort uit dat de beschikbare info beperkt is, en vraag om specificatie "
+            "(kankersoort, behandeltype, etc.) zodat je gerichter kunt zoeken."
         ),
         "input_schema": {
             "type": "object",
@@ -165,8 +186,12 @@ TOOLS: list[dict[str, Any]] = [
                 },
                 "category": {
                     "type": "string",
-                    "enum": ["cancer_type", "treatment", "statistics", "side_effects", "other"],
-                    "description": "Categorie van de verduidelijking.",
+                    "enum": ["cancer_type", "treatment", "statistics", "side_effects", "source_mismatch", "other"],
+                    "description": "Categorie van de verduidelijking. Gebruik 'source_mismatch' als de bronnen niet goed matchen met de vraag.",
+                },
+                "suggested_search": {
+                    "type": "string",
+                    "description": "Optioneel: een betere zoekopdracht om te proberen als de gebruiker antwoordt, bijv. 'chemotherapie bijwerkingen vermoeidheid tips'.",
                 },
             },
             "required": ["clarification_question", "options", "category"],
@@ -303,6 +328,7 @@ class MedicalAnswerOrchestrator:
             evidence_lines.append(
                 f"[SRC-{idx}] {hit.document.title}\n"
                 f"Bron: {prov.publisher or prov.source_id}\n"
+                f"URL: {prov.url}\n"
                 f"Relevantie: {hit.score:.0%}\n"
                 f"Fragment: {hit.excerpt}\n"
             )
@@ -316,6 +342,9 @@ class MedicalAnswerOrchestrator:
                 refusal_reason="Geen relevante bronnen gevonden.",
                 notes=notes,
             )
+
+        # ---- Step 2.5: Detect source mismatch -------------------------
+        mismatch_hint = self._detect_source_mismatch(query, retrieval.hits)
 
         # ---- Step 3: Call Claude with evidence + tools ----------------
         try:
@@ -336,6 +365,15 @@ class MedicalAnswerOrchestrator:
             f"Beschikbaar bewijs:\n"
             + "\n".join(evidence_lines)
         )
+
+        if mismatch_hint:
+            user_message += (
+                f"\n\n⚠️ SYSTEEMWAARSCHUWING: {mismatch_hint}\n"
+                "ACTIE: Gebruik de ask_clarification tool om de gebruiker te vragen "
+                "om meer specifieke informatie. Doe GEEN herhaalde zoekopdrachten — "
+                "die geven dezelfde resultaten. Citeer de bovenstaande bronnen NIET "
+                "als ze niet bij de vraag passen."
+            )
 
         try:
             response = client.messages.create(
@@ -511,6 +549,88 @@ class MedicalAnswerOrchestrator:
             return {"rows": rows, "source": "Kanker Atlas IKNL"}
         except Exception as exc:
             return {"error": f"Cancer Atlas API unavailable: {exc}"}
+
+    # ------------------------------------------------------------------
+    # Source mismatch detection
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _detect_source_mismatch(query: str, hits: list) -> str | None:
+        """Detect when retrieved sources don't match the query topic.
+
+        Returns a hint string if mismatch is detected, None otherwise.
+        """
+        if not hits:
+            return None
+
+        q_lower = query.lower()
+
+        # Extract key topics from query
+        query_topics = set()
+        treatment_keywords = {
+            "chemotherapie": "chemotherapie", "bestraling": "bestraling",
+            "immunotherapie": "immunotherapie", "operatie": "operatie",
+            "hormoontherapie": "hormoontherapie", "doelgerichte therapie": "doelgerichte therapie",
+        }
+        cancer_keywords = {
+            "borstkanker": "borstkanker", "longkanker": "longkanker",
+            "darmkanker": "darmkanker", "prostaatkanker": "prostaatkanker",
+            "huidkanker": "huidkanker", "melanoom": "melanoom",
+            "leukemie": "leukemie", "lymfoom": "lymfoom",
+        }
+        symptom_keywords = {
+            "vermoeidheid": "vermoeidheid", "pijn": "pijn", "misselijkheid": "misselijkheid",
+            "slaap": "slaapproblemen", "haaruitval": "haaruitval",
+            "bijwerkingen": "bijwerkingen",
+        }
+
+        for kw, topic in treatment_keywords.items():
+            if kw in q_lower:
+                query_topics.add(("treatment", topic))
+        for kw, topic in cancer_keywords.items():
+            if kw in q_lower:
+                query_topics.add(("cancer", topic))
+        for kw, topic in symptom_keywords.items():
+            if kw in q_lower:
+                query_topics.add(("symptom", topic))
+
+        if not query_topics:
+            return None  # Can't detect mismatch without clear topics
+
+        # Check if retrieved sources match the query topics
+        hit_titles = " ".join(h.document.title.lower() for h in hits[:5])
+        hit_urls = " ".join(h.document.url.lower() for h in hits[:5])
+        hit_text = hit_titles + " " + hit_urls
+
+        # If query mentions a specific treatment but sources are about different cancers
+        query_treatments = [t[1] for t in query_topics if t[0] == "treatment"]
+        query_cancers = [t[1] for t in query_topics if t[0] == "cancer"]
+
+        if query_treatments and not query_cancers:
+            # User asks about a treatment in general → sources are cancer-specific
+            # Check if sources are about unrelated cancer types
+            cancer_types_in_hits = set()
+            cancer_names = [
+                "vaginakanker", "schaamlipkanker", "baarmoederkanker",
+                "baarmoederhalskanker", "vulvakanker", "eierstokkanker",
+                "borstkanker", "longkanker", "darmkanker", "prostaatkanker",
+                "melanoom", "huidkanker", "leukemie", "lymfoom",
+                "blaaskanker", "nierkanker", "maagkanker", "slokdarmkanker",
+            ]
+            for name in cancer_names:
+                if name in hit_text:
+                    cancer_types_in_hits.add(name)
+
+            if len(cancer_types_in_hits) >= 2:
+                # Sources are about multiple random cancer types — mismatch
+                return (
+                    f"De bronnen gaan over vermoeidheid/bijwerkingen bij specifieke kankersoorten "
+                    f"({', '.join(list(cancer_types_in_hits)[:3])}), maar de vraag gaat over "
+                    f"{' en '.join(query_treatments)} in het algemeen. "
+                    f"Onze informatie is per kankersoort georganiseerd."
+                )
+
+        return None
 
     def _tool_ask_clarification(self, input_data: dict[str, Any]) -> dict[str, Any]:
         """Return clarification data — the agent will format this into its response."""

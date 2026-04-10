@@ -7,6 +7,7 @@ import re
 from typing import Any
 
 from app.config import Settings
+from app.connectors.firecrawl_client import FirecrawlClient
 from app.connectors.kankeratlas import KankerAtlasClient
 from app.connectors.nkr_cijfers import NKRCijfersClient
 from app.connectors.richtlijnendatabase import RichtlijnendatabaseConnector
@@ -47,12 +48,51 @@ GEO_KEYWORDS = [
     "regio",
     "postcode",
     "pc3",
-    "stad",
     "gemeente",
     "provincie",
     "atlas",
     "regionaal",
     "regionalen",
+]
+
+IN_SCOPE_KEYWORDS = [
+    "kanker",
+    "tumor",
+    "oncolog",
+    "chemotherapie",
+    "chemo",
+    "immunotherapie",
+    "bestraling",
+    "radiotherapie",
+    "operatie",
+    "behandeling",
+    "bijwerking",
+    "symptoom",
+    "diagnose",
+    "uitzaai",
+    "stadium",
+    "screening",
+    "onderzoek",
+    "coloscopie",
+    "mammo",
+    "borst",
+    "darm",
+    "long",
+    "prostaat",
+    "melanoom",
+    "huidkanker",
+    "lastmeter",
+    "vermoeid",
+    "misselijk",
+    "pijn",
+    "nkr",
+    "incidentie",
+    "overleving",
+    "sterfte",
+    "richtlijn",
+    "guideline",
+    "atlas",
+    "postcode",
 ]
 
 # Pattern to detect 3-4 digit postcode-like numbers
@@ -78,9 +118,7 @@ class HybridMedicalRetriever:
         self.settings = settings
         self.nkr = NKRCijfersClient(settings)
         self.kankeratlas = KankerAtlasClient(settings)
-        self.richtlijn = RichtlijnendatabaseConnector(
-            firecrawl=__import__("app.connectors.firecrawl_client", fromlist=["FirecrawlClient"]).FirecrawlClient(settings)
-        )
+        self.richtlijn = RichtlijnendatabaseConnector(FirecrawlClient(settings))
 
         # Lazy-init for heavy dependencies (model loading)
         self._embedder: Embedder | None = None
@@ -138,6 +176,14 @@ class HybridMedicalRetriever:
             # Skip legacy patterns — the agent's Lastmeter tool will handle this
             pass
         else:
+            if not self._is_in_scope_query(query):
+                return RetrievalResponse(
+                    query=query,
+                    audience=audience,
+                    refusal_reason="Deze vraag valt buiten het onderwerp kanker en oncologische informatie.",
+                    notes=["Out-of-scope query detected before retrieval."],
+                )
+
             # ---- 2. Legacy unsafe-pattern detection -----------------------
             legacy_refusal = self._check_legacy_patterns(query)
             if legacy_refusal:
@@ -262,6 +308,11 @@ class HybridMedicalRetriever:
             )
         return None
 
+    @staticmethod
+    def _is_in_scope_query(query: str) -> bool:
+        query_lower = query.lower()
+        return any(keyword in query_lower for keyword in IN_SCOPE_KEYWORDS)
+
     # ------------------------------------------------------------------
     # Structured routing (APIs beat embeddings for exactness)
     # ------------------------------------------------------------------
@@ -277,8 +328,10 @@ class HybridMedicalRetriever:
                 logger.exception("Guideline fetch failed; falling through to other routes")
 
         # --- Geographic / Cancer Atlas routing ---
+        has_year = bool(_YEAR_RE.search(query))
         has_geo_kw = any(kw in query_lower for kw in GEO_KEYWORDS)
-        has_postcode = bool(_POSTCODE_RE.search(query))
+        postcode_tokens = _POSTCODE_RE.findall(query)
+        has_postcode = any(not _YEAR_RE.fullmatch(token) for token in postcode_tokens)
         if has_geo_kw or has_postcode:
             try:
                 return self._fetch_kankeratlas(query_lower)
@@ -287,7 +340,6 @@ class HybridMedicalRetriever:
 
         # --- Stats / NKR routing ---
         has_stats_kw = any(kw in query_lower for kw in STATS_KEYWORDS)
-        has_year = bool(_YEAR_RE.search(query))
         if has_stats_kw or has_year:
             try:
                 return self._fetch_nkr(query_lower)

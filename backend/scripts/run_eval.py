@@ -33,7 +33,7 @@ def _init_approved_sources() -> None:
     global APPROVED_SOURCES
     try:
         sources = list_approved_sources()
-        APPROVED_SOURCES = {s["source_id"] for s in sources}
+        APPROVED_SOURCES = {s.source_id for s in sources}
     except Exception:
         # Fallback: known source IDs
         APPROVED_SOURCES = {
@@ -41,8 +41,9 @@ def _init_approved_sources() -> None:
             "nkr-cijfers",
             "kankeratlas",
             "richtlijnendatabase",
-            "iknl-publications",
-            "iknl-web",
+            "iknl.nl",
+            "iknl-reports",
+            "scientific-publications",
         }
 
 

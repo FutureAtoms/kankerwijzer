@@ -1,4 +1,6 @@
+from app.config import get_settings
 from app.models import Provenance, SearchHit, SourceDocument
+from app.retrieval.hybrid import HybridMedicalRetriever
 from app.safety.abstention import check_low_coverage, extract_specific_cancer_terms
 
 
@@ -53,3 +55,68 @@ def test_low_coverage_allows_matching_specific_cancer_term():
     ]
 
     assert check_low_coverage("symptomen longkanker", hits) is None
+
+
+def test_geo_queries_prefer_cancer_atlas_over_nkr(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    atlas_hit = _hit(
+        title="Cancer Atlas long cancer incidence by postcode",
+        text="Regionale atlasgegevens per postcodegebied.",
+        source_id="kankeratlas",
+    )
+    nkr_hit = _hit(
+        title="NKR Cijfers incidence distribution per stadium",
+        text="Landelijke incidentiecijfers uit de Nederlandse Kankerregistratie.",
+        source_id="nkr-cijfers",
+    )
+
+    monkeypatch.setattr(retriever, "_fetch_kankeratlas", lambda query: [atlas_hit])
+    monkeypatch.setattr(retriever, "_fetch_nkr", lambda query: [nkr_hit])
+
+    hits = retriever._route_structured("Welke regio heeft de hoogste borstkanker incidentie?")
+    assert hits[0].document.source_id == "kankeratlas"
+
+
+def test_guideline_queries_prefer_richtlijn_route(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    guideline_hit = _hit(
+        title="Startpagina - Prostaatcarcinoom - Richtlijn - Richtlijnendatabase",
+        text="Overzicht van de prostaatcarcinoomrichtlijn.",
+        source_id="richtlijnendatabase",
+    )
+
+    monkeypatch.setattr(retriever, "_fetch_richtlijn", lambda query: [guideline_hit])
+
+    hits = retriever._route_structured("Find the prostate carcinoma guideline overview.")
+    assert hits[0].document.source_id == "richtlijnendatabase"
+
+
+def test_out_of_scope_queries_are_rejected_before_retrieval():
+    retriever = HybridMedicalRetriever(get_settings())
+
+    result = retriever.retrieve("Wat is een goed recept voor appeltaart?")
+
+    assert result.refusal_reason is not None
+    assert "buiten het onderwerp" in result.refusal_reason.lower()
+
+
+def test_years_are_not_mistaken_for_postcodes_in_stats_queries(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    atlas_hit = _hit(
+        title="Cancer Atlas result",
+        text="Regionale atlasgegevens.",
+        source_id="kankeratlas",
+    )
+    nkr_hit = _hit(
+        title="NKR result",
+        text="Landelijke registratiedata per jaar en stadium.",
+        source_id="nkr-cijfers",
+    )
+
+    monkeypatch.setattr(retriever, "_fetch_kankeratlas", lambda query: [atlas_hit])
+    monkeypatch.setattr(retriever, "_fetch_nkr", lambda query: [nkr_hit])
+
+    hits = retriever._route_structured(
+        "Show the incidence distribution per stadium for all cancers for 2024."
+    )
+    assert hits[0].document.source_id == "nkr-cijfers"
