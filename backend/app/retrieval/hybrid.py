@@ -9,6 +9,7 @@ from typing import Any
 from app.config import Settings
 from app.connectors.kankeratlas import KankerAtlasClient
 from app.connectors.nkr_cijfers import NKRCijfersClient
+from app.connectors.richtlijnendatabase import RichtlijnendatabaseConnector
 from app.models import (
     Audience,
     Provenance,
@@ -18,7 +19,7 @@ from app.models import (
 )
 from app.retrieval.simple import FIRST_PERSON_PATTERNS, UNSAFE_PATTERNS
 from app.safety.abstention import check_evidence_threshold, check_low_coverage
-from app.safety.red_flags import check_red_flags
+from app.safety.red_flags import check_red_flags, get_routing_info
 from app.safety.source_policy import get_publisher_note, validate_source
 from app.vectorstore.embedder import Embedder
 from app.vectorstore.qdrant_store import QdrantStore
@@ -77,6 +78,9 @@ class HybridMedicalRetriever:
         self.settings = settings
         self.nkr = NKRCijfersClient(settings)
         self.kankeratlas = KankerAtlasClient(settings)
+        self.richtlijn = RichtlijnendatabaseConnector(
+            firecrawl=__import__("app.connectors.firecrawl_client", fromlist=["FirecrawlClient"]).FirecrawlClient(settings)
+        )
 
         # Lazy-init for heavy dependencies (model loading)
         self._embedder: Embedder | None = None
@@ -265,14 +269,12 @@ class HybridMedicalRetriever:
     def _route_structured(self, query: str) -> list[SearchHit]:
         query_lower = query.lower()
 
-        # --- Stats / NKR routing ---
-        has_stats_kw = any(kw in query_lower for kw in STATS_KEYWORDS)
-        has_year = bool(_YEAR_RE.search(query))
-        if has_stats_kw or has_year:
+        # --- Guideline routing ---
+        if "richtlijn" in query_lower or "guideline" in query_lower:
             try:
-                return self._fetch_nkr(query_lower)
+                return self._fetch_richtlijn(query_lower)
             except Exception:
-                logger.exception("NKR API call failed; falling through to vector search")
+                logger.exception("Guideline fetch failed; falling through to other routes")
 
         # --- Geographic / Cancer Atlas routing ---
         has_geo_kw = any(kw in query_lower for kw in GEO_KEYWORDS)
@@ -283,7 +285,32 @@ class HybridMedicalRetriever:
             except Exception:
                 logger.exception("Cancer Atlas API call failed; falling through to vector search")
 
+        # --- Stats / NKR routing ---
+        has_stats_kw = any(kw in query_lower for kw in STATS_KEYWORDS)
+        has_year = bool(_YEAR_RE.search(query))
+        if has_stats_kw or has_year:
+            try:
+                return self._fetch_nkr(query_lower)
+            except Exception:
+                logger.exception("NKR API call failed; falling through to vector search")
+
         return []
+
+    def _fetch_richtlijn(self, query_lower: str) -> list[SearchHit]:
+        """Fetch a guideline overview page from Richtlijnendatabase."""
+        guideline = self.richtlijn.scrape_guideline()
+        markdown = guideline.get("markdown", "")
+        title = guideline.get("metadata", {}).get("title") or "Richtlijnendatabase"
+        excerpt = markdown[:400].replace("\n", " ").strip() or title
+        return [
+            self._build_structured_hit(
+                source_id="richtlijnendatabase",
+                title=title,
+                url=guideline.get("url") or self.richtlijn.EXAMPLE_GUIDELINE,
+                text=markdown or title,
+                excerpt=excerpt,
+            )
+        ]
 
     def _fetch_nkr(self, query_lower: str) -> list[SearchHit]:
         """Fetch NKR statistics data."""

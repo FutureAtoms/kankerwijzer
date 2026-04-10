@@ -1271,6 +1271,126 @@ body {
     }
 }
 
+/* ===== CONTACT CARDS ===== */
+.contacts-section {
+    margin: 12px 0 4px;
+    padding: 0 4px;
+}
+.contacts-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+.contact-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    transition: box-shadow 0.2s ease;
+}
+.contact-card:hover {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+.contact-emergency {
+    border-color: #f44336;
+    background: #fff5f5;
+}
+.contact-crisis {
+    border-color: #9c27b0;
+    background: #faf0ff;
+}
+.contact-medical {
+    border-color: #2196F3;
+    background: #f0f7ff;
+}
+.contact-support {
+    border-color: #00A67E;
+    background: #f0faf6;
+}
+.contact-icon {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+.contact-info {
+    flex: 1;
+    min-width: 0;
+}
+.contact-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a1a2e;
+    margin-bottom: 2px;
+}
+.contact-desc {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+.contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.contact-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+.contact-btn-phone {
+    background: #4CAF50;
+    color: white;
+}
+.contact-btn-phone:hover {
+    background: #388E3C;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(76,175,80,0.4);
+}
+.contact-btn-email {
+    background: #2196F3;
+    color: white;
+}
+.contact-btn-email:hover {
+    background: #1976D2;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(33,150,243,0.4);
+}
+.contact-btn-web {
+    background: #FF9800;
+    color: white;
+}
+.contact-btn-web:hover {
+    background: #F57C00;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(255,152,0,0.4);
+}
+
+/* Severity-based refusal boxes */
+.refusal-critical {
+    border-left: 4px solid #f44336 !important;
+    background: #fff5f5 !important;
+}
+.refusal-urgent {
+    border-left: 4px solid #9c27b0 !important;
+    background: #faf0ff !important;
+}
+.refusal-info {
+    border-left: 4px solid #FF9800 !important;
+}
+
 /* ===== CLARIFICATION OPTIONS ===== */
 .clarification-options {
     display: flex;

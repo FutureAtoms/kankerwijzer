@@ -159,7 +159,9 @@
     // ===== Handle API Response =====
     function handleApiResponse(data) {
         if (data.refusal_reason) {
-            addRefusalMessage(data.refusal_reason);
+            var contacts = data.contacts || [];
+            var severity = data.severity || 'info';
+            addRefusalMessage(data.refusal_reason, contacts, severity);
             return;
         }
 
@@ -289,8 +291,11 @@
         });
     }
 
-    function addRefusalMessage(reason) {
+    function addRefusalMessage(reason, contacts, severity) {
         messageCount++;
+        contacts = contacts || [];
+        severity = severity || 'info';
+
         var div = document.createElement('div');
         div.className = 'message-ai';
 
@@ -305,15 +310,79 @@
             '</div>' +
             '<span class="ai-name">KankerWijzer</span>';
 
+        // Refusal box with severity-based styling
         var box = document.createElement('div');
-        box.className = 'refusal-box';
-        box.innerHTML =
-            '<span class="refusal-icon">&#9888;</span> ' + escapeHtml(reason);
+        box.className = 'refusal-box refusal-' + severity;
+
+        var severityIcon = severity === 'critical' ? '\u{1F6A8}' :
+                          severity === 'urgent' ? '\u{1F49C}' : '\u26A0\uFE0F';
+        box.innerHTML = '<span class="refusal-icon">' + severityIcon + '</span> ' + escapeHtml(reason);
 
         div.appendChild(header);
         div.appendChild(box);
+
+        // Render contact cards if present
+        if (contacts.length > 0) {
+            var contactsSection = document.createElement('div');
+            contactsSection.className = 'contacts-section';
+
+            var contactsTitle = document.createElement('div');
+            contactsTitle.className = 'contacts-title';
+            contactsTitle.textContent = 'Direct contact opnemen:';
+            contactsSection.appendChild(contactsTitle);
+
+            contacts.forEach(function (contact) {
+                var card = document.createElement('div');
+                card.className = 'contact-card contact-' + (contact.icon || 'support');
+
+                var cardIcon = getContactIcon(contact.icon);
+                var cardContent = '<div class="contact-icon">' + cardIcon + '</div>';
+                cardContent += '<div class="contact-info">';
+                cardContent += '<div class="contact-name">' + escapeHtml(contact.name) + '</div>';
+
+                if (contact.description) {
+                    cardContent += '<div class="contact-desc">' + escapeHtml(contact.description) + '</div>';
+                }
+
+                cardContent += '<div class="contact-actions">';
+
+                if (contact.phone) {
+                    var cleanPhone = contact.phone.replace(/[\s-]/g, '');
+                    cardContent += '<a href="tel:' + cleanPhone + '" class="contact-btn contact-btn-phone">' +
+                        '\u{1F4DE} ' + contact.phone + '</a>';
+                }
+
+                if (contact.email) {
+                    cardContent += '<a href="mailto:' + contact.email + '" class="contact-btn contact-btn-email">' +
+                        '\u{2709}\uFE0F ' + contact.email + '</a>';
+                }
+
+                if (contact.url) {
+                    cardContent += '<a href="' + contact.url + '" target="_blank" rel="noopener" class="contact-btn contact-btn-web">' +
+                        '\u{1F310} Website</a>';
+                }
+
+                cardContent += '</div></div>';
+                card.innerHTML = cardContent;
+
+                contactsSection.appendChild(card);
+            });
+
+            div.appendChild(contactsSection);
+        }
+
         messagesEl.appendChild(div);
         scrollToBottom();
+    }
+
+    function getContactIcon(iconType) {
+        switch (iconType) {
+            case 'emergency': return '\u{1F6A8}';
+            case 'crisis': return '\u{1F49C}';
+            case 'medical': return '\u{1FA7A}';
+            case 'support': return '\u{1F91D}';
+            default: return '\u{2139}\uFE0F';
+        }
     }
 
     function addErrorMessage(text) {

@@ -9,8 +9,9 @@ from typing import Any
 
 from app.config import Settings
 from app.lastmeter import DOMAIN_RESOURCES, LASTMETER_DOMAINS, _get_dataset
-from app.models import AnswerResponse, Provenance
+from app.models import AnswerResponse, ContactInfo, Provenance
 from app.retrieval.hybrid import HybridMedicalRetriever
+from app.safety.red_flags import check_red_flags, get_routing_info
 
 logger = logging.getLogger(__name__)
 
@@ -258,6 +259,24 @@ class MedicalAnswerOrchestrator:
         """Answer a user question with server-side provenance citations."""
         notes: list[str] = []
 
+        # ---- Step 0: Check for red flags and attach contacts -----------
+        flag_type, _ = check_red_flags(query)
+        contacts: list[ContactInfo] = []
+        severity: str | None = None
+        if flag_type:
+            routing = get_routing_info(flag_type)
+            if routing:
+                severity = routing.get("severity")
+                for c in routing.get("contacts", []):
+                    contacts.append(ContactInfo(
+                        name=c["name"],
+                        phone=c.get("phone"),
+                        email=c.get("email"),
+                        url=c.get("url"),
+                        description=c.get("description"),
+                        icon=c.get("icon"),
+                    ))
+
         # ---- Step 1: Retrieve evidence --------------------------------
         retrieval = self.retriever.retrieve(query=query, audience=audience, limit=limit)
 
@@ -266,6 +285,8 @@ class MedicalAnswerOrchestrator:
                 query=query,
                 audience=audience,
                 refusal_reason=retrieval.refusal_reason,
+                contacts=contacts,
+                severity=severity,
                 notes=retrieval.notes,
             )
 

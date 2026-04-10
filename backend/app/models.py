@@ -63,6 +63,15 @@ class RetrievalResponse(BaseModel):
     refusal_reason: str | None = None
 
 
+class ContactInfo(BaseModel):
+    name: str
+    phone: str | None = None
+    email: str | None = None
+    url: str | None = None
+    description: str | None = None
+    icon: str | None = None
+
+
 class AnswerResponse(BaseModel):
     query: str
     audience: Audience
@@ -70,6 +79,8 @@ class AnswerResponse(BaseModel):
     citations: list[Provenance] = Field(default_factory=list)
     confidence: float | None = Field(None, description="Overall answer confidence 0.0-1.0")
     confidence_label: str | None = Field(None, description="Human-readable confidence: hoog/gemiddeld/laag")
+    contacts: list[ContactInfo] = Field(default_factory=list, description="Emergency/support contacts when applicable")
+    severity: str | None = Field(None, description="Severity level: critical/urgent/info")
     notes: list[str] = Field(default_factory=list)
     refusal_reason: str | None = None
 
