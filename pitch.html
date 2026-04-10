@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KankerWijzer — Hackathon Pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #FAF8F5;
+  --bg-warm: #F5F0EA;
+  --bg-card: #FFFFFF;
+  --text: #1A1A1A;
+  --text-muted: #6B6560;
+  --text-light: #9C9590;
+  --accent: #C45A3C;
+  --accent-soft: #E8A590;
+  --accent-glow: rgba(196, 90, 60, 0.08);
+  --teal: #2A7F6E;
+  --teal-soft: #D0EBE4;
+  --blue: #3A6EA5;
+  --blue-soft: #D4E4F5;
+  --amber: #B8860B;
+  --amber-soft: #F5E6C4;
+  --purple: #6B5B8A;
+  --purple-soft: #E4DFF0;
+  --slate: #4A5568;
+  --border: #E8E2DA;
+  --border-strong: #D4CCC2;
+  --shadow-sm: 0 1px 3px rgba(26,26,26,0.04);
+  --shadow-md: 0 4px 20px rgba(26,26,26,0.06);
+  --shadow-lg: 0 12px 40px rgba(26,26,26,0.08);
+  --radius: 12px;
+  --radius-lg: 20px;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --sans: 'Outfit', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+html { font-size: 16px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Slide Container ─── */
+.deck {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+}
+
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 80px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
+  overflow-y: auto;
+}
+
+.slide.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0s;
+}
+
+.slide-inner {
+  max-width: 1100px;
+  width: 100%;
+}
+
+/* ─── Progress Bar ─── */
+.progress-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--border);
+  z-index: 100;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ─── Slide Counter ─── */
+.slide-counter {
+  position: fixed;
+  bottom: 28px;
+  right: 40px;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--text-light);
+  z-index: 100;
+  letter-spacing: 0.05em;
+}
+
+/* ─── Nav Dots ─── */
+.nav-dots {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 100;
+}
+
+.nav-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border-strong);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.nav-dot.active {
+  background: var(--accent);
+  transform: scale(1.3);
+}
+
+.nav-dot:hover {
+  background: var(--accent-soft);
+}
+
+/* ─── Keyboard Hint ─── */
+.key-hint {
+  position: fixed;
+  bottom: 28px;
+  left: 40px;
+  font-size: 0.7rem;
+  color: var(--text-light);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.key-hint kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ─── Typography ─── */
+.serif { font-family: var(--serif); }
+.sans { font-family: var(--sans); }
+.mono { font-family: var(--mono); }
+
+h1 {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+h2 {
+  font-family: var(--serif);
+  font-weight: 400;
+  font-size: 2.8rem;
+  line-height: 1.15;
+  margin-bottom: 1.5rem;
+  color: var(--text);
+}
+
+h3 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 0.75rem;
+}
+
+p {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  color: var(--text-muted);
+}
+
+/* ─── Stagger Animations ─── */
+.slide.active .stagger { animation: fadeSlideUp 0.5s ease both; }
+.slide.active .stagger:nth-child(1) { animation-delay: 0.05s; }
+.slide.active .stagger:nth-child(2) { animation-delay: 0.12s; }
+.slide.active .stagger:nth-child(3) { animation-delay: 0.19s; }
+.slide.active .stagger:nth-child(4) { animation-delay: 0.26s; }
+.slide.active .stagger:nth-child(5) { animation-delay: 0.33s; }
+.slide.active .stagger:nth-child(6) { animation-delay: 0.40s; }
+.slide.active .stagger:nth-child(7) { animation-delay: 0.47s; }
+.slide.active .stagger:nth-child(8) { animation-delay: 0.54s; }
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes drawLine {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+/* ─── Decorative Elements ─── */
+.accent-line {
+  width: 48px;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px;
+  margin-bottom: 1.5rem;
+}
+
+.accent-line.center { margin-left: auto; margin-right: auto; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 100px;
+  background: var(--accent-glow);
+  color: var(--accent);
+  border: 1px solid rgba(196, 90, 60, 0.15);
+}
+
+/* ─── Card Grid ─── */
+.card-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+.card-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+}
+
+.card h4 {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.card p {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+/* ─── Source Badges ─── */
+.source-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-sm);
+}
+
+.source-badge .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ─── Flow Diagram ─── */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.flow-node {
+  padding: 14px 22px;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-align: center;
+  min-width: 130px;
+  border: 1px solid var(--border);
+}
+
+.flow-arrow {
+  font-size: 1.2rem;
+  color: var(--text-light);
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+/* ─── Stat Callout ─── */
+.stat-row {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+  flex: 1;
+  min-width: 120px;
+}
+
+.stat-number {
+  font-family: var(--serif);
+  font-size: 3rem;
+  color: var(--accent);
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Comparison Table ─── */
+.compare-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+
+.compare-table th {
+  background: var(--bg-warm);
+  padding: 14px 20px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+}
+
+.compare-table td {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.compare-table tr:last-child td { border-bottom: none; }
+
+.compare-table .check { color: var(--teal); font-weight: 600; }
+.compare-table .cross { color: var(--accent); }
+
+/* ─── Quote Block ─── */
+.quote-block {
+  background: var(--bg-card);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 28px 32px;
+  margin: 1.5rem 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.quote-block p {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ─── Criteria Checklist ─── */
+.criteria-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.criteria-item:last-child { border-bottom: none; }
+
+.criteria-check {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--teal-soft);
+  color: var(--teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.criteria-text h4 {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.criteria-text p {
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+/* ─── Architecture Nodes ─── */
+.arch-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px;
+  box-shadow: var(--shadow-md);
+}
+
+.arch-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.arch-row:last-child { margin-bottom: 0; }
+
+.arch-node {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.arch-node.primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+}
+
+.arch-node.secondary {
+  background: var(--bg-warm);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.arch-node.storage {
+  background: var(--teal-soft);
+  color: var(--teal);
+  border: 1px solid rgba(42, 127, 110, 0.2);
+}
+
+.arch-node.api {
+  background: var(--blue-soft);
+  color: var(--blue);
+  border: 1px solid rgba(58, 110, 165, 0.2);
+}
+
+.arch-node.safety {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border: 1px solid rgba(184, 134, 11, 0.2);
+}
+
+.arch-arrow {
+  color: var(--text-light);
+  font-size: 1rem;
+}
+
+.arch-connector {
+  width: 1px;
+  height: 20px;
+  background: var(--border-strong);
+  margin: 0 auto;
+}
+
+.arch-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-light);
+  text-align: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+/* ─── Journey Steps ─── */
+.journey {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+  position: relative;
+}
+
+.journey::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: 28px;
+  right: 28px;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+
+.journey-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 0 8px;
+}
+
+.journey-num {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 1.3rem;
+  margin: 0 auto 14px;
+  border: 2px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  transition: all 0.3s ease;
+}
+
+.journey-step:hover .journey-num {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.1);
+}
+
+.journey-step h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.journey-step p {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-light);
+}
+
+/* ─── Final Slide ─── */
+.final-message {
+  font-family: var(--serif);
+  font-size: 2rem;
+  line-height: 1.4;
+  color: var(--text);
+  max-width: 700px;
+  text-align: center;
+}
+
+.final-message em {
+  color: var(--accent);
+  font-style: italic;
+}
+
+/* ─── Subtle BG Texture ─── */
+.slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 20%, rgba(196, 90, 60, 0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(42, 127, 110, 0.02) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .slide { padding: 40px 32px; }
+  h2 { font-size: 2rem; }
+  .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+  .journey { flex-direction: column; gap: 16px; }
+  .journey::before { display: none; }
+  .arch-row { gap: 8px; }
+  .stat-number { font-size: 2.2rem; }
+}
+
+@media (max-width: 600px) {
+  .slide { padding: 32px 20px; }
+  h2 { font-size: 1.6rem; }
+  .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ─── Pill list ─── */
+.pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pill {
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ─── Two-col layout ─── */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .two-col { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* ─── Safety banner ─── */
+.safety-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px;
+  background: #FEF6F0;
+  border: 1px solid rgba(196, 90, 60, 0.15);
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.safety-banner .safety-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+/* team badge */
+.team-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 100px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+
+/* title decoration */
+.title-deco {
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+  margin: 24px auto;
+}
+</style>
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+
+<div class="key-hint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate</div>
+<div class="nav-dots" id="navDots"></div>
+<div class="slide-counter" id="counter"></div>
+
+<div class="deck" id="deck">
+
+  <!-- ════════════ SLIDE 1: TITLE ════════════ -->
+  <section class="slide active" data-slide="0">
+    <div class="slide-inner" style="text-align:center;">
+      <div class="stagger">
+        <div class="team-badge">
+          <span style="font-size:1rem;">&#9729;</span> Team Uncloud &mdash; BrabantHack 2026
+        </div>
+      </div>
+      <h1 class="stagger" style="font-size:4.5rem; margin-bottom:0;">KankerWijzer</h1>
+      <div class="title-deco stagger"></div>
+      <p class="stagger" style="font-size:1.35rem; max-width:680px; margin:0 auto 2rem;">
+        A provenance-first cancer information assistant that connects<br>
+        trusted Dutch oncology sources with <em style="font-family:var(--serif); color:var(--accent);">exact citations</em>,
+        <em style="font-family:var(--serif); color:var(--accent);">safe refusal</em>,<br>
+        and <em style="font-family:var(--serif); color:var(--accent);">patient-friendly guidance</em>.
+      </p>
+      <div class="stagger" style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
+        <span class="tag">Medical-Grade RAG</span>
+        <span class="tag" style="background:rgba(42,127,110,0.08); color:var(--teal); border-color:rgba(42,127,110,0.15);">7 IKNL Sources</span>
+        <span class="tag" style="background:rgba(58,110,165,0.08); color:var(--blue); border-color:rgba(58,110,165,0.15);">GraphRAG + Hybrid Retrieval</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 2: THE PROBLEM ════════════ -->
+  <section class="slide" data-slide="1">
+    <div class="slide-inner">
+      <h3 class="stagger">The Problem</h3>
+      <h2 class="stagger">Trusted cancer information is<br>scattered. People use ChatGPT instead.</h2>
+
+      <div class="two-col" style="margin-top:2rem;">
+        <div class="stagger">
+          <div class="quote-block">
+            <p>&ldquo;I just asked ChatGPT because I didn&rsquo;t know which IKNL website to check.&rdquo;</p>
+          </div>
+          <p style="margin-top:1.25rem; font-size:1rem;">
+            Patients and families turn to general AI because it's fast and easy.
+            But generic AI sounds <strong>confident while being wrong</strong>, incomplete, or uncited.
+          </p>
+        </div>
+        <div>
+          <div class="card stagger" style="margin-bottom:12px; border-left:3px solid var(--accent);">
+            <h4>&#10007;&ensp;Answers are fast, but not reliable</h4>
+            <p>Generic AI can hallucinate medical facts with no source trail.</p>
+          </div>
+          <div class="card stagger" style="margin-bottom:12px; border-left:3px solid var(--amber);">
+            <h4>&#10007;&ensp;Trusted sources exist, but are hard to find</h4>
+            <p>Information is spread across 7+ IKNL-related sites, APIs, reports, and guidelines.</p>
+          </div>
+          <div class="card stagger" style="border-left:3px solid var(--purple);">
+            <h4>&#10007;&ensp;Context is lost when sources are separated</h4>
+            <p>Medical information loses meaning when disconnected from its provenance.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 3: THE SOLUTION ════════════ -->
+  <section class="slide" data-slide="2">
+    <div class="slide-inner">
+      <h3 class="stagger">Our Solution</h3>
+      <h2 class="stagger">One question. All trusted sources.<br>Every answer cited.</h2>
+
+      <div class="card-grid cols-3" style="margin-top:2rem;">
+        <div class="card stagger">
+          <div class="card-icon" style="background:var(--teal-soft); color:var(--teal);">&#128269;</div>
+          <h4>Source-Grounded Chat</h4>
+          <p>Ask in natural language. Get answers retrieved from trusted sources only, with clickable citations.</p>
+        </div>
+        <div class="card stagger">
+          <div class="card-icon" style="background:var(--blue-soft); color:var(--blue);">&#128202;</div>
+          <h4>Exact Statistics First</h4>
+          <p>NKR and Cancer Atlas APIs answer number questions directly &mdash; before semantic search even runs.</p>
+        </div>
+        <div class="card stagger">
+          <div class="card-icon" style="background:var(--amber-soft); color:var(--amber);">&#128279;</div>
+          <h4>Cross-Source Synthesis</h4>
+          <p>Patient pages, guidelines, reports, and publications connected in one answer with full context.</p>
+        </div>
+        <div class="card stagger">
+          <div class="card-icon" style="background:rgba(196,90,60,0.08); color:var(--accent);">&#128721;</div>
+          <h4>Safe Refusal &amp; Escalation</h4>
+          <p>Diagnosis questions refused. Treatment decisions redirected. Red-flag symptoms route to 112 / huisarts.</p>
+        </div>
+        <div class="card stagger">
+          <div class="card-icon" style="background:var(--purple-soft); color:var(--purple);">&#127993;</div>
+          <h4>Lastmeter Integration</h4>
+          <p>Distress thermometer helps patients reflect on burden. Scores stay client-side. Only resources returned.</p>
+        </div>
+        <div class="card stagger">
+          <div class="card-icon" style="background:var(--teal-soft); color:var(--teal);">&#128220;</div>
+          <h4>Full Provenance Chain</h4>
+          <p>Every chunk carries URL, document ID, page number, section, checksum, and fetch timestamp.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 4: THE 7 SOURCES ════════════ -->
+  <section class="slide" data-slide="3">
+    <div class="slide-inner">
+      <h3 class="stagger">The Sources We Connect</h3>
+      <h2 class="stagger">Seven trusted source families,<br>one unified retrieval layer.</h2>
+
+      <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:2rem;">
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#2196F3;"></span>
+          <span><strong>kanker.nl</strong> &mdash; Patient information</span>
+        </div>
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#4CAF50;"></span>
+          <span><strong>iknl.nl</strong> &mdash; Institutional pages</span>
+        </div>
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#FF9800;"></span>
+          <span><strong>nkr-cijfers.iknl.nl</strong> &mdash; Registry statistics API</span>
+        </div>
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#E91E63;"></span>
+          <span><strong>kankeratlas.iknl.nl</strong> &mdash; Regional atlas API</span>
+        </div>
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#9C27B0;"></span>
+          <span><strong>richtlijnendatabase.nl</strong> &mdash; Clinical guidelines</span>
+        </div>
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#607D8B;"></span>
+          <span><strong>IKNL Reports</strong> &mdash; Bundled PDF reports</span>
+        </div>
+        <div class="source-badge stagger">
+          <span class="dot" style="background:#795548;"></span>
+          <span><strong>Scientific Publications</strong> &mdash; Peer-reviewed papers</span>
+        </div>
+      </div>
+
+      <div class="safety-banner stagger" style="margin-top:2rem;">
+        <span class="safety-icon">&#9432;</span>
+        <span>Richtlijnendatabase is included per hackathon brief but tagged as authored by <strong>Federatie Medisch Specialisten</strong>, not IKNL.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 5: WHAT MEDICAL-GRADE MEANS ════════════ -->
+  <section class="slide" data-slide="4">
+    <div class="slide-inner">
+      <h3 class="stagger">What &ldquo;Medical-Grade&rdquo; Means</h3>
+      <h2 class="stagger">Not a diagnostic system.<br>A medically careful information system.</h2>
+
+      <div class="two-col" style="margin-top:2rem;">
+        <div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Source-locked evidence</h4>
+              <p>Only the 7 approved source families enter the evidence pool. No external web results.</p>
+            </div>
+          </div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Full provenance on every chunk</h4>
+              <p>URL, document ID, chunk ID, page number, section, checksum, fetch time.</p>
+            </div>
+          </div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Structured APIs before embeddings</h4>
+              <p>When exact numbers matter, the system calls NKR / Cancer Atlas APIs first.</p>
+            </div>
+          </div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Abstention on weak evidence</h4>
+              <p>If retrieval scores fall below a calibrated threshold, the system refuses instead of guessing.</p>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Conflict flagging</h4>
+              <p>Contradictory sources are surfaced, not smoothed over.</p>
+            </div>
+          </div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Red-flag symptom routing</h4>
+              <p>Emergency symptoms trigger &ldquo;Bel 112&rdquo; routing. Suicidal ideation routes to 113.</p>
+            </div>
+          </div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Server-side citation assembly</h4>
+              <p>The LLM uses [SRC-N] labels. The server maps them to Provenance objects. The model never authors URLs.</p>
+            </div>
+          </div>
+          <div class="criteria-item stagger">
+            <div class="criteria-check">&#10003;</div>
+            <div class="criteria-text">
+              <h4>Sensitive data stays client-side</h4>
+              <p>Lastmeter distress scores never leave the browser. Only domain keywords are sent.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 6: ARCHITECTURE ════════════ -->
+  <section class="slide" data-slide="5">
+    <div class="slide-inner">
+      <h3 class="stagger">Architecture</h3>
+      <h2 class="stagger">Structured-first hybrid retrieval<br>with graph augmentation.</h2>
+
+      <div class="arch-container stagger" style="margin-top:1.5rem;">
+
+        <div class="arch-label">User Layer</div>
+        <div class="arch-row">
+          <div class="arch-node primary">Custom Frontend + Lastmeter</div>
+        </div>
+
+        <div class="arch-connector"></div>
+
+        <div class="arch-label">API Layer</div>
+        <div class="arch-row">
+          <div class="arch-node secondary">FastAPI Backend</div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-node safety">Guardrails &amp; Safety</div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-node primary">Agent Orchestrator <span style="font-size:0.7rem; opacity:0.8;">(Claude Opus 4.6)</span></div>
+        </div>
+
+        <div class="arch-connector"></div>
+
+        <div class="arch-label">Retrieval Layer &mdash; structured first</div>
+        <div class="arch-row">
+          <div class="arch-node api">NKR Statistics API</div>
+          <div class="arch-node api">Cancer Atlas API</div>
+          <div class="arch-node secondary">Qdrant Vector Index</div>
+          <div class="arch-node secondary" style="background:var(--purple-soft); color:var(--purple); border-color:rgba(107,91,138,0.2);">Neo4j Graph <span style="font-size:0.65rem;">(augmentation)</span></div>
+          <div class="arch-node secondary">Keyword Fallback</div>
+        </div>
+
+        <div class="arch-connector"></div>
+
+        <div class="arch-label">Storage Layer</div>
+        <div class="arch-row">
+          <div class="arch-node storage">Postgres &mdash; canonical source of truth</div>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:32px; margin-top:16px;">
+          <div style="font-size:0.7rem; color:var(--text-light); text-align:center;">
+            <div style="width:10px; height:10px; border-radius:50%; background:var(--teal-soft); border:1px solid rgba(42,127,110,0.3); display:inline-block; vertical-align:middle; margin-right:4px;"></div>
+            Postgres owns provenance
+          </div>
+          <div style="font-size:0.7rem; color:var(--text-light); text-align:center;">
+            <div style="width:10px; height:10px; border-radius:50%; background:var(--blue-soft); border:1px solid rgba(58,110,165,0.3); display:inline-block; vertical-align:middle; margin-right:4px;"></div>
+            Live APIs for exact data
+          </div>
+          <div style="font-size:0.7rem; color:var(--text-light); text-align:center;">
+            <div style="width:10px; height:10px; border-radius:50%; background:var(--purple-soft); border:1px solid rgba(107,91,138,0.3); display:inline-block; vertical-align:middle; margin-right:4px;"></div>
+            Graph is augmentation only
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 7: VS GENERIC AI ════════════ -->
+  <section class="slide" data-slide="6">
+    <div class="slide-inner">
+      <h3 class="stagger">Why Not Just ChatGPT?</h3>
+      <h2 class="stagger">Generic chatbots optimize for fluency.<br>KankerWijzer optimizes for trust.</h2>
+
+      <table class="compare-table stagger" style="margin-top:2rem;">
+        <thead>
+          <tr>
+            <th style="width:35%;">Capability</th>
+            <th style="width:32%;">Generic AI</th>
+            <th style="width:33%;">KankerWijzer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Source provenance</strong></td>
+            <td class="cross">&#10007; Invented or missing URLs</td>
+            <td class="check">&#10003; Server-assembled from Provenance objects</td>
+          </tr>
+          <tr>
+            <td><strong>Source control</strong></td>
+            <td class="cross">&#10007; Entire internet, no filter</td>
+            <td class="check">&#10003; 7 approved IKNL source families only</td>
+          </tr>
+          <tr>
+            <td><strong>Statistics accuracy</strong></td>
+            <td class="cross">&#10007; Recalled from training data</td>
+            <td class="check">&#10003; Live NKR &amp; Cancer Atlas API calls</td>
+          </tr>
+          <tr>
+            <td><strong>Refusal behavior</strong></td>
+            <td class="cross">&#10007; Answers everything confidently</td>
+            <td class="check">&#10003; Calibrated abstention + red-flag routing</td>
+          </tr>
+          <tr>
+            <td><strong>Treatment advice</strong></td>
+            <td class="cross">&#10007; May give specific recommendations</td>
+            <td class="check">&#10003; Refused &mdash; redirected to treating clinician</td>
+          </tr>
+          <tr>
+            <td><strong>Graph context</strong></td>
+            <td class="cross">&#10007; No structured knowledge layer</td>
+            <td class="check">&#10003; Neo4j augmentation for relationship context</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 8: USER JOURNEY ════════════ -->
+  <section class="slide" data-slide="7">
+    <div class="slide-inner">
+      <h3 class="stagger">User Journey</h3>
+      <h2 class="stagger">From question to trusted answer<br>in one conversation.</h2>
+
+      <div class="journey stagger" style="margin-top:2.5rem;">
+        <div class="journey-step">
+          <div class="journey-num">1</div>
+          <h4>Ask</h4>
+          <p>&ldquo;Wat is borstkanker?&rdquo;</p>
+        </div>
+        <div class="journey-step">
+          <div class="journey-num">2</div>
+          <h4>Retrieve</h4>
+          <p>Searches kanker.nl, NKR, guidelines, reports</p>
+        </div>
+        <div class="journey-step">
+          <div class="journey-num">3</div>
+          <h4>Answer</h4>
+          <p>Plain Dutch with cited evidence</p>
+        </div>
+        <div class="journey-step">
+          <div class="journey-num">4</div>
+          <h4>Cite</h4>
+          <p>Clickable source links below the answer</p>
+        </div>
+        <div class="journey-step">
+          <div class="journey-num">5</div>
+          <h4>Guard</h4>
+          <p>Treatment questions? Safely declined.</p>
+        </div>
+        <div class="journey-step">
+          <div class="journey-num">6</div>
+          <h4>Support</h4>
+          <p>Lastmeter surfaces the right resources</p>
+        </div>
+      </div>
+
+      <div class="stagger" style="margin-top:2.5rem;">
+        <div class="safety-banner" style="background:rgba(42,127,110,0.04); border-color:rgba(42,127,110,0.15); color:var(--teal);">
+          <span class="safety-icon">&#128737;</span>
+          <span>At every step: only approved sources, full provenance, and the model <strong>never</strong> authors citation URLs.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 9: HALLUCINATION REDUCTION ════════════ -->
+  <section class="slide" data-slide="8">
+    <div class="slide-inner">
+      <h3 class="stagger">Reducing Hallucination Risk</h3>
+      <h2 class="stagger">Seven layers of defense.</h2>
+
+      <div class="card-grid cols-4" style="margin-top:2rem;">
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128274;</div>
+          <h4 style="font-size:0.85rem;">Source Whitelist</h4>
+          <p style="font-size:0.78rem;">Only 7 approved families</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128202;</div>
+          <h4 style="font-size:0.85rem;">Structured-First</h4>
+          <p style="font-size:0.78rem;">APIs before embeddings</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128207;</div>
+          <h4 style="font-size:0.85rem;">Evidence Threshold</h4>
+          <p style="font-size:0.78rem;">Calibrated abstention score</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#9878;</div>
+          <h4 style="font-size:0.85rem;">Conflict Detection</h4>
+          <p style="font-size:0.78rem;">Flags contradictions</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128421;</div>
+          <h4 style="font-size:0.85rem;">Server-Side Citations</h4>
+          <p style="font-size:0.78rem;">LLM never writes URLs</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128718;</div>
+          <h4 style="font-size:0.85rem;">Graph Augmentation</h4>
+          <p style="font-size:0.78rem;">Context only, never sole basis</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128683;</div>
+          <h4 style="font-size:0.85rem;">Explicit Refusal</h4>
+          <p style="font-size:0.78rem;">Uncertain? Says so.</p>
+        </div>
+        <div class="card stagger" style="text-align:center; padding:22px 16px;">
+          <div style="font-size:1.8rem; margin-bottom:10px;">&#128200;</div>
+          <h4 style="font-size:0.85rem;">Eval Hard-Fails</h4>
+          <p style="font-size:0.78rem;">Build breaks on safety misses</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 10: HACKATHON CRITERIA ════════════ -->
+  <section class="slide" data-slide="9">
+    <div class="slide-inner">
+      <h3 class="stagger">Hackathon Criteria Fit</h3>
+      <h2 class="stagger">How KankerWijzer maps to every domain.</h2>
+
+      <div class="card-grid cols-2" style="margin-top:2rem;">
+        <div class="card stagger" style="border-top:3px solid var(--teal);">
+          <h4 style="color:var(--teal);">Domain 1 &mdash; Information Integrity</h4>
+          <ul style="list-style:none; padding:0; margin-top:10px;">
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Answers from retrieved evidence only</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Source provenance with clickable links</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Trusted IKNL source families only</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Declines when accuracy is not achievable</li>
+          </ul>
+        </div>
+        <div class="card stagger" style="border-top:3px solid var(--blue);">
+          <h4 style="color:var(--blue);">Domain 2 &mdash; Usability</h4>
+          <ul style="list-style:none; padding:0; margin-top:10px;">
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;One search instead of seven destinations</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Natural-language patient-first chat</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Fewer clicks, smarter navigation</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Audience-aware (patient / professional)</li>
+          </ul>
+        </div>
+        <div class="card stagger" style="border-top:3px solid var(--accent);">
+          <h4 style="color:var(--accent);">Domain 3 &mdash; Ethics</h4>
+          <ul style="list-style:none; padding:0; margin-top:10px;">
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Refuses unsafe personalized advice</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Red-flag routing (112, huisarts, 113)</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Lastmeter data stays client-side</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Consent banner for distress screening</li>
+          </ul>
+        </div>
+        <div class="card stagger" style="border-top:3px solid var(--purple);">
+          <h4 style="color:var(--purple);">Domain 4 &mdash; Advanced Solution</h4>
+          <ul style="list-style:none; padding:0; margin-top:10px;">
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Connects all 7 provided sources</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;GraphRAG for relationship context</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Cross-source evidence synthesis</li>
+            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Built for future IKNL adoption</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card stagger" style="margin-top:16px; background:var(--bg-warm); border-color:var(--border); text-align:center;">
+        <p style="font-size:0.9rem; color:var(--text-muted);">
+          <strong style="color:var(--text);">Bonus:</strong> Structured user feedback collection on missing or unclear information
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 11: EVALUATION ════════════ -->
+  <section class="slide" data-slide="10">
+    <div class="slide-inner">
+      <h3 class="stagger">Evaluation</h3>
+      <h2 class="stagger">Hard-fail gates. The build breaks<br>on safety misses.</h2>
+
+      <div class="two-col" style="margin-top:2rem;">
+        <div>
+          <div class="stat-row stagger" style="margin-bottom:2rem;">
+            <div class="stat">
+              <div class="stat-number">45</div>
+              <div class="stat-label">Golden Questions</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">5</div>
+              <div class="stat-label">Hard-Fail Gates</div>
+            </div>
+          </div>
+
+          <div class="card stagger">
+            <h4>Question Categories</h4>
+            <div class="pill-list" style="margin-top:10px;">
+              <span class="pill">Patient info (10)</span>
+              <span class="pill">Statistics (8)</span>
+              <span class="pill">Geographic (6)</span>
+              <span class="pill">Guidelines (6)</span>
+              <span class="pill">Cross-source (5)</span>
+              <span class="pill">Ethical decline (5)</span>
+              <span class="pill">Conflict / OOS (5)</span>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card stagger" style="padding:0; overflow:hidden;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
+              <thead>
+                <tr style="background:var(--bg-warm);">
+                  <th style="padding:14px 18px; text-align:left; font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">Gate</th>
+                  <th style="padding:14px 18px; text-align:right; font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">Threshold</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Faithfulness</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">&ge; 0.85</td></tr>
+                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Citation Correctness</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">&ge; 0.80</td></tr>
+                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Refusal Accuracy</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">&ge; 0.90</td></tr>
+                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Source Whitelist</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">= 1.00</td></tr>
+                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Hallucination Rate</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--accent);">&le; 0.10</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="stagger" style="margin-top:12px; font-size:0.85rem; color:var(--text-light);">
+            Pipeline returns exit code 1 on failure. These are not aspirational &mdash; the build breaks.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 12: TECH STACK ════════════ -->
+  <section class="slide" data-slide="11">
+    <div class="slide-inner">
+      <h3 class="stagger">Stack &amp; What&rsquo;s Built</h3>
+      <h2 class="stagger">Production-oriented choices,<br>not demo shortcuts.</h2>
+
+      <div class="two-col" style="margin-top:2rem;">
+        <div>
+          <h4 class="stagger" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-light); margin-bottom:12px;">Technology Stack</h4>
+          <div class="card stagger" style="padding:0; overflow:hidden;">
+            <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; width:40%; color:var(--text);">LLM</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Claude Opus 4.6</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Backend</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">FastAPI + Python</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Embeddings</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">multilingual-e5-large (1024d)</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Vector Store</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Qdrant</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Graph</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Neo4j + neo4j-graphrag</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Database</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Postgres + pgvector</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Crawl</td>
+                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Firecrawl API</td>
+              </tr>
+              <tr>
+                <td style="padding:12px 16px; font-weight:600; color:var(--text);">PDF Parsing</td>
+                <td style="padding:12px 16px; color:var(--text-muted);">Docling (primary)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div>
+          <h4 class="stagger" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-light); margin-bottom:12px;">Already Built</h4>
+          <div class="card stagger" style="margin-bottom:10px;">
+            <p style="font-size:0.88rem; color:var(--text);">
+              <strong style="color:var(--teal);">&#10003;</strong>&ensp;FastAPI backend &mdash; 27 endpoints, all source connectors
+            </p>
+          </div>
+          <div class="card stagger" style="margin-bottom:10px;">
+            <p style="font-size:0.88rem; color:var(--text);">
+              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Provenance model &mdash; full chain from chunk to URL
+            </p>
+          </div>
+          <div class="card stagger" style="margin-bottom:10px;">
+            <p style="font-size:0.88rem; color:var(--text);">
+              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Hybrid retriever &mdash; structured-first + vector + safety
+            </p>
+          </div>
+          <div class="card stagger" style="margin-bottom:10px;">
+            <p style="font-size:0.88rem; color:var(--text);">
+              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Safety engine &mdash; red-flags, abstention, source policy
+            </p>
+          </div>
+          <div class="card stagger" style="margin-bottom:10px;">
+            <p style="font-size:0.88rem; color:var(--text);">
+              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Source verification &mdash; all 7 families validated
+            </p>
+          </div>
+          <div class="card stagger">
+            <p style="font-size:0.88rem; color:var(--text);">
+              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Docker Compose &mdash; Qdrant + Neo4j + Postgres
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ SLIDE 13: CLOSING ════════════ -->
+  <section class="slide" data-slide="12">
+    <div class="slide-inner" style="text-align:center;">
+      <div class="stagger">
+        <div class="accent-line center"></div>
+      </div>
+      <h1 class="stagger" style="font-size:3.5rem; margin-bottom:1.5rem;">KankerWijzer</h1>
+      <div class="stagger">
+        <p class="final-message" style="margin:0 auto 2.5rem;">
+          People already use AI for cancer information.<br>
+          The question is whether they get speed<br>
+          <em>at the cost of trust.</em>
+        </p>
+      </div>
+      <div class="stagger">
+        <p style="font-size:1.25rem; color:var(--text); font-family:var(--serif); margin-bottom:2rem;">
+          Our answer is <strong style="color:var(--accent);">no.</strong>
+        </p>
+      </div>
+      <div class="stagger">
+        <p style="font-size:1rem; color:var(--text-muted); max-width:620px; margin:0 auto 2rem; line-height:1.7;">
+          KankerWijzer gives users the speed of AI with the discipline of trusted oncology sources,
+          explicit provenance, and medical-grade refusal behavior.
+        </p>
+      </div>
+      <div class="stagger" style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+        <span class="tag">Provenance-First</span>
+        <span class="tag" style="background:rgba(42,127,110,0.08); color:var(--teal); border-color:rgba(42,127,110,0.15);">Medically Careful</span>
+        <span class="tag" style="background:rgba(58,110,165,0.08); color:var(--blue); border-color:rgba(58,110,165,0.15);">Built for IKNL</span>
+      </div>
+      <p class="stagger" style="margin-top:2.5rem; font-size:0.85rem; color:var(--text-light);">
+        Team Uncloud &bull; BrabantHack 2026 &bull; IKNL Med Tech Track
+      </p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function() {
+  const slides = document.querySelectorAll('.slide');
+  const progress = document.getElementById('progress');
+  const counter = document.getElementById('counter');
+  const dotsContainer = document.getElementById('navDots');
+  let current = 0;
+  const total = slides.length;
+
+  // Build nav dots
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    dot.addEventListener('click', () => goTo(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  function goTo(n) {
+    if (n < 0 || n >= total || n === current) return;
+    slides[current].classList.remove('active');
+    dotsContainer.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    dotsContainer.children[current].classList.add('active');
+    progress.style.width = ((current / (total - 1)) * 100) + '%';
+    counter.textContent = (current + 1) + ' / ' + total;
+  }
+
+  function next() { goTo(current + 1); }
+  function prev() { goTo(current - 1); }
+
+  // Keyboard
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); goTo(0); }
+    if (e.key === 'End') { e.preventDefault(); goTo(total - 1); }
+  });
+
+  // Touch
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
+  });
+
+  // Click left/right halves
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.nav-dot, a, button, input, textarea')) return;
+    if (e.clientX > window.innerWidth * 0.65) next();
+    else if (e.clientX < window.innerWidth * 0.35) prev();
+  });
+
+  // Init
+  progress.style.width = '0%';
+  counter.textContent = '1 / ' + total;
+})();
+</script>
+</body>
+</html>

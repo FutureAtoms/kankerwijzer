@@ -27,14 +27,13 @@
                     </svg>
                     Chat
                 </button>
-                <button class="nav-btn" id="btn-lastmeter" title="Lastmeter - binnenkort beschikbaar">
+                <button class="nav-btn" id="btn-lastmeter" title="Lastmeter - meet uw klachten">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 20V10"/>
                         <path d="M18 20V4"/>
                         <path d="M6 20v-4"/>
                     </svg>
                     Lastmeter
-                    <span class="badge-soon">Binnenkort</span>
                 </button>
             </nav>
             <div class="sidebar-footer">
@@ -131,9 +130,22 @@
         </main>
     </div>
 
+    <!-- Lastmeter Panel (overlay) -->
+    <div class="lastmeter-overlay" id="lastmeter-overlay"></div>
+    <div class="lastmeter-panel" id="lastmeter-panel">
+        <div class="lastmeter-header">
+            <h2>Lastmeter</h2>
+            <button class="lastmeter-close" id="lastmeter-close" aria-label="Sluiten">&times;</button>
+        </div>
+        <div class="lastmeter-content" id="lastmeter-content">
+            <!-- Populated by lastmeter.js -->
+        </div>
+    </div>
+
     <!-- Mobile sidebar overlay -->
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
     <script src="js/app.js"></script>
+    <script src="js/lastmeter.js"></script>
 </body>
 </html>

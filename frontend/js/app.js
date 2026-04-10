@@ -72,9 +72,11 @@
         menuToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', closeSidebar);
 
-        // Lastmeter placeholder
+        // Lastmeter - open the panel (handled by lastmeter.js)
         lastmeterBtn.addEventListener('click', function () {
-            alert('De Lastmeter functionaliteit wordt binnenkort toegevoegd.');
+            if (window.openLastmeter) {
+                window.openLastmeter();
+            }
         });
 
         // Focus input
@@ -470,8 +472,43 @@
             siblings.forEach(function (s) { s.classList.remove('selected'); });
             btn.classList.add('selected');
 
-            // In a real app, send feedback to API
-            console.log('Feedback:', { messageId: msgId, type: type });
+            // Map button types to API feedback_type values
+            var feedbackTypeMap = {
+                'positive': 'helpful',
+                'negative': 'incorrect',
+                'missing': 'missing_info',
+            };
+            var feedbackType = feedbackTypeMap[type] || 'helpful';
+            var isHelpful = type === 'positive';
+
+            // Find the original query for this message (search backwards)
+            var msgEl = document.getElementById(msgId);
+            var queryText = 'unknown';
+            if (msgEl) {
+                var prevEl = msgEl.previousElementSibling;
+                while (prevEl) {
+                    if (prevEl.classList.contains('message-user')) {
+                        var bubble = prevEl.querySelector('.bubble');
+                        if (bubble) queryText = bubble.textContent;
+                        break;
+                    }
+                    prevEl = prevEl.previousElementSibling;
+                }
+            }
+
+            // Send feedback to backend
+            fetch(API_BASE + '/feedback/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query_text: queryText,
+                    feedback_type: feedbackType,
+                    is_helpful: isHelpful,
+                    message_index: parseInt(msgId.replace('msg-', ''), 10),
+                }),
+            }).catch(function (err) {
+                console.warn('Feedback submission failed:', err);
+            });
         });
 
         return btn;

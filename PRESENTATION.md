@@ -268,7 +268,7 @@ The current scaffold already includes:
 ### Domain 4: Advanced solution
 - Connects the provided source ecosystem
 - Adds context using graph augmentation and cross-source synthesis
-- Is designed for future implementation with canonical storage, evaluation, and deployment paths
+- Built for future IKNL adoption with canonical storage, evaluation pipelines, and deployment paths
 
 ### Bonus
 - Collects structured user feedback on missing or unclear information

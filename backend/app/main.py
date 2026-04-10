@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.agent.orchestrator import MedicalAnswerOrchestrator
 from app.config import get_settings
+from app.feedback import router as feedback_router
+from app.lastmeter import router as lastmeter_router
 from app.connectors.firecrawl_client import FirecrawlClient, FirecrawlUnavailableError
 from app.connectors.iknl import IKNLWebConnector
 from app.connectors.kanker_nl import LocalKankerNLDataset
@@ -214,6 +216,10 @@ def agent_answer(request: QuestionRequest):
         limit=request.limit,
     )
 
+
+# --- Include routers ---
+app.include_router(lastmeter_router)
+app.include_router(feedback_router)
 
 # --- Static frontend (must be LAST, after all API routes) ---
 app.mount("/app", StaticFiles(directory=str(settings.team_root / "frontend"), html=True), name="frontend")
