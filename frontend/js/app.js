@@ -179,6 +179,13 @@
         scrollToBottom();
     }
 
+    // ===== External Send (used by Lastmeter and other components) =====
+    window.sendChatMessage = function (message) {
+        userInput.value = message;
+        onInputChange();
+        onSend();
+    };
+
     // ===== Send Message =====
     function onSend() {
         var query = userInput.value.trim();
