@@ -8,6 +8,7 @@ import re
 from typing import Any
 
 from app.config import Settings
+from app.lastmeter import DOMAIN_RESOURCES, LASTMETER_DOMAINS, _get_dataset
 from app.models import AnswerResponse, Provenance
 from app.retrieval.hybrid import HybridMedicalRetriever
 
@@ -28,7 +29,22 @@ REGELS:
 6. Eindig met: "Let op: deze informatie is informatief en vervangt geen medisch advies."
 
 Bij onvoldoende bewijs: zeg eerlijk dat je het niet kunt vinden.
-Verwijs bij persoonlijke vragen naar de huisarts of KWF Kanker Infolijn (0800-022 66 22).\
+Verwijs bij persoonlijke vragen naar de huisarts of KWF Kanker Infolijn (0800-022 66 22).
+
+LASTMETER:
+Wanneer een gebruiker praat over hoe zij zich voelen, hun last, klachten, zorgen,
+vermoeidheid, angst, pijn, somberheid, slaapproblemen, of andere vormen van distress
+gerelateerd aan kanker, gebruik dan de lastmeter_assess tool. Dit is de Nederlandse
+Lastmeter (Distress Thermometer) — een gevalideerd instrument voor kankerpatiënten.
+
+De Lastmeter werkt als volgt:
+1. Vraag de patiënt: "Op een schaal van 0-10, hoeveel last heeft u ervaren in de afgelopen week?" (0=geen last, 10=extreme last)
+2. Als de score >= 4: vraag op welke gebieden de patiënt last ervaart (lichamelijk, emotioneel, praktisch, sociaal, zingeving)
+3. Gebruik de lastmeter_assess tool met de geselecteerde domeinen om relevante hulpbronnen op te halen
+4. Presenteer de resultaten met links naar kanker.nl pagina's die specifiek gaan over die klachten
+5. Adviseer altijd om de resultaten te bespreken met hun arts of verpleegkundige
+
+Gebruik de Lastmeter proactief wanneer een patiënt duidelijk last ervaart, maar dwing het niet af bij informationele vragen.\
 """
 
 # ---------------------------------------------------------------------------
@@ -96,6 +112,43 @@ TOOLS: list[dict[str, Any]] = [
                 },
             },
             "required": ["cancer_group", "sex"],
+        },
+    },
+    {
+        "name": "lastmeter_assess",
+        "description": (
+            "De Lastmeter (Distress Thermometer) — een gevalideerd instrument voor kankerpatiënten. "
+            "Gebruik dit wanneer een patiënt praat over hun klachten, last, vermoeidheid, angst, pijn, "
+            "somberheid, slaapproblemen, zorgen, of andere vormen van distress. "
+            "Geeft relevante hulpbronnen van kanker.nl terug op basis van de geselecteerde probleemgebieden. "
+            "Domein-opties: physical:pain, physical:fatigue, physical:sleep, physical:nausea, "
+            "physical:appetite, physical:breathing, physical:mobility, physical:appearance, "
+            "emotional:anxiety, emotional:depression, emotional:worry, emotional:anger, "
+            "emotional:loss_of_interest, practical:work, practical:financial, practical:childcare, "
+            "practical:transport, social:partner, social:family, social:friends, social:children, "
+            "spiritual:meaning, spiritual:faith, spiritual:death"
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "distress_score": {
+                    "type": "integer",
+                    "description": "De lastmeter-score van de patiënt (0-10). 0=geen last, 10=extreme last.",
+                },
+                "domains": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": (
+                        "Probleemgebieden die de patiënt ervaart, afgeleid uit hun bericht. "
+                        "Bijv. ['physical:pain', 'emotional:anxiety', 'physical:fatigue']."
+                    ),
+                },
+                "patient_message": {
+                    "type": "string",
+                    "description": "Het originele bericht van de patiënt (voor context).",
+                },
+            },
+            "required": ["domains"],
         },
     },
 ]
@@ -321,6 +374,8 @@ class MedicalAnswerOrchestrator:
                 return self._tool_query_nkr_statistics(tool_input)
             elif tool_name == "query_cancer_atlas":
                 return self._tool_query_cancer_atlas(tool_input)
+            elif tool_name == "lastmeter_assess":
+                return self._tool_lastmeter_assess(tool_input)
             else:
                 return {"error": f"Unknown tool: {tool_name}"}
         except Exception as exc:
@@ -365,6 +420,56 @@ class MedicalAnswerOrchestrator:
             return {"rows": rows, "source": "Kanker Atlas IKNL"}
         except Exception as exc:
             return {"error": f"Cancer Atlas API unavailable: {exc}"}
+
+    def _tool_lastmeter_assess(self, input_data: dict[str, Any]) -> dict[str, Any]:
+        """Execute lastmeter_assess tool — find resources for patient distress domains."""
+        domains = input_data.get("domains", [])
+        distress_score = input_data.get("distress_score")
+        patient_message = input_data.get("patient_message", "")
+
+        dataset = _get_dataset()
+        resources: list[dict[str, Any]] = []
+        seen_urls: set[str] = set()
+
+        for domain_key in domains:
+            search_queries = DOMAIN_RESOURCES.get(domain_key, [])
+            for sq in search_queries:
+                try:
+                    hits = dataset.search(sq, limit=3)
+                except Exception:
+                    continue
+                for hit in hits:
+                    url = hit.document.url
+                    if url in seen_urls:
+                        continue
+                    seen_urls.add(url)
+                    resources.append({
+                        "domain": domain_key,
+                        "title": hit.document.title,
+                        "url": url,
+                        "excerpt": hit.excerpt[:200] if hit.excerpt else "",
+                    })
+
+        # Build the domain labels for the response
+        domain_labels = {}
+        for d in LASTMETER_DOMAINS:
+            for item in d["items"]:
+                key = f"{d['id']}:{item['id']}"
+                domain_labels[key] = f"{d['name']} — {item['label']}"
+
+        matched_labels = [domain_labels.get(d, d) for d in domains]
+
+        return {
+            "distress_score": distress_score,
+            "identified_domains": matched_labels,
+            "resources": resources[:15],  # cap at 15 links
+            "resource_count": len(resources),
+            "source": "kanker.nl (Lastmeter hulpbronnen)",
+            "note": (
+                "De Lastmeter is een gevalideerd instrument. "
+                "Adviseer de patiënt om deze resultaten te bespreken met hun arts of verpleegkundige."
+            ),
+        }
 
     # ------------------------------------------------------------------
     # Citation mapping

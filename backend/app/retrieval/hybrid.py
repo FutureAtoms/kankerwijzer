@@ -127,15 +127,22 @@ class HybridMedicalRetriever:
                 notes=[f"Red-flag detected: {flag_type}"],
             )
 
-        # ---- 2. Legacy unsafe-pattern detection -----------------------
-        legacy_refusal = self._check_legacy_patterns(query)
-        if legacy_refusal:
-            return RetrievalResponse(
-                query=query,
-                audience=audience,
-                refusal_reason=legacy_refusal,
-                notes=["Unsafe prompt detected by legacy pattern matcher."],
-            )
+        # ---- 1.5 Distress/wellbeing detection (Lastmeter bypass) ------
+        # If the user is expressing distress symptoms, let it through to
+        # the agent so the Lastmeter tool can handle it conversationally.
+        if self._is_distress_query(query):
+            # Skip legacy patterns — the agent's Lastmeter tool will handle this
+            pass
+        else:
+            # ---- 2. Legacy unsafe-pattern detection -----------------------
+            legacy_refusal = self._check_legacy_patterns(query)
+            if legacy_refusal:
+                return RetrievalResponse(
+                    query=query,
+                    audience=audience,
+                    refusal_reason=legacy_refusal,
+                    notes=["Unsafe prompt detected by legacy pattern matcher."],
+                )
 
         # ---- 3. Structured-first routing ------------------------------
         structured_hits = self._route_structured(query)
@@ -199,6 +206,25 @@ class HybridMedicalRetriever:
     # ------------------------------------------------------------------
     # Legacy pattern matching (from simple.py)
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _is_distress_query(query: str) -> bool:
+        """Detect if the query expresses patient distress/wellbeing concerns.
+
+        These should bypass legacy safety patterns and be handled by the
+        agent's Lastmeter tool instead of being refused.
+        """
+        distress_keywords = [
+            "moe", "vermoeid", "pijn", "slaap", "slecht slapen",
+            "angst", "angstig", "bang", "zorgen", "somber", "depressief",
+            "eenzaam", "alleen", "verdrietig", "boos", "gefrustreerd",
+            "misselijk", "eetlust", "gewicht", "benauwd",
+            "last", "klachten", "hoe voel", "moeilijk", "zwaar",
+            "hulp nodig", "niet meer", "stress", "gespannen",
+            "lastmeter", "distress",
+        ]
+        q = query.lower()
+        return sum(1 for kw in distress_keywords if kw in q) >= 2
 
     @staticmethod
     def _check_legacy_patterns(query: str) -> str | None:
