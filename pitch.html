@@ -3,329 +3,113 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KankerWijzer — Hackathon Pitch</title>
+<title>OncologieWijzer — Pitch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Sora:wght@300;400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Karla:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Nunito+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* ═══════ DEFAULT THEME: BLUE & WHITE ═══════ */
 :root {
-  --bg: #FAF8F5;
-  --bg-warm: #F5F0EA;
+  --bg: #F0F5FB;
+  --bg-warm: #E4EDF8;
   --bg-card: #FFFFFF;
-  --text: #1A1A1A;
-  --text-muted: #6B6560;
-  --text-light: #9C9590;
-  --accent: #C45A3C;
-  --accent-soft: #E8A590;
-  --accent-glow: rgba(196, 90, 60, 0.08);
-  --teal: #2A7F6E;
-  --teal-soft: #D0EBE4;
-  --blue: #3A6EA5;
-  --blue-soft: #D4E4F5;
-  --amber: #B8860B;
-  --amber-soft: #F5E6C4;
-  --purple: #6B5B8A;
-  --purple-soft: #E4DFF0;
-  --slate: #4A5568;
-  --border: #E8E2DA;
-  --border-strong: #D4CCC2;
-  --shadow-sm: 0 1px 3px rgba(26,26,26,0.04);
-  --shadow-md: 0 4px 20px rgba(26,26,26,0.06);
-  --shadow-lg: 0 12px 40px rgba(26,26,26,0.08);
-  --radius: 12px;
-  --radius-lg: 20px;
+  --text: #0D1B2E;
+  --text-muted: #3D5470;
+  --text-light: #7A96B4;
+  --accent: #1565A8;
+  --accent-soft: #7FB3DE;
+  --accent-glow: rgba(21, 101, 168, 0.08);
+  --teal: #0D7377;
+  --teal-soft: #C8F0EE;
+  --blue: #1E40AF;
+  --blue-soft: #DBEAFE;
+  --amber: #B45309;
+  --amber-soft: #FEF3C7;
+  --purple: #4338CA;
+  --purple-soft: #E0E7FF;
+  --border: #C8D9EC;
+  --border-strong: #A8C0D8;
+  --shadow-sm: 0 1px 3px rgba(13,27,46,0.06);
+  --shadow-md: 0 4px 20px rgba(13,27,46,0.08);
+  --radius: 16px;
   --serif: 'Instrument Serif', Georgia, serif;
   --sans: 'Outfit', system-ui, sans-serif;
   --mono: 'JetBrains Mono', monospace;
 }
 
-/* ═══════ THEME: EDITORIAL WARM (default) ═══════ */
-/* Already defined in :root above */
-
-/* ═══════ THEME: SWISS PRECISION ═══════ */
-[data-theme="swiss"] {
-  --bg: #F7F8FA;
-  --bg-warm: #EEF0F4;
-  --bg-card: #FFFFFF;
-  --text: #111827;
-  --text-muted: #4B5563;
-  --text-light: #9CA3AF;
-  --accent: #1E3A5F;
-  --accent-soft: #8BADD4;
-  --accent-glow: rgba(30, 58, 95, 0.06);
-  --teal: #047857;
-  --teal-soft: #D1FAE5;
-  --blue: #1D4ED8;
-  --blue-soft: #DBEAFE;
-  --amber: #B45309;
-  --amber-soft: #FEF3C7;
-  --purple: #5B21B6;
-  --purple-soft: #EDE9FE;
-  --slate: #374151;
-  --border: #E5E7EB;
-  --border-strong: #D1D5DB;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
-  --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
-  --serif: 'Playfair Display', Georgia, serif;
-  --sans: 'DM Sans', system-ui, sans-serif;
-}
-
-[data-theme="swiss"] .slide::before {
-  background-image:
-    radial-gradient(circle at 15% 15%, rgba(30, 58, 95, 0.015) 0%, transparent 50%),
-    radial-gradient(circle at 85% 85%, rgba(4, 120, 87, 0.015) 0%, transparent 50%);
+/* ═══════ THEME: EDITORIAL WARM ═══════ */
+[data-theme="editorial"] {
+  --bg: #FAF8F5; --bg-warm: #F5F0EA; --bg-card: #FFFFFF;
+  --text: #1A1A1A; --text-muted: #6B6560; --text-light: #9C9590;
+  --accent: #C45A3C; --accent-soft: #E8A590; --accent-glow: rgba(196,90,60,0.08);
+  --teal: #2A7F6E; --teal-soft: #D0EBE4;
+  --blue: #3A6EA5; --blue-soft: #D4E4F5;
+  --amber: #B8860B; --amber-soft: #F5E6C4;
+  --purple: #6B5B8A; --purple-soft: #E4DFF0;
+  --border: #E8E2DA; --border-strong: #D4CCC2;
+  --shadow-sm: 0 1px 3px rgba(26,26,26,0.04); --shadow-md: 0 4px 20px rgba(26,26,26,0.06);
+  --serif: 'Instrument Serif', Georgia, serif; --sans: 'Outfit', system-ui, sans-serif;
 }
 
 /* ═══════ THEME: BOTANICAL ═══════ */
 [data-theme="botanical"] {
-  --bg: #F6F9F4;
-  --bg-warm: #ECF2E8;
-  --bg-card: #FFFFFF;
-  --text: #1B2E1B;
-  --text-muted: #4A6349;
-  --text-light: #8AA488;
-  --accent: #2D6A4F;
-  --accent-soft: #95D5B2;
-  --accent-glow: rgba(45, 106, 79, 0.07);
-  --teal: #1B4332;
-  --teal-soft: #D8F3DC;
-  --blue: #3A6EA5;
-  --blue-soft: #D4E4F5;
-  --amber: #926C15;
-  --amber-soft: #FEFAE0;
-  --purple: #6B5B8A;
-  --purple-soft: #E4DFF0;
-  --slate: #40513B;
-  --border: #D5E2CF;
-  --border-strong: #B7CCAD;
-  --shadow-sm: 0 1px 3px rgba(27,46,27,0.04);
-  --shadow-md: 0 4px 20px rgba(27,46,27,0.06);
-  --shadow-lg: 0 12px 40px rgba(27,46,27,0.08);
-  --serif: 'Lora', Georgia, serif;
-  --sans: 'Source Sans 3', system-ui, sans-serif;
+  --bg: #F6F9F4; --bg-warm: #ECF2E8; --bg-card: #FFFFFF;
+  --text: #1B2E1B; --text-muted: #4A6349; --text-light: #8AA488;
+  --accent: #2D6A4F; --accent-soft: #95D5B2; --accent-glow: rgba(45,106,79,0.07);
+  --teal: #1B4332; --teal-soft: #D8F3DC;
+  --blue: #3A6EA5; --blue-soft: #D4E4F5;
+  --amber: #926C15; --amber-soft: #FEFAE0;
+  --purple: #6B5B8A; --purple-soft: #E4DFF0;
+  --border: #D5E2CF; --border-strong: #B7CCAD;
+  --shadow-sm: 0 1px 3px rgba(27,46,27,0.04); --shadow-md: 0 4px 20px rgba(27,46,27,0.06);
+  --serif: 'Instrument Serif', Georgia, serif; --sans: 'Outfit', system-ui, sans-serif;
 }
 
-[data-theme="botanical"] .slide::before {
-  background-image:
-    radial-gradient(circle at 25% 30%, rgba(45, 106, 79, 0.025) 0%, transparent 50%),
-    radial-gradient(circle at 75% 70%, rgba(146, 108, 21, 0.015) 0%, transparent 50%);
-}
-
-/* ═══════ THEME: MODERNIST SAND ═══════ */
-[data-theme="modernist"] {
-  --bg: #FBF8F3;
-  --bg-warm: #F3ECE0;
-  --bg-card: #FFFEFA;
-  --text: #2C1810;
-  --text-muted: #6D5D50;
-  --text-light: #A89888;
-  --accent: #C84C09;
-  --accent-soft: #F0A878;
-  --accent-glow: rgba(200, 76, 9, 0.06);
-  --teal: #2A7F6E;
-  --teal-soft: #D0EBE4;
-  --blue: #4A6FA5;
-  --blue-soft: #D8E6F5;
-  --amber: #A67C00;
-  --amber-soft: #FFF2CC;
-  --purple: #7B5EA7;
-  --purple-soft: #EBE0F8;
-  --slate: #5C4F44;
-  --border: #E8DDD0;
-  --border-strong: #D4C5B2;
-  --shadow-sm: 0 1px 3px rgba(44,24,16,0.04);
-  --shadow-md: 0 4px 20px rgba(44,24,16,0.06);
-  --shadow-lg: 0 12px 40px rgba(44,24,16,0.08);
-  --serif: 'Fraunces', Georgia, serif;
-  --sans: 'Sora', system-ui, sans-serif;
-}
-
-[data-theme="modernist"] .slide::before {
-  background-image:
-    radial-gradient(circle at 30% 20%, rgba(200, 76, 9, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 70% 80%, rgba(166, 124, 0, 0.015) 0%, transparent 50%);
-}
-
-/* ═══════ THEME: COASTAL ═══════ */
-[data-theme="coastal"] {
-  --bg: #F5F8FA;
-  --bg-warm: #E8EFF5;
-  --bg-card: #FFFFFF;
-  --text: #14202E;
-  --text-muted: #4A6178;
-  --text-light: #8FA4B8;
-  --accent: #1565A8;
-  --accent-soft: #7FB3DE;
-  --accent-glow: rgba(21, 101, 168, 0.06);
-  --teal: #0D7377;
-  --teal-soft: #CCFBF1;
-  --blue: #1E40AF;
-  --blue-soft: #DBEAFE;
-  --amber: #B45309;
-  --amber-soft: #FEF3C7;
-  --purple: #5B21B6;
-  --purple-soft: #EDE9FE;
-  --slate: #334155;
-  --border: #D6E2EC;
-  --border-strong: #B8CCDC;
-  --shadow-sm: 0 1px 3px rgba(20,32,46,0.04);
-  --shadow-md: 0 4px 20px rgba(20,32,46,0.06);
-  --shadow-lg: 0 12px 40px rgba(20,32,46,0.08);
-  --serif: 'Libre Baskerville', Georgia, serif;
-  --sans: 'Karla', system-ui, sans-serif;
-}
-
-[data-theme="coastal"] .slide::before {
-  background-image:
-    radial-gradient(circle at 20% 30%, rgba(21, 101, 168, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(13, 115, 119, 0.015) 0%, transparent 50%);
-}
-
-/* ═══════ THEME: CLASSICAL ═══════ */
-[data-theme="classical"] {
-  --bg: #FAF7F2;
-  --bg-warm: #F0EBE1;
-  --bg-card: #FFFDF8;
-  --text: #1C1410;
-  --text-muted: #5C4F42;
-  --text-light: #998A7A;
-  --accent: #8B2500;
-  --accent-soft: #D4907A;
-  --accent-glow: rgba(139, 37, 0, 0.06);
-  --teal: #3B6B5A;
-  --teal-soft: #D4E8DF;
-  --blue: #3A5A8C;
-  --blue-soft: #D4DFF0;
-  --amber: #8C6B20;
-  --amber-soft: #F5ECCA;
-  --purple: #5A3E7A;
-  --purple-soft: #E5D8F0;
-  --slate: #4A3F35;
-  --border: #E0D8CC;
-  --border-strong: #CCC0AE;
-  --shadow-sm: 0 1px 3px rgba(28,20,16,0.04);
-  --shadow-md: 0 4px 20px rgba(28,20,16,0.05);
-  --shadow-lg: 0 12px 40px rgba(28,20,16,0.07);
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --sans: 'Nunito Sans', system-ui, sans-serif;
-}
-
-[data-theme="classical"] .slide::before {
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(139, 37, 0, 0.015) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(59, 107, 90, 0.015) 0%, transparent 50%);
+/* ═══════ THEME: DARK ═══════ */
+[data-theme="dark"] {
+  --bg: #0F172A; --bg-warm: #1E293B; --bg-card: #1E293B;
+  --text: #F1F5F9; --text-muted: #94A3B8; --text-light: #64748B;
+  --accent: #60A5FA; --accent-soft: #3B82F6; --accent-glow: rgba(96,165,250,0.1);
+  --teal: #34D399; --teal-soft: rgba(52,211,153,0.15);
+  --blue: #818CF8; --blue-soft: rgba(129,140,248,0.15);
+  --amber: #FBBF24; --amber-soft: rgba(251,191,36,0.15);
+  --purple: #A78BFA; --purple-soft: rgba(167,139,250,0.15);
+  --border: #334155; --border-strong: #475569;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2); --shadow-md: 0 4px 20px rgba(0,0,0,0.3);
+  --serif: 'Instrument Serif', Georgia, serif; --sans: 'Outfit', system-ui, sans-serif;
 }
 
 /* ═══════ THEME SWITCHER UI ═══════ */
 .theme-switcher {
-  position: fixed;
-  top: 16px;
-  right: 24px;
-  z-index: 200;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  position: fixed; top: 16px; right: 24px; z-index: 200;
+  display: flex; align-items: center; gap: 6px;
 }
-
 .theme-switcher-label {
-  font-family: var(--sans);
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-light);
-  margin-right: 4px;
-  font-weight: 600;
+  font-family: var(--sans); font-size: 0.65rem; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--text-light); margin-right: 4px; font-weight: 600;
 }
-
 .theme-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  border: 2px solid var(--border);
-  cursor: pointer;
-  transition: all 0.25s ease;
-  position: relative;
-  overflow: hidden;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border);
+  cursor: pointer; transition: all 0.25s ease; position: relative; overflow: hidden;
+  padding: 0; display: flex; align-items: center; justify-content: center;
 }
-
-.theme-btn:hover {
-  transform: scale(1.15);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.theme-btn.active {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-glow);
-  transform: scale(1.15);
-}
-
-.theme-btn .swatch {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-
-/* Swatch colors for each theme */
-.theme-btn[data-theme="editorial"] .swatch {
-  background: linear-gradient(135deg, #FAF8F5 50%, #C45A3C 50%);
-}
-.theme-btn[data-theme="swiss"] .swatch {
-  background: linear-gradient(135deg, #F7F8FA 50%, #1E3A5F 50%);
-}
-.theme-btn[data-theme="botanical"] .swatch {
-  background: linear-gradient(135deg, #F6F9F4 50%, #2D6A4F 50%);
-}
-.theme-btn[data-theme="modernist"] .swatch {
-  background: linear-gradient(135deg, #FBF8F3 50%, #C84C09 50%);
-}
-.theme-btn[data-theme="coastal"] .swatch {
-  background: linear-gradient(135deg, #F5F8FA 50%, #1565A8 50%);
-}
-.theme-btn[data-theme="classical"] .swatch {
-  background: linear-gradient(135deg, #FAF7F2 50%, #8B2500 50%);
-}
-
+.theme-btn:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.theme-btn.active { border-color: var(--accent); transform: scale(1.15); }
+.theme-btn .swatch { width: 100%; height: 100%; border-radius: 50%; }
+.theme-btn[data-theme="blue"] .swatch   { background: linear-gradient(135deg, #F0F5FB 50%, #1565A8 50%); }
+.theme-btn[data-theme="editorial"] .swatch { background: linear-gradient(135deg, #FAF8F5 50%, #C45A3C 50%); }
+.theme-btn[data-theme="botanical"] .swatch { background: linear-gradient(135deg, #F6F9F4 50%, #2D6A4F 50%); }
+.theme-btn[data-theme="dark"] .swatch   { background: linear-gradient(135deg, #1E293B 50%, #60A5FA 50%); }
 .theme-btn-tooltip {
-  position: absolute;
-  bottom: -28px;
-  left: 50%;
-  transform: translateX(-50%);
-  white-space: nowrap;
-  font-size: 0.6rem;
-  font-family: var(--sans);
-  font-weight: 500;
-  color: var(--text-muted);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  padding: 2px 8px;
-  border-radius: 4px;
-  opacity: 0;
-  pointer-events: none;
+  position: absolute; bottom: -28px; left: 50%; transform: translateX(-50%);
+  white-space: nowrap; font-size: 0.6rem; font-family: var(--sans); font-weight: 500;
+  color: var(--text-muted); background: var(--bg-card); border: 1px solid var(--border);
+  padding: 2px 8px; border-radius: 4px; opacity: 0; pointer-events: none;
   transition: opacity 0.2s ease;
-  box-shadow: var(--shadow-sm);
 }
-
-.theme-btn:hover .theme-btn-tooltip {
-  opacity: 1;
-}
-
-html { font-size: 16px; }
-
-/* Smooth theme transitions */
-body, .card, .arch-container, .quote-block, .source-badge, .tag,
-.compare-table, .compare-table th, .compare-table td,
-.safety-banner, .team-badge, .pill, .criteria-check,
-.arch-node, .journey-num, .nav-dot, .progress-fill,
-h1, h2, h3, h4, p, .title-deco, .accent-line {
-  transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
-}
+.theme-btn:hover .theme-btn-tooltip { opacity: 1; }
 
 body {
   font-family: var(--sans);
@@ -337,696 +121,100 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ─── Slide Container ─── */
-.deck {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-}
+/* ─── Progress ─── */
+.progress-track { position: fixed; top: 0; left: 0; right: 0; height: 3px; background: var(--border); z-index: 100; }
+.progress-fill { height: 100%; background: var(--accent); transition: width 0.4s cubic-bezier(0.4,0,0.2,1); border-radius: 0 2px 2px 0; }
+
+/* ─── Nav dots ─── */
+.nav-dots { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 100; }
+.nav-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); border: none; cursor: pointer; transition: all 0.3s ease; padding: 0; }
+.nav-dot.active { background: var(--accent); transform: scale(1.35); }
+.nav-dot:hover { background: var(--accent-soft); }
+
+/* ─── Counter & hint ─── */
+.slide-counter { position: fixed; bottom: 28px; right: 40px; font-family: var(--mono); font-size: 0.75rem; color: var(--text-light); z-index: 100; }
+.key-hint { position: fixed; bottom: 28px; left: 40px; font-size: 0.7rem; color: var(--text-light); z-index: 100; display: flex; align-items: center; gap: 6px; }
+.key-hint kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; font-family: var(--mono); font-size: 0.65rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; }
+
+/* ─── Deck & slides ─── */
+.deck { position: relative; width: 100vw; height: 100vh; }
 
 .slide {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
   padding: 60px 80px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(20px);
+  opacity: 0; visibility: hidden; transform: translateY(24px);
   transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0.5s;
   overflow-y: auto;
 }
+.slide.active { opacity: 1; visibility: visible; transform: translateY(0); transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0s; }
+.slide-inner { max-width: 1100px; width: 100%; }
 
-.slide.active {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-  transition: opacity 0.5s ease, transform 0.5s ease, visibility 0s 0s;
-}
+/* ─── Animations ─── */
+.slide.active .stagger { animation: fadeUp 0.5s ease both; }
+.slide.active .stagger:nth-child(1) { animation-delay: 0.05s; }
+.slide.active .stagger:nth-child(2) { animation-delay: 0.13s; }
+.slide.active .stagger:nth-child(3) { animation-delay: 0.21s; }
+.slide.active .stagger:nth-child(4) { animation-delay: 0.29s; }
+.slide.active .stagger:nth-child(5) { animation-delay: 0.37s; }
 
-.slide-inner {
-  max-width: 1100px;
-  width: 100%;
-}
-
-/* ─── Progress Bar ─── */
-.progress-track {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--border);
-  z-index: 100;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--accent);
-  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 0 2px 2px 0;
-}
-
-/* ─── Slide Counter ─── */
-.slide-counter {
-  position: fixed;
-  bottom: 28px;
-  right: 40px;
-  font-family: var(--mono);
-  font-size: 0.75rem;
-  color: var(--text-light);
-  z-index: 100;
-  letter-spacing: 0.05em;
-}
-
-/* ─── Nav Dots ─── */
-.nav-dots {
-  position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 8px;
-  z-index: 100;
-}
-
-.nav-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--border-strong);
-  border: none;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  padding: 0;
-}
-
-.nav-dot.active {
-  background: var(--accent);
-  transform: scale(1.3);
-}
-
-.nav-dot:hover {
-  background: var(--accent-soft);
-}
-
-/* ─── Keyboard Hint ─── */
-.key-hint {
-  position: fixed;
-  bottom: 28px;
-  left: 40px;
-  font-size: 0.7rem;
-  color: var(--text-light);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.key-hint kbd {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 5px;
-  font-family: var(--mono);
-  font-size: 0.65rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-}
+@keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ─── Typography ─── */
-.serif { font-family: var(--serif); }
-.sans { font-family: var(--sans); }
-.mono { font-family: var(--mono); }
+h1 { font-family: var(--serif); font-weight: 400; line-height: 1.1; }
+h2 { font-family: var(--serif); font-weight: 400; font-size: 3.4rem; line-height: 1.12; margin-bottom: 1.5rem; color: var(--text); }
+h3 { font-family: var(--sans); font-weight: 600; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.14em; color: var(--accent); margin-bottom: 0.75rem; }
+p { font-size: 1.25rem; line-height: 1.65; color: var(--text-muted); }
+strong { color: var(--text); font-weight: 600; }
 
-h1 {
-  font-family: var(--serif);
-  font-weight: 400;
-  line-height: 1.1;
-}
+/* ─── Layout helpers ─── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 28px; }
 
-h2 {
-  font-family: var(--serif);
-  font-weight: 400;
-  font-size: 2.8rem;
-  line-height: 1.15;
-  margin-bottom: 1.5rem;
-  color: var(--text);
-}
+/* ─── Cards ─── */
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; box-shadow: var(--shadow-sm); }
+.card h4 { font-family: var(--sans); font-weight: 600; font-size: 1.15rem; margin-bottom: 10px; color: var(--text); }
+.card p { font-size: 1.05rem; }
 
-h3 {
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 1rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--accent);
-  margin-bottom: 0.75rem;
-}
+/* ─── Big stat ─── */
+.big-stat { font-family: var(--serif); font-size: 4rem; color: var(--accent); line-height: 1; margin-bottom: 8px; }
+.big-stat-label { font-size: 1.05rem; color: var(--text-muted); }
 
-p {
-  font-size: 1.15rem;
-  line-height: 1.65;
-  color: var(--text-muted);
-}
+/* ─── Badge / tag ─── */
+.tag { display: inline-flex; align-items: center; padding: 6px 16px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; border-radius: 100px; background: var(--accent-glow); color: var(--accent); border: 1px solid rgba(196,90,60,0.15); }
 
-/* ─── Stagger Animations ─── */
-.slide.active .stagger { animation: fadeSlideUp 0.5s ease both; }
-.slide.active .stagger:nth-child(1) { animation-delay: 0.05s; }
-.slide.active .stagger:nth-child(2) { animation-delay: 0.12s; }
-.slide.active .stagger:nth-child(3) { animation-delay: 0.19s; }
-.slide.active .stagger:nth-child(4) { animation-delay: 0.26s; }
-.slide.active .stagger:nth-child(5) { animation-delay: 0.33s; }
-.slide.active .stagger:nth-child(6) { animation-delay: 0.40s; }
-.slide.active .stagger:nth-child(7) { animation-delay: 0.47s; }
-.slide.active .stagger:nth-child(8) { animation-delay: 0.54s; }
-
-@keyframes fadeSlideUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to   { opacity: 1; transform: scale(1); }
-}
-
-@keyframes drawLine {
-  from { width: 0; }
-  to   { width: 100%; }
-}
-
-/* ─── Decorative Elements ─── */
-.accent-line {
-  width: 48px;
-  height: 3px;
-  background: var(--accent);
-  border-radius: 2px;
-  margin-bottom: 1.5rem;
-}
-
+/* ─── Accent line ─── */
+.accent-line { width: 52px; height: 3px; background: var(--accent); border-radius: 2px; margin-bottom: 1.5rem; }
 .accent-line.center { margin-left: auto; margin-right: auto; }
 
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  border-radius: 100px;
-  background: var(--accent-glow);
-  color: var(--accent);
-  border: 1px solid rgba(196, 90, 60, 0.15);
-}
+/* ─── Flow diagram ─── */
+.flow { display: flex; flex-direction: column; gap: 8px; }
+.flow-step { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-radius: 12px; font-size: 1.05rem; font-weight: 500; }
+.flow-arrow { text-align: center; font-size: 1.1rem; color: var(--text-light); padding: 0 20px; }
+.flow-result { display: flex; gap: 12px; }
+.flow-pass { flex: 1; padding: 12px 16px; background: rgba(42,127,110,0.07); border: 1px solid rgba(42,127,110,0.2); border-radius: 10px; font-size: 1rem; text-align: center; color: var(--teal); font-weight: 600; }
+.flow-block { flex: 1; padding: 12px 16px; background: rgba(196,90,60,0.07); border: 1px solid rgba(196,90,60,0.2); border-radius: 10px; font-size: 1rem; text-align: center; color: var(--accent); font-weight: 600; }
 
-/* ─── Card Grid ─── */
-.card-grid {
-  display: grid;
-  gap: 16px;
-}
+/* ─── Arch node ─── */
+.arch-row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 6px; }
+.arch-node { padding: 10px 18px; border-radius: 10px; font-size: 0.95rem; font-weight: 500; border: 1px solid var(--border); background: var(--bg-card); color: var(--text); }
+.arch-node.primary { background: var(--accent-glow); border-color: rgba(196,90,60,0.2); color: var(--accent); }
+.arch-node.teal { background: var(--teal-soft); border-color: rgba(42,127,110,0.2); color: var(--teal); }
+.arch-node.blue { background: var(--blue-soft); border-color: rgba(58,110,165,0.2); color: var(--blue); }
+.arch-node.purple { background: var(--purple-soft); border-color: rgba(107,91,138,0.2); color: var(--purple); }
+.arch-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-light); font-weight: 600; text-align: center; margin-bottom: 6px; }
+.arch-conn { text-align: center; color: var(--text-light); font-size: 1.1rem; margin: 4px 0; }
 
-.card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
-.card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
-.card-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+/* ─── Check list ─── */
+.checklist { list-style: none; padding: 0; }
+.checklist li { padding: 10px 0; font-size: 1.15rem; color: var(--text-muted); border-bottom: 1px solid var(--border); display: flex; gap: 12px; align-items: flex-start; }
+.checklist li:last-child { border-bottom: none; }
+.checklist li span.icon { color: var(--teal); font-size: 1rem; margin-top: 3px; flex-shrink: 0; }
 
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 28px;
-  box-shadow: var(--shadow-sm);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  margin-bottom: 16px;
-}
-
-.card h4 {
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.card p {
-  font-size: 0.9rem;
-  line-height: 1.55;
-  color: var(--text-muted);
-}
-
-/* ─── Source Badges ─── */
-.source-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  box-shadow: var(--shadow-sm);
-}
-
-.source-badge .dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-/* ─── Flow Diagram ─── */
-.flow {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.flow-node {
-  padding: 14px 22px;
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-align: center;
-  min-width: 130px;
-  border: 1px solid var(--border);
-}
-
-.flow-arrow {
-  font-size: 1.2rem;
-  color: var(--text-light);
-  padding: 0 6px;
-  flex-shrink: 0;
-}
-
-/* ─── Stat Callout ─── */
-.stat-row {
-  display: flex;
-  gap: 32px;
-  flex-wrap: wrap;
-}
-
-.stat {
-  text-align: center;
-  flex: 1;
-  min-width: 120px;
-}
-
-.stat-number {
-  font-family: var(--serif);
-  font-size: 3rem;
-  color: var(--accent);
-  line-height: 1;
-  margin-bottom: 6px;
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-/* ─── Comparison Table ─── */
-.compare-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  border-radius: var(--radius);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  font-size: 0.9rem;
-}
-
-.compare-table th {
-  background: var(--bg-warm);
-  padding: 14px 20px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text-muted);
-  border-bottom: 1px solid var(--border);
-}
-
-.compare-table td {
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text-muted);
-  line-height: 1.5;
-}
-
-.compare-table tr:last-child td { border-bottom: none; }
-
-.compare-table .check { color: var(--teal); font-weight: 600; }
-.compare-table .cross { color: var(--accent); }
-
-/* ─── Quote Block ─── */
-.quote-block {
-  background: var(--bg-card);
-  border-left: 4px solid var(--accent);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  padding: 28px 32px;
-  margin: 1.5rem 0;
-  box-shadow: var(--shadow-sm);
-}
-
-.quote-block p {
-  font-family: var(--serif);
-  font-size: 1.35rem;
-  font-style: italic;
-  line-height: 1.5;
-  color: var(--text);
-}
-
-/* ─── Criteria Checklist ─── */
-.criteria-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 18px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.criteria-item:last-child { border-bottom: none; }
-
-.criteria-check {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--teal-soft);
-  color: var(--teal);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.criteria-text h4 {
-  font-weight: 600;
-  font-size: 1rem;
-  margin-bottom: 4px;
-}
-
-.criteria-text p {
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-/* ─── Architecture Nodes ─── */
-.arch-container {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  padding: 36px;
-  box-shadow: var(--shadow-md);
-}
-
-.arch-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.arch-row:last-child { margin-bottom: 0; }
-
-.arch-node {
-  padding: 10px 18px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.arch-node.primary {
-  background: var(--accent);
-  color: white;
-  border: none;
-}
-
-.arch-node.secondary {
-  background: var(--bg-warm);
-  color: var(--text);
-  border: 1px solid var(--border);
-}
-
-.arch-node.storage {
-  background: var(--teal-soft);
-  color: var(--teal);
-  border: 1px solid rgba(42, 127, 110, 0.2);
-}
-
-.arch-node.api {
-  background: var(--blue-soft);
-  color: var(--blue);
-  border: 1px solid rgba(58, 110, 165, 0.2);
-}
-
-.arch-node.safety {
-  background: var(--amber-soft);
-  color: var(--amber);
-  border: 1px solid rgba(184, 134, 11, 0.2);
-}
-
-.arch-arrow {
-  color: var(--text-light);
-  font-size: 1rem;
-}
-
-.arch-connector {
-  width: 1px;
-  height: 20px;
-  background: var(--border-strong);
-  margin: 0 auto;
-}
-
-.arch-label {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--text-light);
-  text-align: center;
-  margin-bottom: 8px;
-  font-weight: 600;
-}
-
-/* ─── Journey Steps ─── */
-.journey {
-  display: flex;
-  gap: 0;
-  align-items: stretch;
-  position: relative;
-}
-
-.journey::before {
-  content: '';
-  position: absolute;
-  top: 28px;
-  left: 28px;
-  right: 28px;
-  height: 2px;
-  background: var(--border);
-  z-index: 0;
-}
-
-.journey-step {
-  flex: 1;
-  text-align: center;
-  position: relative;
-  z-index: 1;
-  padding: 0 8px;
-}
-
-.journey-num {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--serif);
-  font-size: 1.3rem;
-  margin: 0 auto 14px;
-  border: 2px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text);
-  transition: all 0.3s ease;
-}
-
-.journey-step:hover .journey-num {
-  border-color: var(--accent);
-  color: var(--accent);
-  transform: scale(1.1);
-}
-
-.journey-step h4 {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-.journey-step p {
-  font-size: 0.75rem;
-  line-height: 1.45;
-  color: var(--text-light);
-}
-
-/* ─── Final Slide ─── */
-.final-message {
-  font-family: var(--serif);
-  font-size: 2rem;
-  line-height: 1.4;
-  color: var(--text);
-  max-width: 700px;
-  text-align: center;
-}
-
-.final-message em {
-  color: var(--accent);
-  font-style: italic;
-}
-
-/* ─── Subtle BG Texture ─── */
-.slide::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(circle at 20% 20%, rgba(196, 90, 60, 0.02) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(42, 127, 110, 0.02) 0%, transparent 50%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-/* ─── Responsive ─── */
 @media (max-width: 900px) {
   .slide { padding: 40px 32px; }
-  h2 { font-size: 2rem; }
-  .card-grid.cols-3 { grid-template-columns: 1fr 1fr; }
-  .card-grid.cols-4 { grid-template-columns: 1fr 1fr; }
-  .journey { flex-direction: column; gap: 16px; }
-  .journey::before { display: none; }
-  .arch-row { gap: 8px; }
-  .stat-number { font-size: 2.2rem; }
-}
-
-@media (max-width: 600px) {
-  .slide { padding: 32px 20px; }
-  h2 { font-size: 1.6rem; }
-  .card-grid.cols-2, .card-grid.cols-3, .card-grid.cols-4 { grid-template-columns: 1fr; }
-}
-
-/* ─── Pill list ─── */
-.pill-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.pill {
-  padding: 8px 16px;
-  border-radius: 100px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  color: var(--text-muted);
-  box-shadow: var(--shadow-sm);
-}
-
-/* ─── Two-col layout ─── */
-.two-col {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 48px;
-  align-items: start;
-}
-
-@media (max-width: 800px) {
-  .two-col { grid-template-columns: 1fr; gap: 24px; }
-}
-
-/* ─── Safety banner ─── */
-.safety-banner {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 16px 22px;
-  background: #FEF6F0;
-  border: 1px solid rgba(196, 90, 60, 0.15);
-  border-radius: var(--radius);
-  font-size: 0.85rem;
-  color: var(--accent);
-  font-weight: 500;
-}
-
-.safety-banner .safety-icon {
-  font-size: 1.3rem;
-  flex-shrink: 0;
-}
-
-/* team badge */
-.team-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 18px;
-  border-radius: 100px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 24px;
-}
-
-/* title decoration */
-.title-deco {
-  width: 80px;
-  height: 4px;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
-  margin: 24px auto;
+  h2 { font-size: 2.4rem; }
+  .two-col, .three-col { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -1036,33 +224,21 @@ p {
 
 <div class="theme-switcher" id="themeSwitcher">
   <span class="theme-switcher-label">Theme</span>
-  <button class="theme-btn active" data-theme="editorial" title="Editorial Warm">
-    <div class="swatch"></div>
-    <span class="theme-btn-tooltip">Editorial</span>
+  <button class="theme-btn active" data-theme="blue" title="Blue &amp; White">
+    <div class="swatch"></div><span class="theme-btn-tooltip">Blue</span>
   </button>
-  <button class="theme-btn" data-theme="swiss" title="Swiss Precision">
-    <div class="swatch"></div>
-    <span class="theme-btn-tooltip">Swiss</span>
+  <button class="theme-btn" data-theme="editorial" title="Editorial Warm">
+    <div class="swatch"></div><span class="theme-btn-tooltip">Warm</span>
   </button>
   <button class="theme-btn" data-theme="botanical" title="Botanical">
-    <div class="swatch"></div>
-    <span class="theme-btn-tooltip">Botanical</span>
+    <div class="swatch"></div><span class="theme-btn-tooltip">Green</span>
   </button>
-  <button class="theme-btn" data-theme="modernist" title="Modernist Sand">
-    <div class="swatch"></div>
-    <span class="theme-btn-tooltip">Modernist</span>
-  </button>
-  <button class="theme-btn" data-theme="coastal" title="Coastal">
-    <div class="swatch"></div>
-    <span class="theme-btn-tooltip">Coastal</span>
-  </button>
-  <button class="theme-btn" data-theme="classical" title="Classical">
-    <div class="swatch"></div>
-    <span class="theme-btn-tooltip">Classical</span>
+  <button class="theme-btn" data-theme="dark" title="Dark">
+    <div class="swatch"></div><span class="theme-btn-tooltip">Dark</span>
   </button>
 </div>
 
-<div class="key-hint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate &ensp; <kbd>T</kbd> cycle theme</div>
+<div class="key-hint"><kbd>&larr;</kbd><kbd>&rarr;</kbd> navigate &ensp; <kbd>T</kbd> theme</div>
 <div class="nav-dots" id="navDots"></div>
 <div class="slide-counter" id="counter"></div>
 
@@ -1071,653 +247,183 @@ p {
   <!-- ════════════ SLIDE 1: TITLE ════════════ -->
   <section class="slide active" data-slide="0">
     <div class="slide-inner" style="text-align:center;">
-      <div class="stagger">
-        <div class="team-badge">
-          <span style="font-size:1rem;">&#9729;</span> Team Uncloud &mdash; BrabantHack 2026
-        </div>
-      </div>
-      <h1 class="stagger" style="font-size:4.5rem; margin-bottom:0;">KankerWijzer</h1>
-      <div class="title-deco stagger"></div>
-      <p class="stagger" style="font-size:1.35rem; max-width:680px; margin:0 auto 2rem;">
-        A provenance-first cancer information assistant that connects<br>
-        trusted Dutch oncology sources with <em style="font-family:var(--serif); color:var(--accent);">exact citations</em>,
-        <em style="font-family:var(--serif); color:var(--accent);">safe refusal</em>,<br>
-        and <em style="font-family:var(--serif); color:var(--accent);">patient-friendly guidance</em>.
+      <div class="accent-line center stagger"></div>
+      <h1 class="stagger" style="font-size:5.5rem; margin-bottom:1rem;">OncologieWijzer</h1>
+      <p class="stagger" style="font-size:1.6rem; max-width:640px; margin:0 auto 2.5rem; color:var(--text-muted);">
+        Trusted cancer information.<br>
+        <em style="font-family:var(--serif); color:var(--accent);">As fast and easy as ChatGPT. Actually correct.</em>
       </p>
-      <div class="stagger" style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap;">
-        <span class="tag">Medical-Grade RAG</span>
-        <span class="tag" style="background:rgba(42,127,110,0.08); color:var(--teal); border-color:rgba(42,127,110,0.15);">7 IKNL Sources</span>
-        <span class="tag" style="background:rgba(58,110,165,0.08); color:var(--blue); border-color:rgba(58,110,165,0.15);">GraphRAG + Hybrid Retrieval</span>
+      <div class="stagger" style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+        <span class="tag">IKNL Med Tech Track</span>
+        <span class="tag" style="background:rgba(42,127,110,0.08); color:var(--teal); border-color:rgba(42,127,110,0.15);">Team Uncloud</span>
+        <span class="tag" style="background:rgba(58,110,165,0.08); color:var(--blue); border-color:rgba(58,110,165,0.15);">BrabantHack 2026</span>
       </div>
     </div>
   </section>
 
-  <!-- ════════════ SLIDE 2: THE PROBLEM ════════════ -->
+  <!-- ════════════ SLIDE 2: PROBLEM ════════════ -->
   <section class="slide" data-slide="1">
     <div class="slide-inner">
-      <h3 class="stagger">The Problem</h3>
-      <h2 class="stagger">Trusted cancer information is<br>scattered. People use ChatGPT instead.</h2>
+      <h3 class="stagger">Problem &amp; Approach</h3>
+      <h2 class="stagger">Patients use ChatGPT.<br>It sounds right. It isn&rsquo;t.</h2>
 
-      <div class="two-col" style="margin-top:2rem;">
-        <div class="stagger">
-          <div class="quote-block">
-            <p>&ldquo;I just asked ChatGPT because I didn&rsquo;t know which IKNL website to check.&rdquo;</p>
+      <div class="two-col stagger">
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          <div style="background:var(--bg-warm); border:1px solid var(--border); border-left:4px solid var(--accent); border-radius:var(--radius); padding:28px;">
+            <p style="font-size:1.3rem; font-family:var(--serif); color:var(--text); line-height:1.5;">
+              &ldquo;I asked ChatGPT &mdash; it&rsquo;s fast, comfortable, no login needed.&rdquo;
+            </p>
+            <p style="font-size:1.1rem; margin-top:14px;">
+              That&rsquo;s the bar we must match. If our tool is harder to reach, patients go back to ChatGPT &mdash; where answers are <strong>confidently wrong</strong>.
+            </p>
           </div>
-          <p style="margin-top:1.25rem; font-size:1rem;">
-            Patients and families turn to general AI because it's fast and easy.
-            But generic AI sounds <strong>confident while being wrong</strong>, incomplete, or uncited.
-          </p>
+          <div style="background:var(--bg-warm); border:1px solid var(--border); border-radius:var(--radius); padding:22px 28px;">
+            <p style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-light); font-weight:600; margin-bottom:10px;">User</p>
+            <p style="font-size:1.15rem;">Patient looking for information &mdash; in a format as fast and familiar as ChatGPT, but correct. Like <em>thuisarts.nl</em>, but for oncology. On the IKNL page.</p>
+          </div>
         </div>
-        <div>
-          <div class="card stagger" style="margin-bottom:12px; border-left:3px solid var(--accent);">
-            <h4>&#10007;&ensp;Answers are fast, but not reliable</h4>
-            <p>Generic AI can hallucinate medical facts with no source trail.</p>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="card" style="border-left:4px solid var(--accent);">
+            <h4>&#9679;&nbsp; Familiar &amp; frictionless</h4>
+            <p>No login. No navigation. A chatbot &mdash; because that&rsquo;s where the problem lives and what patients already use.</p>
           </div>
-          <div class="card stagger" style="margin-bottom:12px; border-left:3px solid var(--amber);">
-            <h4>&#10007;&ensp;Trusted sources exist, but are hard to find</h4>
-            <p>Information is spread across 7+ IKNL-related sites, APIs, reports, and guidelines.</p>
+          <div class="card" style="border-left:4px solid var(--teal);">
+            <h4>&#9679;&nbsp; Accurate &mdash; sources only</h4>
+            <p>Direct links to trusted sources. No interpretation, no clinical decisions. If we&rsquo;re not sure, we say so.</p>
           </div>
-          <div class="card stagger" style="border-left:3px solid var(--purple);">
-            <h4>&#10007;&ensp;Context is lost when sources are separated</h4>
-            <p>Medical information loses meaning when disconnected from its provenance.</p>
+          <div class="card" style="border-left:4px solid var(--purple);">
+            <h4>&#9679;&nbsp; Quantitative</h4>
+            <p>Digitized Lastmeter detects psychosocial need &amp; creates population data for IKNL. Output exports as a GP-ready summary.</p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ════════════ SLIDE 3: THE SOLUTION ════════════ -->
+  <!-- ════════════ SLIDE 3: IMPACT ════════════ -->
   <section class="slide" data-slide="2">
     <div class="slide-inner">
-      <h3 class="stagger">Our Solution</h3>
-      <h2 class="stagger">One question. All trusted sources.<br>Every answer cited.</h2>
+      <h3 class="stagger">Impact</h3>
+      <h2 class="stagger">Three groups benefit.<br>One tool.</h2>
 
-      <div class="card-grid cols-3" style="margin-top:2rem;">
-        <div class="card stagger">
-          <div class="card-icon" style="background:var(--teal-soft); color:var(--teal);">&#128269;</div>
-          <h4>Source-Grounded Chat</h4>
-          <p>Ask in natural language. Get answers retrieved from trusted sources only, with clickable citations.</p>
+      <div class="three-col stagger">
+        <div class="card" style="border-top:4px solid var(--teal);">
+          <div style="font-size:2.5rem; margin-bottom:12px;">&#128100;</div>
+          <h4>Patient</h4>
+          <p>Correct, cited answers — as fast as ChatGPT, no login. Distress screening exports as a <strong>GP-ready summary</strong>, so patients can fully describe their situation before a time-limited appointment.</p>
+          <p style="margin-top:10px; font-size:1rem; color:var(--text-light);">The chat becomes a helper — not a replacement for their doctor.</p>
         </div>
-        <div class="card stagger">
-          <div class="card-icon" style="background:var(--blue-soft); color:var(--blue);">&#128202;</div>
-          <h4>Exact Statistics First</h4>
-          <p>NKR and Cancer Atlas APIs answer number questions directly &mdash; before semantic search even runs.</p>
+        <div class="card" style="border-top:4px solid var(--blue);">
+          <div style="font-size:2.5rem; margin-bottom:12px;">&#128084;</div>
+          <h4>Clinician</h4>
+          <p>Structured distress report arrives before the visit. Patients are better prepared. <strong>Clinical visit anxiety</strong> &mdash; rushing to describe everything in 10 minutes &mdash; is reduced.</p>
         </div>
-        <div class="card stagger">
-          <div class="card-icon" style="background:var(--amber-soft); color:var(--amber);">&#128279;</div>
-          <h4>Cross-Source Synthesis</h4>
-          <p>Patient pages, guidelines, reports, and publications connected in one answer with full context.</p>
-        </div>
-        <div class="card stagger">
-          <div class="card-icon" style="background:rgba(196,90,60,0.08); color:var(--accent);">&#128721;</div>
-          <h4>Safe Refusal &amp; Escalation</h4>
-          <p>Diagnosis questions refused. Treatment decisions redirected. Red-flag symptoms route to 112 / huisarts.</p>
-        </div>
-        <div class="card stagger">
-          <div class="card-icon" style="background:var(--purple-soft); color:var(--purple);">&#127993;</div>
-          <h4>Lastmeter Integration</h4>
-          <p>Distress thermometer helps patients reflect on burden. Scores stay client-side. Only resources returned.</p>
-        </div>
-        <div class="card stagger">
-          <div class="card-icon" style="background:var(--teal-soft); color:var(--teal);">&#128220;</div>
-          <h4>Full Provenance Chain</h4>
-          <p>Every chunk carries URL, document ID, page number, section, checksum, and fetch timestamp.</p>
+        <div class="card" style="border-top:4px solid var(--purple);">
+          <div style="font-size:2.5rem; margin-bottom:12px;">&#128202;</div>
+          <h4>IKNL</h4>
+          <p>Aggregated Lastmeter scores over time create a <strong>new population signal</strong>. If average distress rises year over year, IKNL sees it in the data before it appears in clinical records.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ════════════ SLIDE 4: THE 7 SOURCES ════════════ -->
+  <!-- ════════════ SLIDE 4: ARCHITECTURE ════════════ -->
   <section class="slide" data-slide="3">
     <div class="slide-inner">
-      <h3 class="stagger">The Sources We Connect</h3>
-      <h2 class="stagger">Seven trusted source families,<br>one unified retrieval layer.</h2>
+      <h3 class="stagger">Architecture</h3>
+      <h2 class="stagger">One question. Seven sources.<br>Every answer cited.</h2>
 
-      <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:2rem;">
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#2196F3;"></span>
-          <span><strong>kanker.nl</strong> &mdash; Patient information</span>
-        </div>
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#4CAF50;"></span>
-          <span><strong>iknl.nl</strong> &mdash; Institutional pages</span>
-        </div>
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#FF9800;"></span>
-          <span><strong>nkr-cijfers.iknl.nl</strong> &mdash; Registry statistics API</span>
-        </div>
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#E91E63;"></span>
-          <span><strong>kankeratlas.iknl.nl</strong> &mdash; Regional atlas API</span>
-        </div>
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#9C27B0;"></span>
-          <span><strong>richtlijnendatabase.nl</strong> &mdash; Clinical guidelines</span>
-        </div>
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#607D8B;"></span>
-          <span><strong>IKNL Reports</strong> &mdash; Bundled PDF reports</span>
-        </div>
-        <div class="source-badge stagger">
-          <span class="dot" style="background:#795548;"></span>
-          <span><strong>Scientific Publications</strong> &mdash; Peer-reviewed papers</span>
-        </div>
-      </div>
+      <div class="two-col stagger" style="align-items:center; gap:48px;">
+        <div>
+          <div style="background:var(--bg-warm); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+            <div class="arch-label">User</div>
+            <div class="arch-row"><div class="arch-node primary">Patient question</div></div>
+            <div class="arch-conn">&#8595;</div>
 
-      <div class="safety-banner stagger" style="margin-top:2rem;">
-        <span class="safety-icon">&#9432;</span>
-        <span>Richtlijnendatabase is included per hackathon brief but tagged as authored by <strong>Federatie Medisch Specialisten</strong>, not IKNL.</span>
+            <div class="arch-label">Safety Layer</div>
+            <div class="arch-row">
+              <div class="arch-node">Red-flag detection</div>
+              <div class="arch-node">Scope check</div>
+            </div>
+            <div class="arch-conn">&#8595;</div>
+
+            <div class="arch-label">Retrieval — structured first</div>
+            <div class="arch-row">
+              <div class="arch-node blue">NKR API</div>
+              <div class="arch-node blue">Atlas API</div>
+              <div class="arch-node teal">Qdrant vectors</div>
+              <div class="arch-node purple">Neo4j graph</div>
+            </div>
+            <div class="arch-conn">&#8595;</div>
+
+            <div class="arch-label">Answer</div>
+            <div class="arch-row"><div class="arch-node primary">Claude — cites [SRC-N] only</div></div>
+          </div>
+        </div>
+        <div>
+          <ul class="checklist">
+            <li><span class="icon">&#10003;</span> 7 approved IKNL source families — no open web</li>
+            <li><span class="icon">&#10003;</span> LLM never writes URLs — server assembles citations</li>
+            <li><span class="icon">&#10003;</span> Refuses below confidence threshold — says "I don't know"</li>
+            <li><span class="icon">&#10003;</span> Emergency symptoms route to 112 / huisarts / 113</li>
+            <li><span class="icon">&#10003;</span> Lastmeter distress scores stay client-side</li>
+            <li><span class="icon">&#10003;</span> FastAPI backend — 27 endpoints, all sources connected</li>
+          </ul>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- ════════════ SLIDE 5: WHAT MEDICAL-GRADE MEANS ════════════ -->
+  <!-- ════════════ SLIDE 5: FUTURE STEPS ════════════ -->
   <section class="slide" data-slide="4">
     <div class="slide-inner">
-      <h3 class="stagger">What &ldquo;Medical-Grade&rdquo; Means</h3>
-      <h2 class="stagger">Not a diagnostic system.<br>A medically careful information system.</h2>
+      <h3 class="stagger">Future Steps</h3>
+      <h2 class="stagger">A Compliance Officer agent.<br>Clean context. Dutch regulations.</h2>
 
-      <div class="two-col" style="margin-top:2rem;">
+      <div class="two-col stagger" style="gap:48px; align-items:center;">
         <div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Source-locked evidence</h4>
-              <p>Only the 7 approved source families enter the evidence pool. No external web results.</p>
-            </div>
-          </div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Full provenance on every chunk</h4>
-              <p>URL, document ID, chunk ID, page number, section, checksum, fetch time.</p>
-            </div>
-          </div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Structured APIs before embeddings</h4>
-              <p>When exact numbers matter, the system calls NKR / Cancer Atlas APIs first.</p>
-            </div>
-          </div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Abstention on weak evidence</h4>
-              <p>If retrieval scores fall below a calibrated threshold, the system refuses instead of guessing.</p>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Conflict flagging</h4>
-              <p>Contradictory sources are surfaced, not smoothed over.</p>
-            </div>
-          </div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Red-flag symptom routing</h4>
-              <p>Emergency symptoms trigger &ldquo;Bel 112&rdquo; routing. Suicidal ideation routes to 113.</p>
-            </div>
-          </div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Server-side citation assembly</h4>
-              <p>The LLM uses [SRC-N] labels. The server maps them to Provenance objects. The model never authors URLs.</p>
-            </div>
-          </div>
-          <div class="criteria-item stagger">
-            <div class="criteria-check">&#10003;</div>
-            <div class="criteria-text">
-              <h4>Sensitive data stays client-side</h4>
-              <p>Lastmeter distress scores never leave the browser. Only domain keywords are sent.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 6: ARCHITECTURE ════════════ -->
-  <section class="slide" data-slide="5">
-    <div class="slide-inner">
-      <h3 class="stagger">Architecture</h3>
-      <h2 class="stagger">Structured-first hybrid retrieval<br>with graph augmentation.</h2>
-
-      <div class="arch-container stagger" style="margin-top:1.5rem;">
-
-        <div class="arch-label">User Layer</div>
-        <div class="arch-row">
-          <div class="arch-node primary">Custom Frontend + Lastmeter</div>
-        </div>
-
-        <div class="arch-connector"></div>
-
-        <div class="arch-label">API Layer</div>
-        <div class="arch-row">
-          <div class="arch-node secondary">FastAPI Backend</div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node safety">Guardrails &amp; Safety</div>
-          <div class="arch-arrow">&rarr;</div>
-          <div class="arch-node primary">Agent Orchestrator <span style="font-size:0.7rem; opacity:0.8;">(Claude Opus 4.6)</span></div>
-        </div>
-
-        <div class="arch-connector"></div>
-
-        <div class="arch-label">Retrieval Layer &mdash; structured first</div>
-        <div class="arch-row">
-          <div class="arch-node api">NKR Statistics API</div>
-          <div class="arch-node api">Cancer Atlas API</div>
-          <div class="arch-node secondary">Qdrant Vector Index</div>
-          <div class="arch-node secondary" style="background:var(--purple-soft); color:var(--purple); border-color:rgba(107,91,138,0.2);">Neo4j Graph <span style="font-size:0.65rem;">(augmentation)</span></div>
-          <div class="arch-node secondary">Keyword Fallback</div>
-        </div>
-
-        <div class="arch-connector"></div>
-
-        <div class="arch-label">Storage Layer</div>
-        <div class="arch-row">
-          <div class="arch-node storage">Postgres &mdash; canonical source of truth</div>
-        </div>
-
-        <div style="display:flex; justify-content:center; gap:32px; margin-top:16px;">
-          <div style="font-size:0.7rem; color:var(--text-light); text-align:center;">
-            <div style="width:10px; height:10px; border-radius:50%; background:var(--teal-soft); border:1px solid rgba(42,127,110,0.3); display:inline-block; vertical-align:middle; margin-right:4px;"></div>
-            Postgres owns provenance
-          </div>
-          <div style="font-size:0.7rem; color:var(--text-light); text-align:center;">
-            <div style="width:10px; height:10px; border-radius:50%; background:var(--blue-soft); border:1px solid rgba(58,110,165,0.3); display:inline-block; vertical-align:middle; margin-right:4px;"></div>
-            Live APIs for exact data
-          </div>
-          <div style="font-size:0.7rem; color:var(--text-light); text-align:center;">
-            <div style="width:10px; height:10px; border-radius:50%; background:var(--purple-soft); border:1px solid rgba(107,91,138,0.3); display:inline-block; vertical-align:middle; margin-right:4px;"></div>
-            Graph is augmentation only
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 7: VS GENERIC AI ════════════ -->
-  <section class="slide" data-slide="6">
-    <div class="slide-inner">
-      <h3 class="stagger">Why Not Just ChatGPT?</h3>
-      <h2 class="stagger">Generic chatbots optimize for fluency.<br>KankerWijzer optimizes for trust.</h2>
-
-      <table class="compare-table stagger" style="margin-top:2rem;">
-        <thead>
-          <tr>
-            <th style="width:35%;">Capability</th>
-            <th style="width:32%;">Generic AI</th>
-            <th style="width:33%;">KankerWijzer</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><strong>Source provenance</strong></td>
-            <td class="cross">&#10007; Invented or missing URLs</td>
-            <td class="check">&#10003; Server-assembled from Provenance objects</td>
-          </tr>
-          <tr>
-            <td><strong>Source control</strong></td>
-            <td class="cross">&#10007; Entire internet, no filter</td>
-            <td class="check">&#10003; 7 approved IKNL source families only</td>
-          </tr>
-          <tr>
-            <td><strong>Statistics accuracy</strong></td>
-            <td class="cross">&#10007; Recalled from training data</td>
-            <td class="check">&#10003; Live NKR &amp; Cancer Atlas API calls</td>
-          </tr>
-          <tr>
-            <td><strong>Refusal behavior</strong></td>
-            <td class="cross">&#10007; Answers everything confidently</td>
-            <td class="check">&#10003; Calibrated abstention + red-flag routing</td>
-          </tr>
-          <tr>
-            <td><strong>Treatment advice</strong></td>
-            <td class="cross">&#10007; May give specific recommendations</td>
-            <td class="check">&#10003; Refused &mdash; redirected to treating clinician</td>
-          </tr>
-          <tr>
-            <td><strong>Graph context</strong></td>
-            <td class="cross">&#10007; No structured knowledge layer</td>
-            <td class="check">&#10003; Neo4j augmentation for relationship context</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 8: USER JOURNEY ════════════ -->
-  <section class="slide" data-slide="7">
-    <div class="slide-inner">
-      <h3 class="stagger">User Journey</h3>
-      <h2 class="stagger">From question to trusted answer<br>in one conversation.</h2>
-
-      <div class="journey stagger" style="margin-top:2.5rem;">
-        <div class="journey-step">
-          <div class="journey-num">1</div>
-          <h4>Ask</h4>
-          <p>&ldquo;Wat is borstkanker?&rdquo;</p>
-        </div>
-        <div class="journey-step">
-          <div class="journey-num">2</div>
-          <h4>Retrieve</h4>
-          <p>Searches kanker.nl, NKR, guidelines, reports</p>
-        </div>
-        <div class="journey-step">
-          <div class="journey-num">3</div>
-          <h4>Answer</h4>
-          <p>Plain Dutch with cited evidence</p>
-        </div>
-        <div class="journey-step">
-          <div class="journey-num">4</div>
-          <h4>Cite</h4>
-          <p>Clickable source links below the answer</p>
-        </div>
-        <div class="journey-step">
-          <div class="journey-num">5</div>
-          <h4>Guard</h4>
-          <p>Treatment questions? Safely declined.</p>
-        </div>
-        <div class="journey-step">
-          <div class="journey-num">6</div>
-          <h4>Support</h4>
-          <p>Lastmeter surfaces the right resources</p>
-        </div>
-      </div>
-
-      <div class="stagger" style="margin-top:2.5rem;">
-        <div class="safety-banner" style="background:rgba(42,127,110,0.04); border-color:rgba(42,127,110,0.15); color:var(--teal);">
-          <span class="safety-icon">&#128737;</span>
-          <span>At every step: only approved sources, full provenance, and the model <strong>never</strong> authors citation URLs.</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 9: HALLUCINATION REDUCTION ════════════ -->
-  <section class="slide" data-slide="8">
-    <div class="slide-inner">
-      <h3 class="stagger">Reducing Hallucination Risk</h3>
-      <h2 class="stagger">Seven layers of defense.</h2>
-
-      <div class="card-grid cols-4" style="margin-top:2rem;">
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128274;</div>
-          <h4 style="font-size:0.85rem;">Source Whitelist</h4>
-          <p style="font-size:0.78rem;">Only 7 approved families</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128202;</div>
-          <h4 style="font-size:0.85rem;">Structured-First</h4>
-          <p style="font-size:0.78rem;">APIs before embeddings</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128207;</div>
-          <h4 style="font-size:0.85rem;">Evidence Threshold</h4>
-          <p style="font-size:0.78rem;">Calibrated abstention score</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#9878;</div>
-          <h4 style="font-size:0.85rem;">Conflict Detection</h4>
-          <p style="font-size:0.78rem;">Flags contradictions</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128421;</div>
-          <h4 style="font-size:0.85rem;">Server-Side Citations</h4>
-          <p style="font-size:0.78rem;">LLM never writes URLs</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128718;</div>
-          <h4 style="font-size:0.85rem;">Graph Augmentation</h4>
-          <p style="font-size:0.78rem;">Context only, never sole basis</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128683;</div>
-          <h4 style="font-size:0.85rem;">Explicit Refusal</h4>
-          <p style="font-size:0.78rem;">Uncertain? Says so.</p>
-        </div>
-        <div class="card stagger" style="text-align:center; padding:22px 16px;">
-          <div style="font-size:1.8rem; margin-bottom:10px;">&#128200;</div>
-          <h4 style="font-size:0.85rem;">Eval Hard-Fails</h4>
-          <p style="font-size:0.78rem;">Build breaks on safety misses</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 10: HACKATHON CRITERIA ════════════ -->
-  <section class="slide" data-slide="9">
-    <div class="slide-inner">
-      <h3 class="stagger">Hackathon Criteria Fit</h3>
-      <h2 class="stagger">How KankerWijzer maps to every domain.</h2>
-
-      <div class="card-grid cols-2" style="margin-top:2rem;">
-        <div class="card stagger" style="border-top:3px solid var(--teal);">
-          <h4 style="color:var(--teal);">Domain 1 &mdash; Information Integrity</h4>
-          <ul style="list-style:none; padding:0; margin-top:10px;">
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Answers from retrieved evidence only</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Source provenance with clickable links</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Trusted IKNL source families only</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Declines when accuracy is not achievable</li>
-          </ul>
-        </div>
-        <div class="card stagger" style="border-top:3px solid var(--blue);">
-          <h4 style="color:var(--blue);">Domain 2 &mdash; Usability</h4>
-          <ul style="list-style:none; padding:0; margin-top:10px;">
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;One search instead of seven destinations</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Natural-language patient-first chat</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Fewer clicks, smarter navigation</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Audience-aware (patient / professional)</li>
-          </ul>
-        </div>
-        <div class="card stagger" style="border-top:3px solid var(--accent);">
-          <h4 style="color:var(--accent);">Domain 3 &mdash; Ethics</h4>
-          <ul style="list-style:none; padding:0; margin-top:10px;">
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Refuses unsafe personalized advice</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Red-flag routing (112, huisarts, 113)</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Lastmeter data stays client-side</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Consent banner for distress screening</li>
-          </ul>
-        </div>
-        <div class="card stagger" style="border-top:3px solid var(--purple);">
-          <h4 style="color:var(--purple);">Domain 4 &mdash; Advanced Solution</h4>
-          <ul style="list-style:none; padding:0; margin-top:10px;">
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Connects all 7 provided sources</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;GraphRAG for relationship context</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Cross-source evidence synthesis</li>
-            <li style="padding:6px 0; font-size:0.88rem; color:var(--text-muted);">&#10003;&ensp;Built for future IKNL adoption</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card stagger" style="margin-top:16px; background:var(--bg-warm); border-color:var(--border); text-align:center;">
-        <p style="font-size:0.9rem; color:var(--text-muted);">
-          <strong style="color:var(--text);">Bonus:</strong> Structured user feedback collection on missing or unclear information
-        </p>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 11: EVALUATION ════════════ -->
-  <section class="slide" data-slide="10">
-    <div class="slide-inner">
-      <h3 class="stagger">Evaluation</h3>
-      <h2 class="stagger">Hard-fail gates. The build breaks<br>on safety misses.</h2>
-
-      <div class="two-col" style="margin-top:2rem;">
-        <div>
-          <div class="stat-row stagger" style="margin-bottom:2rem;">
-            <div class="stat">
-              <div class="stat-number">45</div>
-              <div class="stat-label">Golden Questions</div>
-            </div>
-            <div class="stat">
-              <div class="stat-number">5</div>
-              <div class="stat-label">Hard-Fail Gates</div>
-            </div>
-          </div>
-
-          <div class="card stagger">
-            <h4>Question Categories</h4>
-            <div class="pill-list" style="margin-top:10px;">
-              <span class="pill">Patient info (10)</span>
-              <span class="pill">Statistics (8)</span>
-              <span class="pill">Geographic (6)</span>
-              <span class="pill">Guidelines (6)</span>
-              <span class="pill">Cross-source (5)</span>
-              <span class="pill">Ethical decline (5)</span>
-              <span class="pill">Conflict / OOS (5)</span>
-            </div>
-          </div>
-        </div>
-        <div>
-          <div class="card stagger" style="padding:0; overflow:hidden;">
-            <table style="width:100%; border-collapse:collapse; font-size:0.88rem;">
-              <thead>
-                <tr style="background:var(--bg-warm);">
-                  <th style="padding:14px 18px; text-align:left; font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">Gate</th>
-                  <th style="padding:14px 18px; text-align:right; font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted);">Threshold</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Faithfulness</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">&ge; 0.85</td></tr>
-                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Citation Correctness</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">&ge; 0.80</td></tr>
-                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Refusal Accuracy</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">&ge; 0.90</td></tr>
-                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Source Whitelist</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--teal);">= 1.00</td></tr>
-                <tr><td style="padding:12px 18px; border-top:1px solid var(--border);">Hallucination Rate</td><td style="padding:12px 18px; border-top:1px solid var(--border); text-align:right; font-family:var(--mono); font-weight:500; color:var(--accent);">&le; 0.10</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="stagger" style="margin-top:12px; font-size:0.85rem; color:var(--text-light);">
-            Pipeline returns exit code 1 on failure. These are not aspirational &mdash; the build breaks.
+          <p style="font-size:1.25rem; margin-bottom:1.5rem;">
+            AI has no BIG-registratie. We need an <strong>independent supervisor agent</strong> that inspects every answer — with a fresh context window, no conversation history.
           </p>
+          <div style="display:flex; flex-direction:column; gap:14px;">
+            <div class="card" style="padding:20px 24px; border-left:4px solid var(--amber);">
+              <h4 style="font-size:1.05rem;">Inputs: question + answer + tool results</h4>
+              <p style="font-size:1rem;">No chat history — smaller, sharper focus on compliance.</p>
+            </div>
+            <div class="card" style="padding:20px 24px; border-left:4px solid var(--teal);">
+              <h4 style="font-size:1.05rem;">Checks WGBO, AVG &amp; AI Act</h4>
+              <p style="font-size:1rem;">Flags answers that drift into clinical decision-making or cite unsupported claims.</p>
+            </div>
+            <div class="card" style="padding:20px 24px; border-left:4px solid var(--accent);">
+              <h4 style="font-size:1.05rem;">Blocks — doesn&rsquo;t just log</h4>
+              <p style="font-size:1rem;">Non-compliant answers are held. Patient gets a safe fallback.</p>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ════════════ SLIDE 12: TECH STACK ════════════ -->
-  <section class="slide" data-slide="11">
-    <div class="slide-inner">
-      <h3 class="stagger">Stack &amp; What&rsquo;s Built</h3>
-      <h2 class="stagger">Production-oriented choices,<br>not demo shortcuts.</h2>
-
-      <div class="two-col" style="margin-top:2rem;">
         <div>
-          <h4 class="stagger" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-light); margin-bottom:12px;">Technology Stack</h4>
-          <div class="card stagger" style="padding:0; overflow:hidden;">
-            <table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; width:40%; color:var(--text);">LLM</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Claude Opus 4.6</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Backend</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">FastAPI + Python</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Embeddings</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">multilingual-e5-large (1024d)</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Vector Store</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Qdrant</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Graph</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Neo4j + neo4j-graphrag</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Database</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Postgres + pgvector</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); font-weight:600; color:var(--text);">Crawl</td>
-                <td style="padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text-muted);">Firecrawl API</td>
-              </tr>
-              <tr>
-                <td style="padding:12px 16px; font-weight:600; color:var(--text);">PDF Parsing</td>
-                <td style="padding:12px 16px; color:var(--text-muted);">Docling (primary)</td>
-              </tr>
-            </table>
-          </div>
-        </div>
-        <div>
-          <h4 class="stagger" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-light); margin-bottom:12px;">Already Built</h4>
-          <div class="card stagger" style="margin-bottom:10px;">
-            <p style="font-size:0.88rem; color:var(--text);">
-              <strong style="color:var(--teal);">&#10003;</strong>&ensp;FastAPI backend &mdash; 27 endpoints, all source connectors
-            </p>
-          </div>
-          <div class="card stagger" style="margin-bottom:10px;">
-            <p style="font-size:0.88rem; color:var(--text);">
-              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Provenance model &mdash; full chain from chunk to URL
-            </p>
-          </div>
-          <div class="card stagger" style="margin-bottom:10px;">
-            <p style="font-size:0.88rem; color:var(--text);">
-              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Hybrid retriever &mdash; structured-first + vector + safety
-            </p>
-          </div>
-          <div class="card stagger" style="margin-bottom:10px;">
-            <p style="font-size:0.88rem; color:var(--text);">
-              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Safety engine &mdash; red-flags, abstention, source policy
-            </p>
-          </div>
-          <div class="card stagger" style="margin-bottom:10px;">
-            <p style="font-size:0.88rem; color:var(--text);">
-              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Source verification &mdash; all 7 families validated
-            </p>
-          </div>
-          <div class="card stagger">
-            <p style="font-size:0.88rem; color:var(--text);">
-              <strong style="color:var(--teal);">&#10003;</strong>&ensp;Docker Compose &mdash; Qdrant + Neo4j + Postgres
-            </p>
+          <div style="background:var(--bg-warm); border:1px solid var(--border); border-radius:var(--radius); padding:28px;">
+            <div class="flow">
+              <div class="flow-step" style="background:var(--bg-card); border:1px solid var(--border);">
+                <span style="font-size:1.4rem;">&#128100;</span> User question
+              </div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step" style="background:var(--teal-soft); border:1px solid rgba(42,127,110,0.2);">
+                <span style="font-size:1.4rem;">&#129302;</span> Answer Agent &mdash; retrieves &amp; cites
+              </div>
+              <div class="flow-arrow">&#8595; answer + tool results</div>
+              <div class="flow-step" style="background:var(--amber-soft); border:1px solid rgba(184,134,11,0.2);">
+                <span style="font-size:1.4rem;">&#128373;</span> Compliance Agent &mdash; fresh context
+              </div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-result">
+                <div class="flow-pass">&#10003; Compliant<br><span style="font-size:0.85rem; font-weight:400;">→ user</span></div>
+                <div class="flow-block">&#10007; Blocked<br><span style="font-size:0.85rem; font-weight:400;">→ safe fallback</span></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <!-- ════════════ SLIDE 13: CLOSING ════════════ -->
-  <section class="slide" data-slide="12">
-    <div class="slide-inner" style="text-align:center;">
-      <div class="stagger">
-        <div class="accent-line center"></div>
-      </div>
-      <h1 class="stagger" style="font-size:3.5rem; margin-bottom:1.5rem;">KankerWijzer</h1>
-      <div class="stagger">
-        <p class="final-message" style="margin:0 auto 2.5rem;">
-          People already use AI for cancer information.<br>
-          The question is whether they get speed<br>
-          <em>at the cost of trust.</em>
-        </p>
-      </div>
-      <div class="stagger">
-        <p style="font-size:1.25rem; color:var(--text); font-family:var(--serif); margin-bottom:2rem;">
-          Our answer is <strong style="color:var(--accent);">no.</strong>
-        </p>
-      </div>
-      <div class="stagger">
-        <p style="font-size:1rem; color:var(--text-muted); max-width:620px; margin:0 auto 2rem; line-height:1.7;">
-          KankerWijzer gives users the speed of AI with the discipline of trusted oncology sources,
-          explicit provenance, and medical-grade refusal behavior.
-        </p>
-      </div>
-      <div class="stagger" style="display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
-        <span class="tag">Provenance-First</span>
-        <span class="tag" style="background:rgba(42,127,110,0.08); color:var(--teal); border-color:rgba(42,127,110,0.15);">Medically Careful</span>
-        <span class="tag" style="background:rgba(58,110,165,0.08); color:var(--blue); border-color:rgba(58,110,165,0.15);">Built for IKNL</span>
-      </div>
-      <p class="stagger" style="margin-top:2.5rem; font-size:0.85rem; color:var(--text-light);">
-        Team Uncloud &bull; BrabantHack 2026 &bull; IKNL Med Tech Track
-      </p>
     </div>
   </section>
 
@@ -1725,7 +431,6 @@ p {
 
 <script>
 (function() {
-  /* ─── Slide Navigation ─── */
   const slides = document.querySelectorAll('.slide');
   const progress = document.getElementById('progress');
   const counter = document.getElementById('counter');
@@ -1756,29 +461,22 @@ p {
   function prev() { goTo(current - 1); }
 
   /* ─── Theme Switching ─── */
-  const themes = ['editorial', 'swiss', 'botanical', 'modernist', 'coastal', 'classical'];
+  const themes = ['blue', 'editorial', 'botanical', 'dark'];
   const themeBtns = document.querySelectorAll('.theme-btn');
   let currentTheme = 0;
 
   function setTheme(name) {
-    if (name === 'editorial') {
+    if (name === 'blue') {
       document.documentElement.removeAttribute('data-theme');
     } else {
       document.documentElement.setAttribute('data-theme', name);
     }
-    themeBtns.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.theme === name);
-    });
+    themeBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.theme === name));
     currentTheme = themes.indexOf(name);
-    // Smooth color transition on body
-    document.body.style.transition = 'background 0.4s ease, color 0.4s ease';
   }
 
   themeBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      setTheme(btn.dataset.theme);
-    });
+    btn.addEventListener('click', (e) => { e.stopPropagation(); setTheme(btn.dataset.theme); });
   });
 
   function cycleTheme() {
@@ -1786,7 +484,6 @@ p {
     setTheme(themes[currentTheme]);
   }
 
-  /* ─── Keyboard ─── */
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') { e.preventDefault(); next(); }
     if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
@@ -1795,7 +492,6 @@ p {
     if (e.key === 't' || e.key === 'T') { e.preventDefault(); cycleTheme(); }
   });
 
-  /* ─── Touch ─── */
   let touchStartX = 0;
   document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
   document.addEventListener('touchend', (e) => {
@@ -1803,14 +499,12 @@ p {
     if (Math.abs(dx) > 50) { dx < 0 ? next() : prev(); }
   });
 
-  /* ─── Click left/right halves ─── */
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.nav-dot, .theme-btn, .theme-switcher, a, button, input, textarea')) return;
+    if (e.target.closest('.nav-dot, a, button, input')) return;
     if (e.clientX > window.innerWidth * 0.65) next();
     else if (e.clientX < window.innerWidth * 0.35) prev();
   });
 
-  /* ─── Init ─── */
   progress.style.width = '0%';
   counter.textContent = '1 / ' + total;
 })();
