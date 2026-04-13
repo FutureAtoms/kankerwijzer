@@ -9,7 +9,10 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from neo4j import GraphDatabase
+try:
+    from neo4j import GraphDatabase
+except ImportError:
+    GraphDatabase = None  # type: ignore[assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +23,9 @@ class GraphRetriever:
     def __init__(self, settings: Any) -> None:
         self._driver = None
         self._settings = settings
+        if GraphDatabase is None:
+            logger.info("GraphRetriever: neo4j dependency not installed — graph features disabled.")
+            return
         try:
             self._driver = GraphDatabase.driver(
                 settings.neo4j_uri,
@@ -323,6 +329,75 @@ class GraphRetriever:
                 "edge_count": 0,
                 "cancer_types": 0,
             }
+
+    # ------------------------------------------------------------------
+    # get_full_graph — return all nodes and edges for visualization
+    # ------------------------------------------------------------------
+
+    def get_full_graph(self) -> dict:
+        """Return all nodes and edges for D3 visualization."""
+        if not self.available:
+            return {"nodes": [], "links": []}
+
+        try:
+            with self._driver.session() as session:
+                # Fetch all nodes
+                node_result = session.run(
+                    """
+                    MATCH (n)
+                    WHERE n.name IS NOT NULL
+                    RETURN id(n) AS id, n.name AS name, labels(n) AS types,
+                           n.description AS description, n.sources AS sources
+                    """
+                )
+                nodes = []
+                node_id_map = {}  # neo4j internal id -> our id
+                for rec in node_result:
+                    neo_id = rec["id"]
+                    types = rec["types"]
+                    node_type = types[0] if types else "Unknown"
+                    node_id = f"{node_type.lower()}-{rec['name']}"
+                    node_id_map[neo_id] = node_id
+                    nodes.append({
+                        "id": node_id,
+                        "type": node_type,
+                        "label": rec["name"],
+                        "data": {
+                            "name": rec["name"],
+                            "description": rec.get("description") or "",
+                            "sources": rec.get("sources") or [],
+                        },
+                    })
+
+                # Fetch all relationships
+                rel_result = session.run(
+                    """
+                    MATCH (a)-[r]->(b)
+                    WHERE a.name IS NOT NULL AND b.name IS NOT NULL
+                    RETURN id(a) AS source_id, id(b) AS target_id,
+                           type(r) AS rel_type, r.description AS description
+                    """
+                )
+                links = []
+                seen_links = set()
+                for rec in rel_result:
+                    source = node_id_map.get(rec["source_id"])
+                    target = node_id_map.get(rec["target_id"])
+                    if source and target:
+                        link_key = f"{source}-{rec['rel_type']}-{target}"
+                        if link_key not in seen_links:
+                            seen_links.add(link_key)
+                            links.append({
+                                "source": source,
+                                "target": target,
+                                "rel": rec["rel_type"],
+                            })
+
+                return {"nodes": nodes, "links": links}
+
+        except Exception as exc:
+            logger.warning("get_full_graph failed: %s", exc)
+            return {"nodes": [], "links": []}
 
     def close(self) -> None:
         if self._driver:

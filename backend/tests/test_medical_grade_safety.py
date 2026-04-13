@@ -77,6 +77,34 @@ def test_geo_queries_prefer_cancer_atlas_over_nkr(monkeypatch):
     assert hits[0].document.source_id == "kankeratlas"
 
 
+def test_kankeratlas_fetch_uses_query_specific_group_and_filters(monkeypatch):
+    retriever = HybridMedicalRetriever(get_settings())
+    captured: dict[str, int] = {}
+
+    def fake_cancer_data(cancer_group: int, sex: int, postcode_digits: int):
+        captured.update(
+            {
+                "cancer_group": cancer_group,
+                "sex": sex,
+                "postcode_digits": postcode_digits,
+            }
+        )
+        return {"res": [{"postcode": "1011", "p50": 12.8}]}
+
+    monkeypatch.setattr(retriever.kankeratlas, "cancer_data", fake_cancer_data)
+
+    hits = retriever._fetch_kankeratlas(
+        "toon regionale longkanker cijfers voor vrouwen per pc4"
+    )
+
+    assert captured == {
+        "cancer_group": 11,
+        "sex": 2,
+        "postcode_digits": 4,
+    }
+    assert "longkanker" in hits[0].document.title.lower()
+
+
 def test_guideline_queries_prefer_richtlijn_route(monkeypatch):
     retriever = HybridMedicalRetriever(get_settings())
     guideline_hit = _hit(

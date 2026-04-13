@@ -5,17 +5,38 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from qdrant_client import QdrantClient
-from qdrant_client.models import (
-    Distance,
-    FieldCondition,
-    Filter,
-    MatchValue,
-    PointStruct,
-    VectorParams,
-)
-
 from app.config import get_settings
+
+
+class QdrantUnavailableError(RuntimeError):
+    pass
+
+
+def _load_qdrant_dependencies() -> dict[str, Any]:
+    try:
+        from qdrant_client import QdrantClient
+        from qdrant_client.models import (
+            Distance,
+            FieldCondition,
+            Filter,
+            MatchValue,
+            PointStruct,
+            VectorParams,
+        )
+    except ImportError as exc:
+        raise QdrantUnavailableError(
+            "qdrant-client is not installed. Install backend dependencies with `uv sync`."
+        ) from exc
+
+    return {
+        "QdrantClient": QdrantClient,
+        "Distance": Distance,
+        "FieldCondition": FieldCondition,
+        "Filter": Filter,
+        "MatchValue": MatchValue,
+        "PointStruct": PointStruct,
+        "VectorParams": VectorParams,
+    }
 
 
 class QdrantStore:
@@ -25,7 +46,8 @@ class QdrantStore:
         settings = get_settings()
         self.url = url or settings.qdrant_url
         self.collection = collection or settings.qdrant_collection
-        self.client = QdrantClient(url=self.url)
+        self._deps = _load_qdrant_dependencies()
+        self.client = self._deps["QdrantClient"](url=self.url)
 
     # ------------------------------------------------------------------
     # Collection management
@@ -39,7 +61,10 @@ class QdrantStore:
             return
         self.client.create_collection(
             collection_name=self.collection,
-            vectors_config=VectorParams(size=dim, distance=Distance.COSINE),
+            vectors_config=self._deps["VectorParams"](
+                size=dim,
+                distance=self._deps["Distance"].COSINE,
+            ),
         )
 
     # ------------------------------------------------------------------
@@ -62,7 +87,7 @@ class QdrantStore:
             batch_payloads = payloads[start:end]
 
             points = [
-                PointStruct(
+                self._deps["PointStruct"](
                     id=str(uuid.uuid5(uuid.NAMESPACE_URL, cid)),
                     vector=vec,
                     payload=pay,
@@ -91,9 +116,12 @@ class QdrantStore:
         """
         query_filter = None
         if source_filter:
-            query_filter = Filter(
+            query_filter = self._deps["Filter"](
                 must=[
-                    FieldCondition(key="source_id", match=MatchValue(value=source_filter))
+                    self._deps["FieldCondition"](
+                        key="source_id",
+                        match=self._deps["MatchValue"](value=source_filter),
+                    )
                 ]
             )
 

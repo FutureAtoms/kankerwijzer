@@ -49,16 +49,28 @@ class Settings(BaseSettings):
     )
 
     @property
+    def bundled_data_root(self) -> Path:
+        repo_local_data = self.team_root / "problem-statement" / "data"
+        if repo_local_data.exists():
+            return repo_local_data
+
+        hackathon_data = self.hackathon_root / "data"
+        if hackathon_data.exists():
+            return hackathon_data
+
+        return repo_local_data
+
+    @property
     def kanker_dataset_path(self) -> Path:
-        return self.hackathon_root / "data" / "kanker_nl_pages_all.json"
+        return self.bundled_data_root / "kanker_nl_pages_all.json"
 
     @property
     def reports_dir(self) -> Path:
-        return self.hackathon_root / "data" / "reports"
+        return self.bundled_data_root / "reports"
 
     @property
     def scientific_publications_dir(self) -> Path:
-        return self.hackathon_root / "data" / "scientific_publications"
+        return self.bundled_data_root / "scientific_publications"
 
     @property
     def sample_output_dir(self) -> Path:

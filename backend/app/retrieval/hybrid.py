@@ -169,6 +169,46 @@ STAGE_ALIASES: dict[str, tuple[str, ...]] = {
     "iv": ("stadium iv", "stadium 4", "stage iv", "stage 4"),
 }
 
+ATLAS_CANCER_GROUPS: dict[str, dict[str, Any]] = {
+    "alle": {"group": 1, "label": "alle kankersoorten", "validsex": 3, "pc4": False},
+    "alvleesklierkanker": {
+        "group": 2,
+        "label": "alvleesklierkanker en periampullaire kanker",
+        "validsex": 3,
+        "pc4": False,
+    },
+    "baarmoederhalskanker": {"group": 3, "label": "baarmoederhalskanker", "validsex": 2, "pc4": False},
+    "blaaskanker": {"group": 4, "label": "blaaskanker en kanker van de urinewegen", "validsex": 3, "pc4": False},
+    "borstkanker": {"group": 5, "label": "borstkanker", "validsex": 2, "pc4": False},
+    "darmkanker": {"group": 6, "label": "darmkanker", "validsex": 3, "pc4": False},
+    "dikkedarmkanker": {"group": 6, "label": "darmkanker", "validsex": 3, "pc4": False},
+    "endeldarmkanker": {"group": 6, "label": "darmkanker", "validsex": 3, "pc4": False},
+    "eierstokkanker": {"group": 7, "label": "eierstokkanker", "validsex": 2, "pc4": False},
+    "baarmoederkanker": {"group": 8, "label": "baarmoederkanker", "validsex": 2, "pc4": False},
+    "keelkanker": {"group": 9, "label": "hoofd-halskanker", "validsex": 3, "pc4": False},
+    "leverkanker": {"group": 10, "label": "leverkanker en galwegkanker", "validsex": 3, "pc4": False},
+    "longkanker": {"group": 11, "label": "longkanker", "validsex": 3, "pc4": True},
+    "leukemie": {"group": 12, "label": "lymfomen en lymfatische leukemie", "validsex": 3, "pc4": False},
+    "hodgkinlymfoom": {"group": 12, "label": "lymfomen en lymfatische leukemie", "validsex": 3, "pc4": False},
+    "non-hodgkinlymfoom": {"group": 12, "label": "lymfomen en lymfatische leukemie", "validsex": 3, "pc4": False},
+    "maagkanker": {"group": 13, "label": "maagkanker", "validsex": 3, "pc4": False},
+    "hersenkanker": {
+        "group": 14,
+        "label": "maligne tumoren van het centraal zenuwstelsel",
+        "validsex": 3,
+        "pc4": False,
+    },
+    "melanoom": {"group": 15, "label": "huidkanker - melanoom", "validsex": 3, "pc4": False},
+    "huidkanker": {"group": 15, "label": "huidkanker - melanoom", "validsex": 3, "pc4": False},
+    "nierkanker": {"group": 19, "label": "nierkanker", "validsex": 3, "pc4": False},
+    "prostaatkanker": {"group": 22, "label": "prostaatkanker", "validsex": 1, "pc4": False},
+    "schildklierkanker": {"group": 24, "label": "schildklierkanker", "validsex": 3, "pc4": False},
+    "slokdarmkanker": {"group": 25, "label": "slokdarmkanker", "validsex": 3, "pc4": False},
+}
+
+ATLAS_SEX_CODES = {"man": 1, "vrouw": 2, "alle": 3}
+ATLAS_SEX_LABELS = {1: "mannen", 2: "vrouwen", 3: "alle personen"}
+
 
 class HybridMedicalRetriever:
     """Structured-first, then vector, with medical safety.
@@ -539,17 +579,22 @@ class HybridMedicalRetriever:
 
     def _fetch_kankeratlas(self, query_lower: str) -> list[SearchHit]:
         """Fetch Cancer Atlas regional data."""
-        atlas = self.kankeratlas.cancer_data(11, 3, 3)
-        rows = atlas.get("res", [])[:5]
-        excerpt = "Top sample postcode rows from the lung-cancer atlas: " + ", ".join(
-            f"{row['postcode']} (p50={row['p50']})"
-            for row in rows
-            if isinstance(row, dict) and "postcode" in row and "p50" in row
+        atlas_request = self._parse_kankeratlas_request(query_lower)
+        atlas = self.kankeratlas.cancer_data(
+            atlas_request["cancer_group"],
+            atlas_request["sex"],
+            atlas_request["postcode_digits"],
         )
+        rows = atlas.get("res", [])[:5] if isinstance(atlas, dict) else []
+        title = (
+            f"Kanker Atlas {atlas_request['cancer_label'].title()} "
+            f"per PC{atlas_request['postcode_digits']}"
+        )
+        excerpt = self._kankeratlas_excerpt_for_request(atlas_request, rows)
         return [
             self._build_structured_hit(
                 source_id="kankeratlas",
-                title="Cancer Atlas lung cancer incidence by postcode",
+                title=title,
                 url="https://kankeratlas.iknl.nl",
                 text=str(rows),
                 excerpt=excerpt,
@@ -591,6 +636,33 @@ class HybridMedicalRetriever:
             "sex": self._extract_sex(query),
             "stat_type": self._extract_stat_type(query),
             "stage": self._extract_stage(query),
+        }
+
+    def _parse_kankeratlas_request(self, query: str) -> dict[str, Any]:
+        cancer_type = self._extract_cancer_type(query)
+        atlas_group = ATLAS_CANCER_GROUPS.get(cancer_type, ATLAS_CANCER_GROUPS["alle"])
+        requested_sex = ATLAS_SEX_CODES.get(self._extract_sex(query), 3)
+        sex = atlas_group["validsex"] if atlas_group["validsex"] in (1, 2) else requested_sex
+
+        postcode_tokens = [
+            token for token in _POSTCODE_RE.findall(query) if not _YEAR_RE.fullmatch(token)
+        ]
+        postcode_digits = 3
+        if atlas_group["pc4"] and (
+            "pc4" in query
+            or "4-cijfer" in query
+            or "4 digit" in query
+            or any(len(token) == 4 for token in postcode_tokens)
+        ):
+            postcode_digits = 4
+        if "pc3" in query or "3-cijfer" in query or "3 digit" in query:
+            postcode_digits = 3
+
+        return {
+            "cancer_group": atlas_group["group"],
+            "cancer_label": atlas_group["label"],
+            "sex": sex,
+            "postcode_digits": postcode_digits,
         }
 
     @staticmethod
@@ -670,6 +742,28 @@ class HybridMedicalRetriever:
         return (
             f"{metric_label.capitalize()} in {year} voor {readable_sex} "
             f"met {readable_cancer}{readable_stage}: {int(value)}."
+        )
+
+    @staticmethod
+    def _kankeratlas_excerpt_for_request(
+        request: dict[str, Any], rows: list[dict[str, Any]]
+    ) -> str:
+        sex_label = ATLAS_SEX_LABELS.get(request["sex"], "alle personen")
+        cancer_label = request["cancer_label"]
+        postcode_level = f"PC{request['postcode_digits']}"
+        samples = [
+            f"{row['postcode']} (p50={row['p50']})"
+            for row in rows
+            if isinstance(row, dict) and "postcode" in row and "p50" in row
+        ]
+        if not samples:
+            return (
+                f"Regionale atlasdata voor {sex_label} met {cancer_label} "
+                f"op {postcode_level}-niveau."
+            )
+        return (
+            f"Regionale atlasdata voor {sex_label} met {cancer_label} "
+            f"op {postcode_level}-niveau. Voorbeelden: {', '.join(samples)}."
         )
 
     # ------------------------------------------------------------------
